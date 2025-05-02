@@ -27,7 +27,11 @@
     {"$GMFolder":"","%Name":"Timelines","folderPath":"folders/Timelines.yy","name":"Timelines","resourceType":"GMFolder","resourceVersion":"2.0",},
   ],
   "ForcedPrefabProjectReferences":[],
-  "IncludedFiles":[],
+  "IncludedFiles":[
+    {"$GMIncludedFile":"","%Name":"arb1.json","CopyToMask":-1,"filePath":"datafiles/langs","name":"arb1.json","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
+    {"$GMIncludedFile":"","%Name":"arb2.json","CopyToMask":-1,"filePath":"datafiles/langs","name":"arb2.json","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
+    {"$GMIncludedFile":"","%Name":"jp.json","CopyToMask":-1,"filePath":"datafiles/langs","name":"jp.json","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
+  ],
   "isEcma":false,
   "LibraryEmitters":[],
   "MetaData":{
@@ -35,13 +39,21 @@
   },
   "name":"GM-I18n",
   "resources":[
-    {"id":{"name":"Room1","path":"rooms/Room1/Room1.yy",},},
+    {"id":{"name":"fNotoSansArbSemiBold","path":"fonts/fNotoSansArbSemiBold/fNotoSansArbSemiBold.yy",},},
+    {"id":{"name":"fNotoSansJPSemiBold","path":"fonts/fNotoSansJPSemiBold/fNotoSansJPSemiBold.yy",},},
+    {"id":{"name":"fNotoSansMedium","path":"fonts/fNotoSansMedium/fNotoSansMedium.yy",},},
+    {"id":{"name":"fNotoSansSemiBold","path":"fonts/fNotoSansSemiBold/fNotoSansSemiBold.yy",},},
+    {"id":{"name":"oBtnLocale","path":"objects/oBtnLocale/oBtnLocale.yy",},},
+    {"id":{"name":"oController","path":"objects/oController/oController.yy",},},
+    {"id":{"name":"oUI","path":"objects/oUI/oUI.yy",},},
+    {"id":{"name":"rDemo1","path":"rooms/rDemo1/rDemo1.yy",},},
     {"id":{"name":"scI18n","path":"scripts/scI18n/scI18n.yy",},},
+    {"id":{"name":"sRoundRect","path":"sprites/sRoundRect/sRoundRect.yy",},},
   ],
   "resourceType":"GMProject",
   "resourceVersion":"2.0",
   "RoomOrderNodes":[
-    {"roomId":{"name":"Room1","path":"rooms/Room1/Room1.yy",},},
+    {"roomId":{"name":"rDemo1","path":"rooms/rDemo1/rDemo1.yy",},},
   ],
   "templateType":"game",
   "TextureGroups":[

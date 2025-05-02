@@ -1,45 +1,59 @@
 global.i18n_name = "";
 
-function I18nLocaleInit(code, name, file = false) constructor {
+
+/**
+ * @desc description
+ * @param {String} lang_code Description
+ * @param {String} lang_name Description
+ * @param {String | Array<String>} [lang_file]="" Description
+ */
+function I18nLocaleInit(lang_code, lang_name, lang_file = "") constructor {
 	// Guard clauses
-	if (!is_string(code)) {
-		show_debug_message("i18n ERROR: Locale code must be a string");
+	if (!is_string(lang_code)) {
+		show_debug_message("I18n ERROR - Locale code must be a string");
 		exit;
 	}
-	if (!is_string(name)) {
-		show_debug_message("i18n ERROR: Locale name must be a string");
+	if (!is_string(lang_name)) {
+		show_debug_message("I18n ERROR - Locale name must be a string");
 		exit;
 	}
 
 	// Struct members
-	code = code;
-	name = name;
+	code = lang_code;
+	name = lang_name;
 
-	if (!is_bool(file)) {
-		if (!(is_string(file) || is_array(file))) {
-			show_debug_message("i18n ERROR: Locale file must be a string or an array of strings");
+	if (lang_file != "") {
+		if (!(is_string(lang_file) || is_array(lang_file))) {
+			show_debug_message("I18n ERROR - Locale file must be a string or an array of strings");
 			exit;
 		}
-		file = file;
+		file = lang_file;
 	} 
 }
 
-function I18nLoad(time, i18n = false) constructor {
+
+/**
+ * @desc description
+ * @param {Real | Array<Real> | Undefined} interval Description
+ * @param {Struct.i18n_create | Bool} [i18n_struct]=false Description
+ */
+function I18nLoad(interval, i18n_struct = false) constructor {
 	// Guard clauses
-	if (!is_numeric(time)) {
-		show_debug_message("i18n ERROR: Load time must be numeric");
+	if (!is_numeric(interval)) {
+		show_debug_message("I18n ERROR - Load interval must be numeric");
 		exit;
 	}
-
-	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("i18n ERROR: i18n must be a i18n struct");
+	
+	i18n = i18n_struct;
+	if (!(is_struct(i18n_struct) || is_bool(i18n_struct))) {
+		show_debug_message("I18n ERROR - i18n must be a i18n struct");
 		exit;
-	} else if (is_bool(i18n)) {
+	} else if (is_bool(i18n_struct)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
 	}
 
 	// Struct members
-	time = time;
+	time = interval;
 	step = 0;
 	max_step = 0;
 	step_time = [];
@@ -48,6 +62,10 @@ function I18nLoad(time, i18n = false) constructor {
 	files = [];
 	files_locale = [];
 	for (var i = 0; i < array_length(i18n.locales); i++) {
+		if (!struct_exists(i18n.locales[i], "file")) {
+			continue;
+		}
+		
 		if (!is_array(i18n.locales[i].file)) {
 			i18n.locales[i].file = [i18n.locales[i].file];
 		}
@@ -58,12 +76,13 @@ function I18nLoad(time, i18n = false) constructor {
 		}
 	}
 
-	// Load all files if interval is not set
+	// Load all files later in i18n_update_loader() if interval is not set
 	if (time == 0) {
-		for (var i = 0; i < array_length(files); i++) {
-			load(files[i], files_locale[i]);
+		time = [-1];	
+		/*for (var i = 0; i < array_length(files); i++) {
+			self.load(files[i], files_locale[i]);
 		}
-		exit;
+		exit;*/
 	}
 
 	// Calculate max step and step time	
@@ -88,7 +107,7 @@ function I18nLoad(time, i18n = false) constructor {
 	}
 
 	static dt = function() {
-		return ((delta_time/1000000) / (1/game_get_speed(gamespeed_fps)));
+		return ((delta_time/1000000) / (1/60));
 	}
 	
 	static update = function(use_delta_time = false) {
@@ -103,12 +122,12 @@ function I18nLoad(time, i18n = false) constructor {
 	static load = function(filename, locale) {
 		// Guard clauses
 		if (!is_string(filename)) {
-			show_debug_message("i18n ERROR: JSON filename must be a string");
+			show_debug_message("I18n ERROR - JSON filename must be a string");
 			exit;
 		}
 
 		if (string_pos(".json", filename) == 0) {
-			show_debug_message($"i18n ERROR: \"{filename}\" is not a valid file");
+			show_debug_message($"I18n ERROR - \"{filename}\" is not a valid file");
 			exit;
 		}
 
@@ -120,16 +139,16 @@ function I18nLoad(time, i18n = false) constructor {
 			root = working_directory;
 		}
 
-		file_loc = root + string_copy(filename, 3, string_length(filename) - 3);
+		file_loc = root + string_copy(filename, 3, string_length(filename) - 2);
 
 		if (!file_exists(file_loc)) {
-			show_debug_message("i18n ERROR: JSON file does not exist: " + file_loc);
+			show_debug_message("I18n ERROR - JSON file does not exist: " + file_loc);
 			exit;
 		}
 		
 		var file = file_text_open_read(file_loc);
 		if (file == -1) {
-			show_debug_message("i18n ERROR: Could not open JSON file: " + file_loc);
+			show_debug_message("I18n ERROR - Could not open JSON file: " + file_loc);
 			exit;
 		}
 
@@ -145,12 +164,12 @@ function I18nLoad(time, i18n = false) constructor {
 			var json_struct = json_parse(json_string);
 			flatten(json_struct, i18n, locale);
 		} catch (e) {
-			show_debug_message("i18n ERROR: Failed to parse JSON: " + string(e));
+			show_debug_message("I18n ERROR - Failed to parse JSON: " + string(e));
 			exit;
 		}
 	}
 
-	static flatten = function(struct, locale = "", prefix = "") {
+	static flatten = function(struct, i18n, locale = "", prefix = "") {
 		var names = struct_get_names(struct);
 		
 		for (var i = 0; i < array_length(names); i++) {
@@ -162,6 +181,7 @@ function I18nLoad(time, i18n = false) constructor {
 				flatten(value, i18n, locale, key);
 			} else {
 				if (!i18n.hashed) {
+					struct_set(i18n.data[$ locale].messages, key, value);
 					i18n.data[$ locale].messages[$ key] = value;
 				} else {
 					struct_set_from_hash(i18n.data[$ locale].messages, variable_get_hash(key), value);
@@ -171,20 +191,49 @@ function I18nLoad(time, i18n = false) constructor {
 	}
 }
 
+/**
+ * @desc description
+ * @param {Asset.GMFont} [font] Description
+ * @param {Constant.HAlign} [halign] Description
+ * @param {Constant.VAlign} [valign] Description
+ * @param {Constant.Colour} [color] Description
+ * @param {Real} [scale] Description
+ * @param {Real} [rotation] Description
+ * @param {Real} [alpha] Description
+
+ */
+function I18nDrawings(font = undefined, halign = undefined, valign = undefined, color = undefined, scale = undefined, rotation = undefined, alpha = undefined) constructor  {
+	font = font;
+	halign = halign;
+	valign = valign;
+	color = color;
+	scale = scale;
+	rotation = rotation;
+	alpha = alpha;
+}
+
+/**
+ * @desc description
+ * @param {String} var_name Description
+ * @param {String} default_locale Description
+ * @param {Array<Struct.I18nLocaleInit>} locales Description
+ * @param {Bool | Struct} [options]=false Description
+ * @returns {Struct} Description
+ */
 function i18n_create(var_name, default_locale, locales, options = false) {
 	// Guard clauses
 	if (!(is_string(var_name) && is_string(default_locale))) {
-		show_debug_message("i18n ERROR: var_name and default_locale must be strings");
+		show_debug_message("I18n ERROR - var_name and default_locale must be strings");
 		exit;
 	}
 
 	if (!is_array(locales)) {
-		show_debug_message("i18n ERROR: locales must be an array of I18nLocaleInit structs");
+		show_debug_message("I18n ERROR - locales must be an array of I18nLocaleInit structs");
 		exit;
 	}
 
 	if (!(is_bool(options || is_struct(options)))) {
-		show_debug_message("i18n ERROR: options must be a struct");
+		show_debug_message("I18n ERROR - options must be a struct");
 		exit;
 	}
 
@@ -193,7 +242,8 @@ function i18n_create(var_name, default_locale, locales, options = false) {
 		name: var_name,
 		scope: "instance",
 		default_locale: default_locale,
-		locale: default_locale
+		locale: default_locale,
+		locales: locales,
 		data: {},
 		refs: [],
 		hashed: true
@@ -208,15 +258,16 @@ function i18n_create(var_name, default_locale, locales, options = false) {
 
 	// Set options
 	if (is_struct(options)) {
-		struct_foreach(options, function(key, value) {
-			i18n[$ key] = value;
-		})
+		var names = struct_get_names(options);
+		for (var i = 0; i < array_length(names); i++) {
+			i18n[$ names[i]] = options[$ names[i]];
+		}
 	}
 
 	// Initialize data
 	for (var i = 0; i < array_length(locales); i++) {
 		if (!struct_exists(i18n.data, locales[i].code)) {
-			i18n_set_locales(locales[i].code, i18n);
+			i18n_add_locales(locales[i].code, i18n);
 		}
 
 		if (struct_exists(locales[i], "file")) {
@@ -225,50 +276,66 @@ function i18n_create(var_name, default_locale, locales, options = false) {
 				locales[i].file = [locales[i].file];
 			}
 			
-			i18n.loader = new I18nLoad(i18n.time ?? 0, i18n);
+			if (!struct_exists(i18n, "loader")) {
+				i18n.loader = new I18nLoad((struct_exists(i18n, "time") ? i18n.time : 0), i18n);
+			}
 		}
 	}
-
+	
+	show_debug_message(i18n);
 	return i18n;
 }
 
+
+/**
+ * @desc description
+ * @param {Bool} [use_delta_time]=false Description
+ * @param {Struct.i18n_create | Bool} [i18n]=false Description
+ */
 function i18n_update_loader(use_delta_time = false, i18n = false) {
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("i18n ERROR: i18n must be a i18n struct");
+		show_debug_message("I18n ERROR - i18n must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
 	}
 
 	if (!is_bool(use_delta_time)) {
-		show_debug_message("i18n ERROR: Use delta time must be boolean");
+		show_debug_message("I18n ERROR - Use delta time must be boolean");
 		exit;
 	}
 
 	if (!struct_exists(i18n, "loader")) {
-		show_debug_message("i18n ERROR: i18n must have a loader");
+		show_debug_message("I18n ERROR - i18n must have a loader");
 		exit;
 	}
 
-	if (i18n.loader.step < i18n.loader.max_step) {
+	if (struct_exists(i18n, "time") && i18n.loader.step < i18n.loader.max_step) {
 		i18n.loader.update(use_delta_time);
 	}
 }
 
-function i18n_set_messages(locale, data, i18n = false) {
+
+/**
+ * @desc description
+ * @param {String} locale Description
+ * @param {Struct} data Description
+ * @param {Bool | Struct.i18n_create} [i18n]=false Description
+ */
+function i18n_add_messages(locale, data, i18n = false) {
 	// Guard clauses
 	if (!is_string(locale)) {
-		show_debug_message("i18n ERROR: Locale must be a string");
+		show_debug_message("I18n ERROR - Locale must be a string");
 		exit;
 	}
 
 	if (!is_struct(data)) {
-		show_debug_message("i18n ERROR: Data must be a struct -> {key: value, ...}");
+		show_debug_message("I18n ERROR - Data must be a struct -> {key: value, ...}");
 		exit;
 	}
 
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("i18n ERROR: i18n must be a i18n struct");
+		show_debug_message("I18n ERROR - i18n must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
@@ -287,25 +354,33 @@ function i18n_set_messages(locale, data, i18n = false) {
 	}
 }
 
-function i18n_set_drawings(locale, preset_name, data, i18n = false) {
+
+/**
+ * @desc description
+ * @param {String | Array<String>} locale Description
+ * @param {String | Array<String>} preset_name Description
+ * @param {Struct.I18nDrawings} data Description
+ * @param {Bool | Struct.i18n_create} [i18n]=false Description
+ */
+function i18n_add_drawings(locale, preset_name, data, i18n = false) {
 	// Guard clauses
 	if (!(is_string(locale) || is_array(locale))) {
-		show_debug_message("i18n ERROR: Locale must be a string or array of strings");
+		show_debug_message("I18n ERROR - Locale must be a string or array of strings");
 		exit;
 	}
 
 	if (!(is_string(preset_name) || is_array(preset_name))) {
-		show_debug_message("i18n ERROR: Drawing preset name must be a string or array of strings");
+		show_debug_message("I18n ERROR - Drawing preset name must be a string or array of strings");
 		exit;
 	}
 
 	if (!(is_struct(data) || is_array(data))) {
-		show_debug_message("i18n ERROR: Data must be a struct -> Partial<{font, halign, valign, color, scale, rotation, alpha}> or array of this struct");
+		show_debug_message("I18n ERROR - Data must be a struct -> Partial<{font, halign, valign, color, scale, rotation, alpha}> or array of this struct");
 		exit;
 	}
 
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("i18n ERROR: i18n must be a i18n struct");
+		show_debug_message("I18n ERROR - i18n must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
@@ -320,7 +395,7 @@ function i18n_set_drawings(locale, preset_name, data, i18n = false) {
 	}
 
 	if (array_length(preset_name) != array_length(data)) {
-		show_debug_message("i18n ERROR: Drawing preset name and data must be the same length");
+		show_debug_message("I18n ERROR - Drawing preset name and data must be the same length");
 		exit;
 	}
 
@@ -340,15 +415,21 @@ function i18n_set_drawings(locale, preset_name, data, i18n = false) {
 	}
 }
 
-function i18n_set_locales(code, i18n = false) {
+
+/**
+ * @desc description
+ * @param {String | Array<String>} code Description
+ * @param {Bool | Struct.i18n_create} [i18n]=false Description
+ */
+function i18n_add_locales(code, i18n = false) {
 	// Guard clauses
 	if (!(is_string(code) || is_array(code))) {
-		show_debug_message("i18n ERROR: Code must be a string or an array of strings");
+		show_debug_message("I18n ERROR - Code must be a string or an array of strings");
 		exit;
 	}
 
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("i18n ERROR: i18n must be a i18n struct");
+		show_debug_message("I18n ERROR - i18n must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
