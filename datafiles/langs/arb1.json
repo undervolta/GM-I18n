@@ -1,3 +1,12 @@
 {
-    "lang": "عربى"
+    "lang": "عربى",
+    "hello": "مرحبا!",
+    "goodbye": "مع السَّلَامة",
+    "welcome": "مرحبا بك فى {name}!",
+    "items": {
+        "sword": "سيف",
+        "shield": "درع",
+        "potion": "مشروب"
+    },
+    "error_message": "حدث خطأ: {error_code}"
 }

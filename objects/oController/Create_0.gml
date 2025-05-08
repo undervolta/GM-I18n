@@ -12,11 +12,29 @@ global.i18n = i18n_create("g.i18n", "en", [
 
 i18n_add_messages("en", {
 	lang: "English",
+	this_lang: "[[lang]] is currently in use. [[hello]]",
 	hello: "Hello world!",
-	nested: {
-		a: "Test A",
-		b: "Test B"
-	}
+	goodbye: "Goodbye world!",
+	welcome: "Welcome to {0}, {1}!",
+	items: {
+		sword: "Sword",
+		shield: "Shield",
+		potion: "Potion",
+		letter: "Message:\n'[[dialog.npc_4]]'"
+	},
+	dialog: {
+		npc_1: "Help me, I'm trapped!",
+		npc_2: "I'm being held captive by a monster. Please save me!",
+		npc_3: "Hello, {name}! [[welcome]]",
+		npc_4: "He said, \"Welcome to our {0} village, {1}! That's all, now save my friend.\""
+	},
+	menu: {
+		start: "Start Game",
+		options: "Options"
+	},
+	error_num: "{num}. [[error_check]]",
+	error_check: "I18n - lang {locale} - [[error_message]]",
+	error_message: "An error occurred: {error_code}"
 })
 
 i18n_add_locales(["id", "kr", "cn"]);
@@ -35,25 +53,10 @@ i18n_add_drawings(["en", "id"],  ["preset1", "preset2"], [
 
 /*hello_text = i18n_create_ref_message("hello_text", "hello")
 hello_arr = [
-	i18n_create_ref_message("hello_arr.0", "hello"),
-	i18n_create_ref_message("hello_arr.1", "nested.a")
+	i18n_create_ref_message("hello_arr.0", "goodbye"),
+	i18n_create_ref_message("hello_arr.1", "items.sword")
 ]
-my_struct = {
-	stc: i18n_get_messages(["hello", "lang"]),
-	dyn: i18n_create_ref_message("my_struct.dyn", "lang"),
-	arr: ["0", "1", i18n_create_ref_message("my_struct.arr.2", "hello")],
-	nested: {
-		n_dyn: i18n_create_ref_message("my_struct.nested.n_dyn", "hello"),
-		n_arr: [i18n_create_ref_message("my_struct.nested.n_arr.0", "goodbye")],
-	}
-}*/
-
-hello_text = i18n_create_ref_message("hello_text", "hello")
-hello_arr = [
-	i18n_create_ref_message("hello_arr.0", "hello"),
-	i18n_create_ref_message("hello_arr.1", "nested.a")
-]
-/*global.my_struct = {
+global.my_struct = {
 	stc: i18n_get_messages(["hello", "lang"]),
 	dyn: i18n_create_ref_message("g.my_struct.dyn", "lang"),
 	arr: ["0", "1", i18n_create_ref_message("global.my_struct.arr.2", "hello")],
@@ -65,3 +68,32 @@ hello_arr = [
 
 /*show_debug_message($"hello_text = {hello_text}")
 show_debug_message($"refs = {global.i18n.refs}")*/
+
+ref_welcome = i18n_create_ref_message("ref_welcome", "welcome", [
+	"GM-I18n", "Dev"
+])
+ref_text = i18n_create_ref_message("ref_text", "dialog.npc_3", {
+	name: "Dev"	
+})
+ref_arr = [
+	i18n_create_ref_message("ref_arr.0", "hello"),
+	i18n_create_ref_message("ref_arr.1", "goodbye")
+]
+global.ref_struct = {
+	dyn: i18n_create_ref_message("g.ref_struct.dyn", "lang"),
+	arr: ["0", "1", i18n_create_ref_message("global.ref_struct.arr.2", "this_lang", {})],
+	nested: {
+		n_dyn: i18n_create_ref_message("global.ref_struct.nested.n_dyn", "error_num", {
+			num: choose(1, 2, 3, 4),
+			child: {
+				locale: choose("id", "ja", "ar", "cn", "kr"),
+				child: {
+					error_code: "1.23.456"
+				}
+			}	
+		}),
+		n_arr: [i18n_create_ref_message("g.ref_struct.nested.n_arr.0", "items.letter", {
+			child: ["Old", "Adventurer"]	
+		})],
+	}
+}

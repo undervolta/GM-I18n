@@ -1,5 +1,21 @@
 {
-    "lang": "日本語", 
+    "lang": "日本語",
     "hello": "こんにちは！",
-    "goodbye": "さようなら！"
+    "goodbye": "さようなら！",
+    "welcome": "ようこそ、{name}さん！",
+    "items": {
+        "sword": "剣",
+        "shield": "盾",
+        "potion": "ポーション"
+    },
+    "dialog": {
+        "npc_1": "冒険者よ、助けてくれ！",
+        "npc_2": "この村には昔から伝わる伝説があります。"
+    },
+    "menu": {
+        "start": "ゲームスタート",
+        "options": "設定",
+        "exit": "終了"
+    },
+    "error_message": "エラーが発生しました: {error_code}"
 }
