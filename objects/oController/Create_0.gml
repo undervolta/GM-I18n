@@ -16,6 +16,7 @@ i18n_add_messages("en", {
 	hello: "Hello world!",
 	goodbye: "Goodbye world!",
 	welcome: "Welcome to {0}, {1}!",
+	cond: "Noooo! | Yesssss!",
 	items: {
 		sword: "Sword",
 		shield: "Shield",
@@ -26,13 +27,14 @@ i18n_add_messages("en", {
 		npc_1: "Help me, I'm trapped!",
 		npc_2: "I'm being held captive by a monster. Please save me!",
 		npc_3: "Hello, {name}! [[welcome]]",
-		npc_4: "He said, \"Welcome to our {0} village, {1}! That's all, now save my friend.\""
+		npc_4: "He said, \"Welcome to our {0} village, {1}! That's all, now save my friend.\"",
+		npc_5: "Thanks! | Thank you!"
 	},
 	menu: {
 		start: "Start Game",
 		options: "Options"
 	},
-	error_num: "{num}. [[error_check]]",
+	error_num: "${num}. [[error_check]]",
 	error_check: "I18n - lang {locale} - [[error_message]]",
 	error_message: "An error occurred: {error_code}"
 })
@@ -49,6 +51,10 @@ i18n_add_drawings(["en", "id"],  ["preset1", "preset2"], [
 	new I18nDrawings(fNotoSansMedium, fa_left, fa_middle, #FFFFFF, 1, 0, 1),
 	new I18nDrawings(fNotoSansArbSemiBold, fa_center, fa_middle, #000000, 1, 0, 1),
 ]);
+
+i18n_add_dictionaries("en", [
+	["1", "剣"]
+])
 
 
 /*hello_text = i18n_create_ref_message("hello_text", "hello")
@@ -77,8 +83,10 @@ ref_text = i18n_create_ref_message("ref_text", "dialog.npc_3", {
 })
 ref_arr = [
 	i18n_create_ref_message("ref_arr.0", "hello"),
-	i18n_create_ref_message("ref_arr.1", "goodbye")
+	i18n_create_ref_message("ref_arr.1", "goodbye"),
+	i18n_create_ref_message("ref_arr.2", "dialog.npc_5", 0)
 ]
+ref_npc_5 = i18n_create_ref_message("ref_npc_5", "dialog.npc_5", 0);
 global.ref_struct = {
 	dyn: i18n_create_ref_message("g.ref_struct.dyn", "lang"),
 	arr: ["0", "1", i18n_create_ref_message("global.ref_struct.arr.2", "this_lang", {})],

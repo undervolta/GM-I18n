@@ -24,7 +24,7 @@ var error = i18n_get_messages("error_check", {
 	}
 })
 var error_num = i18n_get_messages("error_num", {
-	num: choose(1, 2, 3, 4),
+	num: "Num 1",
 	child: {
 		locale: choose("id", "ja", "ar", "cn", "kr"),
 		child: {
@@ -32,6 +32,13 @@ var error_num = i18n_get_messages("error_num", {
 		}
 	}	
 })
+var cond = i18n_get_messages("cond", {
+	plural: function(x) {
+		var result = (x < 5) ? 0 : 1;
+		return result;
+	},
+	plural_value: 5
+});
 
 show_debug_message($"hello = {hello}")
 show_debug_message($"potion = {potion}")
@@ -42,3 +49,11 @@ show_debug_message($"this_lang = {this_lang}")
 show_debug_message($"npc3 = {npc3}")
 show_debug_message($"error = {error}")
 show_debug_message($"error_num = {error_num}")
+show_debug_message($"cond = {cond}")
+
+/*show_debug_message($"data = {global.i18n.refs.messages.data}")
+show_debug_message($"ref_npc_5 old = {ref_npc_5}")
+
+i18n_update_plurals("ref_npc_5", 1)
+i18n_update_refs()
+show_debug_message($"ref_npc_5 new = {ref_npc_5}")*/
