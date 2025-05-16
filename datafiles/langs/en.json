@@ -1,13 +1,4 @@
 {
-	"title": "GM-I18n Demo",
-    "lang": "English",
-	"menu_1": {
-		"title": "Translation",
-		"head_1": "Static Text Translation",
-		"desc_1": "This sentence is static. It will be translated to the selected locale. Changing the locale won't affect this sentence.",
-		"head_2": "Dynamic Text Translation",
-		"desc_2": "This sentence is dynamic. It will be translated to the selected locale by default. Changing the locale will affect this sentence. If the passed key message doesn't exist in the selected locale, it will use the default locale instead."
-	},
 	"menu_2": {
 		"title": "Interpolation",
 		"head_1": "Indexed Data Interpolation",

@@ -1,4 +1,4 @@
-/// @description Insert description here
-
 draw_self();
-draw_text(x, y, ref_msg)
+
+i18n_draw_message(x - 165, y - 2, ref_msg, , "header");
+

@@ -4,12 +4,14 @@
 menu_list = [];
 btn_list = [];
 
+page = 1;
 
 // Create menu
 var inst_layer = layer_get_id("Instances");
 
 for (var i = 0; i < 6; i++) {
 	var menu = instance_create_layer(216, 176 + (i * 72), inst_layer, oMenu, {
+		ui_id : id,
 		num : i + 1,
 		key : string($"menu_{i + 1}.title")
 	});
@@ -18,16 +20,23 @@ for (var i = 0; i < 6; i++) {
 
 
 // Create locale/language switcher
-var langs = i18n_get_locales_name();
+var locales = i18n_get_locales_code();
 
-for (var i = 0; i < array_length(langs); i++) {
+for (var i = 0; i < array_length(locales); i++) {
 	var btn = instance_create_layer(room_width - 154, 178 + (i * 108), inst_layer, oBtnLocale, {
+		ui_id : id,
 		num : i + 1,
-		text : langs[i]
+		locale : locales[i]
 	});
 	array_push(btn_list, btn);
 }
 
+
+// Create message references 
+menu_1_head_1 = i18n_get_messages("menu_1.head_1", , "en");
+menu_1_desc_1 = i18n_get_messages("menu_1.desc_1", , "en");
+menu_1_head_2 = i18n_create_ref_message("menu_1_head_2", "menu_1.head_2");
+menu_1_desc_2 = i18n_create_ref_message("menu_1_desc_2", "menu_1.desc_2");
 
 /*from_ui = i18n_create_ref_message("from_ui", "lang")
 global.ui_text = i18n_create_ref_message("g.ui_text", "goodbye")

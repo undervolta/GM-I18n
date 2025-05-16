@@ -4,12 +4,76 @@
 global.i18n = i18n_create("g.i18n", "en", [
 	new I18nLocaleInit("en", "English", "~/langs/en.json"),
 	new I18nLocaleInit("ja", "日本語", "~/langs/ja.json"),
-	new I18nLocaleInit("ar", "عربى", ["~/langs/ar1.json", "~/langs/ar2.json"]),
+	new I18nLocaleInit("ko", "한국어", "~/langs/ko.json") 
+	//new I18nLocaleInit("ar", "عربى", ["~/langs/ar1.json", "~/langs/ar2.json"]),
 ], {
+	debug: true,
 	hashed: false,
-	time: [0, 0.5, 0.2, 0.3]
+	time: 0.5
 });
 
+
+// Add hardcoded messages to en locale
+i18n_add_messages("en", {
+	lang: "English",
+	title: "GM-I18n Demo",
+	plural_guide: "Press arrow up or down to change the plural value",
+	menu_1: {
+		title: "Translation",
+		head_1: "Static Text Translation",
+		desc_1: "This sentence is static. It will be translated to the selected locale. Changing the locale won't affect this sentence.",
+		head_2: "Dynamic Text Translation",
+		desc_2: "This sentence is dynamic. It will be translated to the selected locale by default. Changing the locale will affect this sentence. If the passed key message doesn't exist in the selected locale, it will use the default locale instead.",
+	},
+	menu_2: {
+		title: "Interpolation",
+	},
+	menu_3: {
+		title: "Pluralization",
+	},
+	menu_4: {
+		title: "Dictionary",
+	},
+	menu_5: {
+		title: "Drawing",
+	},
+	menu_6: {
+		title: "Localized Assets"
+	}
+});
+
+
+// Create non-regular fonts
+global.font_ja = font_add(working_directory + "fonts/NotoSansJP-Medium.ttf", 32, 0, 0, 32, 127);
+global.font_kr = font_add(working_directory + "fonts/NotoSansKR-Medium.ttf", 32, 0, 0, 32, 127);
+
+
+// Add drawing presets for each locale
+i18n_add_drawings("en", ["title", "button", "header", "desc"], [
+	new I18nDrawings(fNotoSansSemiBold, fa_left, fa_middle, #FFFFFF, 1.14, 0, 1),
+	new I18nDrawings(fNotoSansSemiBold, fa_center, fa_middle, #000000, 0.65, 0, 1),
+	new I18nDrawings(fNotoSansSemiBold, fa_left, fa_middle, #FFFFFF, 0.65, 0, 1),
+	new I18nDrawings(fNotoSansMedium, fa_left, fa_top, #CCCCCC, 0.49, 0, 1, -1, 1198)
+]);
+
+i18n_add_drawings("ja", ["button", "header", "desc"], [
+	new I18nDrawings(global.font_ja, fa_center, fa_middle, #000000, 0.65, 0, 1),
+	new I18nDrawings(global.font_ja, fa_left, fa_middle, #FFFFFF, 0.65, 0, 1),
+	new I18nDrawings(global.font_ja, fa_left, fa_top, #CCCCCC, 0.49, 0, 1, -1, 1198)
+]);
+
+i18n_add_drawings("ko", ["button", "header", "desc"], [
+	new I18nDrawings(global.font_kr, fa_center, fa_middle, #000000, 0.65, 0, 1),
+	new I18nDrawings(global.font_kr, fa_left, fa_middle, #FFFFFF, 0.65, 0, 1),
+	new I18nDrawings(global.font_kr, fa_left, fa_top, #CCCCCC, 0.49, 0, 1, -1, 1198)
+]);
+
+
+/*i18n_add_drawings("ar", ["button", "header", "desc"], [
+	new I18nDrawings(font_add(working_directory + "fonts/NotoSansArabic-SemiBold.ttf", 32, 0, 0, 32, 127), fa_center, fa_middle, #000000, 0.65, 0, 1),
+	new I18nDrawings(fNotoSansARSemiBold, fa_left, fa_middle, #FFFFFF, 0.65, 0, 1),
+	new I18nDrawings(fNotoSansARMedium, fa_left, fa_top, #CCCCCC, 0.49, 0, 1, -1, 410)
+]);*/
 
 
 /*i18n_add_messages("en", {
