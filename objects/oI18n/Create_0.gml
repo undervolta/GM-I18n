@@ -8,12 +8,12 @@ global.i18n = i18n_create("g.i18n", "en", [
 	//new I18nLocaleInit("ar", "عربى", ["~/langs/ar1.json", "~/langs/ar2.json"]),
 ], {
 	debug: true,
-	hashed: false,
+	hashed: true,
 	time: 0.5
 });
 
 
-// Add hardcoded messages to en locale
+// Add hardcoded messages to en locale. Great for mandatory initial messages.
 i18n_add_messages("en", {
 	lang: "English",
 	title: "GM-I18n Demo",

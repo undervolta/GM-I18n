@@ -17,15 +17,3 @@ in_use = function() {
 }
 
 in_use();
-
-/*reverse = function(str) {
-    var len = string_length(str);
-    var reversed = "";
-    
-    // Iterate through the string backwards and build the reversed string
-    for (var i = len; i > 0; i--) {
-        reversed += string_char_at(str, i);
-    }
-    
-    return reversed;
-}*/

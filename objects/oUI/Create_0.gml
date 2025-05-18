@@ -38,6 +38,34 @@ menu_1_desc_1 = i18n_get_messages("menu_1.desc_1", , "en");
 menu_1_head_2 = i18n_create_ref_message("menu_1_head_2", "menu_1.head_2");
 menu_1_desc_2 = i18n_create_ref_message("menu_1_desc_2", "menu_1.desc_2");
 
+menu_2 = {
+	head_1 : i18n_create_ref_message("menu_2.head_1", "menu_2.head_1"),
+	desc_1 : i18n_create_ref_message("menu_2.desc_1", "menu_2.desc_1"),
+	head_2 : i18n_create_ref_message("menu_2.head_2", "menu_2.head_2"),
+	desc_2 : i18n_create_ref_message("menu_2.desc_2", "menu_2.desc_2"),
+	head_3 : i18n_create_ref_message("menu_2.head_3", "menu_2.head_3"),
+	desc_3 : i18n_create_ref_message("menu_2.desc_3", "menu_2.desc_3")
+}
+
+menu_3 = [
+	i18n_create_ref_message("menu_3.0", "menu_3.head_1"),
+	i18n_create_ref_message("menu_3.1", "menu_3.desc_1"),
+	i18n_create_ref_message("menu_3.2", "menu_3.head_2"),
+	i18n_create_ref_message("menu_3.3", "menu_3.desc_2"),
+]
+
+my_val = 0;
+menu_3_test = i18n_create_ref_message("menu_3_test", "menu_3.test_1", {
+	qty : my_val,
+	plural : function (val) {
+		var result = (val <= 1) ? val : 2;
+		self.qty = val;
+		
+		return result;
+	},
+	plural_value : my_val
+});
+
 /*from_ui = i18n_create_ref_message("from_ui", "lang")
 global.ui_text = i18n_create_ref_message("g.ui_text", "goodbye")
 global.ui_text = i18n_create_ref_message("g.ui_text", "menu.start")*/

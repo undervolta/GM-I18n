@@ -44,10 +44,6 @@
   },
   "name":"GM-I18n",
   "resources":[
-    {"id":{"name":"fNotoSansARMedium","path":"fonts/fNotoSansARMedium/fNotoSansARMedium.yy",},},
-    {"id":{"name":"fNotoSansARSemiBold","path":"fonts/fNotoSansARSemiBold/fNotoSansARSemiBold.yy",},},
-    {"id":{"name":"fNotoSansJPMedium","path":"fonts/fNotoSansJPMedium/fNotoSansJPMedium.yy",},},
-    {"id":{"name":"fNotoSansJPSemiBold","path":"fonts/fNotoSansJPSemiBold/fNotoSansJPSemiBold.yy",},},
     {"id":{"name":"fNotoSansMedium","path":"fonts/fNotoSansMedium/fNotoSansMedium.yy",},},
     {"id":{"name":"fNotoSansSemiBold","path":"fonts/fNotoSansSemiBold/fNotoSansSemiBold.yy",},},
     {"id":{"name":"oBtnLocale","path":"objects/oBtnLocale/oBtnLocale.yy",},},

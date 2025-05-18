@@ -9,7 +9,8 @@ enum I18N_DRAWING {
 	ROTATION,
 	ALPHA,
 	SEP,
-	WIDTH
+	WIDTH,
+	LINE_BREAK
 }
 
 enum I18N_DRAW_TEXT {
@@ -255,8 +256,9 @@ function I18nLoad(interval, i18n_struct = false) constructor {
  * @param {Real} [draw_alpha] Drawing or text opacity.
  * @param {Real} [draw_sep] Text separation.
  * @param {Real} [draw_width] Text width.
+ * @param {Bool} [force_line_break]=false Force line break.
  */
-function I18nDrawings(draw_font = undefined, draw_halign = undefined, draw_valign = undefined, draw_color = undefined, draw_scale = undefined, draw_rotation = undefined, draw_alpha = undefined, draw_sep = undefined, draw_width = undefined) constructor  {
+function I18nDrawings(draw_font = undefined, draw_halign = undefined, draw_valign = undefined, draw_color = undefined, draw_scale = undefined, draw_rotation = undefined, draw_alpha = undefined, draw_sep = undefined, draw_width = undefined, force_line_break = false) constructor  {
 	font = ((asset_get_type(draw_font) == asset_font) ? draw_font : undefined);
 	halign = draw_halign;
 	valign = draw_valign;
@@ -266,6 +268,9 @@ function I18nDrawings(draw_font = undefined, draw_halign = undefined, draw_valig
 	alpha = (is_real(draw_alpha) ? draw_alpha : undefined);
 	sep = (is_real(draw_sep) ? draw_sep : -1);
 	width = (is_real(draw_width) ? draw_width : room_width);
+
+	// Optional
+	line_break = force_line_break;
 
 	// Set draw type
 	draw_type = I18N_DRAW_TEXT.NORMAL;
@@ -903,28 +908,28 @@ function i18n_get_messages(key, data = undefined, locale = "", i18n = false) {
 
 			if (array_length(raw_plural) > 1) {
 				if (is_real(data)) {					// Pluralization by index
-					if (data >= i18n.plural_start_at && data <= array_length(raw_plural) - 1 + i18n.plural_start_at) {
-						result[i] = string_trim(raw_plural[floor(data - i18n.plural_start_at)]);
-					} else if (i18n.debug) {
-						show_debug_message($"I18n ERROR - i18n_get_messages() - Pluralization index out of range");
+					result[i] = string_trim(raw_plural[max(i18n.plural_start_at, floor(data - i18n.plural_start_at))]);
+
+					if (i18n.debug && (data < i18n.plural_start_at || data > array_length(raw_plural) - 1 + i18n.plural_start_at)) {
+						show_debug_message($"I18n WARNING - i18n_get_messages() - Pluralization index out of range");
 					}
 				} else if (is_struct(data)) {			// Pluralization by struct (need "plural" key (e.g {plural: 1}, {plural: function(number) {return number}, plural_value: 1}, ...))
 					if (struct_exists(data, "plural")) {
 						if (struct_exists(data, "plural_value")) {
 							if (is_real(data.plural)) {
-								if (data.plural >= i18n.plural_start_at && data.plural <= array_length(raw_plural) - 1 + i18n.plural_start_at) {
-									result[i] = string_trim(raw_plural[floor(data.plural - i18n.plural_start_at)]);
-								} else if (i18n.debug) {
-									show_debug_message($"I18n ERROR - i18n_get_messages() - Pluralization index out of range");
+								result[i] = string_trim(raw_plural[max(i18n.plural_start_at, floor(data.plural - i18n.plural_start_at))]);
+								
+								if (i18n.debug && (data.plural < i18n.plural_start_at || data.plural > array_length(raw_plural) - 1 + i18n.plural_start_at)) {
+									show_debug_message($"I18n WARNING - i18n_get_messages() - Pluralization index out of range");
 								}
 							} else if (is_method(data.plural)) {
 								var plural_result = data.plural(data.plural_value);
 
 								if (is_real(plural_result)) {
-									if (plural_result >= i18n.plural_start_at && plural_result <= array_length(raw_plural) - 1 + i18n.plural_start_at) {
-										result[i] = string_trim(raw_plural[floor(plural_result - i18n.plural_start_at)]);
-									} else if (i18n.debug) {
-										show_debug_message($"I18n ERROR - i18n_get_messages() - Pluralization index out of range");
+									result[i] = string_trim(raw_plural[max(i18n.plural_start_at, floor(plural_result - i18n.plural_start_at))]);
+
+									if (i18n.debug && (plural_result < i18n.plural_start_at || plural_result > array_length(raw_plural) - 1 + i18n.plural_start_at)) {
+										show_debug_message($"I18n WARNING - i18n_get_messages() - Pluralization index out of range");
 									}
 								} else if (i18n.debug) {
 									show_debug_message($"I18n ERROR - i18n_get_messages() - Pluralization method must return a real number");
@@ -1350,7 +1355,7 @@ function i18n_get_ref_message(index, i18n = false) {
 	var to_update = name_split[array_length(name_split) - 1];
 
 	for (var i = ((root_ref == "global")); i < (array_length(name_split) - 1); i++) {
-		if (string_digits(name_split[i]) != "") {
+		if (string_digits(name_split[i]) != "" && string_letters(name_split[i]) == "") {
 			show_debug_message($"I18n ERROR - i18n_get_ref_message() - An array is only supported at the last reference level");
 			break;
 		}
@@ -1529,35 +1534,23 @@ function i18n_update_plurals(var_name, value, update_refs = false, i18n = false)
 		exit;
 	}
 
-	var target_ref = i18n_get_ref_message(ref_index, i18n);
-	
-	// Check if the reference has derived reference(s)
-	if (!ref_match) {
-		var curr_split = string_split(var_name, ".", true);
-		var target_split = string_split(i18n.refs.messages.refs[ref_index], ".", true);
-
-		for (var i = array_length(target_split) - 1; i < array_length(curr_split); i++) {
-			if (is_struct(target_ref)) {
-				if (struct_exists(target_ref, curr_split[i])) {
-					target_ref = target_ref[$ curr_split[i]];
-				} else {
-					show_debug_message($"I18n ERROR - i18n_update_plurals() - Struct {target_ref} member {curr_split[i]} doesn't exist");
-					break;
-				}
-			} else {
-				show_debug_message($"I18n ERROR - i18n_update_plurals() - Reference {var_name} isn't a struct");
-				break;
-			}
-		}
-	}
+	var target_ref = i18n.refs.messages.data[ref_index];
 
 	// Update pluralization value
-	if (is_real(value)) {
-		i18n.refs.messages.data[ref_index] = value;
-	} else if (struct_exists(target_ref, "plural") && struct_exists(target_ref, "plural_value")) {
-		target_ref.plural_value = value;
+	if (is_real(target_ref)) {
+		target_ref = value;
+	} else if (is_struct(target_ref)) {
+		if (struct_exists(target_ref, "plural")) {
+			if (struct_exists(target_ref, "plural_value")) {	// Custom pluralization value (using method)
+				target_ref.plural_value = value;
+			} else {											// Default pluralization value (using index)
+				target_ref.plural = value;
+			}
+		} else {
+			show_debug_message($"I18n ERROR - i18n_update_plurals() - Struct {i18n.refs.messages.data[ref_index]} doesn't have a plural member");
+		}
 	} else {
-		show_debug_message($"I18n ERROR - i18n_update_plurals() - Struct {target_ref} doesn't have a plural or plural_value member");
+		show_debug_message($"I18n ERROR - i18n_update_plurals() - Data at index {ref_index} isn't a real or struct");
 	}
 
 	// Update i18n references
@@ -1745,96 +1738,121 @@ function i18n_draw_message(x, y, text, data = undefined, preset_name = "", local
 	if (preset_name != "") {
 		drawing_data = i18n_use_drawing(preset_name, locale, i18n);
 	}
+
+	// Check if the drawing's forced line break is enabled
+	if (!is_undefined(drawing_data)) {
+		if (drawing_data.line_break) {
+			var text_split = string_split(text, " ", true);
+			var current_str = "";
+			var result = "";
+
+			for (var i = 0; i < string_length(text); i++) {
+				if (string_width(current_str + string_char_at(text, i + 1)) <= drawing_data.width) {
+					current_str += string_char_at(text, i + 1);
+				} else {
+					result += current_str + "\n";
+					current_str = "";
+				}
+			}
+			
+			result += current_str;
+			text = result;
+		}
+	}
 	
 	// Draw message
-	switch (drawing_data.draw_type) {
-		case I18N_DRAW_TEXT.NORMAL:
-			draw_text(x, y, text);
-			break;
-			
-		case I18N_DRAW_TEXT.EXTENDED:
-			draw_text_ext(x, y, text, 
-				(is_undefined(drawing_data.sep) ? -1 : drawing_data.sep), 
-				(is_undefined(drawing_data.width) ? room_width : drawing_data.width));
-			break;
-			
-		case I18N_DRAW_TEXT.COLORED:
-			draw_text_colour(x, y, text, 
-				(is_undefined(drawing_data.color) ? c_white : 
-					(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 0)] : drawing_data.color)), 
-				(is_undefined(drawing_data.color) ? c_white : 
-					(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 1)] : drawing_data.color)), 
-				(is_undefined(drawing_data.color) ? c_white : 
-					(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 2)] : drawing_data.color)), 
-				(is_undefined(drawing_data.color) ? c_white : 
-					(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 3)] : drawing_data.color)), 
-				(is_undefined(drawing_data.alpha) ? 1 : drawing_data.alpha));
-			break;
+	if (is_undefined(drawing_data)) {
+		draw_text(x, y, text);
+	} else {
+		switch (drawing_data.draw_type) {
+			case I18N_DRAW_TEXT.NORMAL:
+				draw_text(x, y, text);
+				break;
+				
+			case I18N_DRAW_TEXT.EXTENDED:
+				draw_text_ext(x, y, text, 
+					(is_undefined(drawing_data.sep) ? -1 : drawing_data.sep), 
+					(is_undefined(drawing_data.width) ? room_width : drawing_data.width));
+				break;
+				
+			case I18N_DRAW_TEXT.COLORED:
+				draw_text_colour(x, y, text, 
+					(is_undefined(drawing_data.color) ? c_white : 
+						(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 0)] : drawing_data.color)), 
+					(is_undefined(drawing_data.color) ? c_white : 
+						(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 1)] : drawing_data.color)), 
+					(is_undefined(drawing_data.color) ? c_white : 
+						(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 2)] : drawing_data.color)), 
+					(is_undefined(drawing_data.color) ? c_white : 
+						(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 3)] : drawing_data.color)), 
+					(is_undefined(drawing_data.alpha) ? 1 : drawing_data.alpha));
+				break;
 
-		case I18N_DRAW_TEXT.TRANSFORMED:
-			draw_text_transformed(x, y, text, 
-				(is_undefined(drawing_data.scale) ? 1 : drawing_data.scale), 
-				(is_undefined(drawing_data.scale) ? 1 : drawing_data.scale), 
-				(is_undefined(drawing_data.rotation) ? 0 : drawing_data.rotation));
-			break;
-			
-		case I18N_DRAW_TEXT.EXT_COLORED:
-			draw_text_ext_colour(x, y, text, 
-				(is_undefined(drawing_data.sep) ? -1 : drawing_data.sep), 
-				(is_undefined(drawing_data.width) ? room_width : drawing_data.width), 
-				(is_undefined(drawing_data.color) ? c_white : 
-					(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 0)] : drawing_data.color)), 
-				(is_undefined(drawing_data.color) ? c_white : 
-					(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 1)] : drawing_data.color)), 
-				(is_undefined(drawing_data.color) ? c_white : 
-					(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 2)] : drawing_data.color)),
-				(is_undefined(drawing_data.color) ? c_white : 
-					(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 3)] : drawing_data.color)),
-				(is_undefined(drawing_data.alpha) ? 1 : drawing_data.alpha));
-			break;
-			
-		case I18N_DRAW_TEXT.EXT_TRANSFORMED:
-			draw_text_ext_transformed(x, y, text, 
-				(is_undefined(drawing_data.sep) ? -1 : drawing_data.sep), 
-				(is_undefined(drawing_data.width) ? room_width : drawing_data.width), 
-				(is_undefined(drawing_data.scale) ? 1 : drawing_data.scale), 
-				(is_undefined(drawing_data.scale) ? 1 : drawing_data.scale), 
-				(is_undefined(drawing_data.rotation) ? 0 : drawing_data.rotation));
-			break;
+			case I18N_DRAW_TEXT.TRANSFORMED:
+				draw_text_transformed(x, y, text, 
+					(is_undefined(drawing_data.scale) ? 1 : drawing_data.scale), 
+					(is_undefined(drawing_data.scale) ? 1 : drawing_data.scale), 
+					(is_undefined(drawing_data.rotation) ? 0 : drawing_data.rotation));
+				break;
+				
+			case I18N_DRAW_TEXT.EXT_COLORED:
+				draw_text_ext_colour(x, y, text, 
+					(is_undefined(drawing_data.sep) ? -1 : drawing_data.sep), 
+					(is_undefined(drawing_data.width) ? room_width : drawing_data.width), 
+					(is_undefined(drawing_data.color) ? c_white : 
+						(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 0)] : drawing_data.color)), 
+					(is_undefined(drawing_data.color) ? c_white : 
+						(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 1)] : drawing_data.color)), 
+					(is_undefined(drawing_data.color) ? c_white : 
+						(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 2)] : drawing_data.color)),
+					(is_undefined(drawing_data.color) ? c_white : 
+						(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 3)] : drawing_data.color)),
+					(is_undefined(drawing_data.alpha) ? 1 : drawing_data.alpha));
+				break;
+				
+			case I18N_DRAW_TEXT.EXT_TRANSFORMED:
+				draw_text_ext_transformed(x, y, text, 
+					(is_undefined(drawing_data.sep) ? -1 : drawing_data.sep), 
+					(is_undefined(drawing_data.width) ? room_width : drawing_data.width), 
+					(is_undefined(drawing_data.scale) ? 1 : drawing_data.scale), 
+					(is_undefined(drawing_data.scale) ? 1 : drawing_data.scale), 
+					(is_undefined(drawing_data.rotation) ? 0 : drawing_data.rotation));
+				break;
 
-		case I18N_DRAW_TEXT.TRANSFORMED_COLORED:
-			draw_text_transformed_colour(x, y, text, 
-				(is_undefined(drawing_data.scale) ? 1 : drawing_data.scale),
-				(is_undefined(drawing_data.scale) ? 1 : drawing_data.scale),
-				(is_undefined(drawing_data.rotation) ? 0 : drawing_data.rotation),
-				(is_undefined(drawing_data.color) ? c_white : 
-					(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 0)] : drawing_data.color)), 
-				(is_undefined(drawing_data.color) ? c_white : 
-					(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 1)] : drawing_data.color)),
-				(is_undefined(drawing_data.color) ? c_white : 
-					(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 2)] : drawing_data.color)),
-				(is_undefined(drawing_data.color) ? c_white : 
-					(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 3)] : drawing_data.color)),
-				(is_undefined(drawing_data.alpha) ? 1 : drawing_data.alpha));
-			break;
+			case I18N_DRAW_TEXT.TRANSFORMED_COLORED:
+				draw_text_transformed_colour(x, y, text, 
+					(is_undefined(drawing_data.scale) ? 1 : drawing_data.scale),
+					(is_undefined(drawing_data.scale) ? 1 : drawing_data.scale),
+					(is_undefined(drawing_data.rotation) ? 0 : drawing_data.rotation),
+					(is_undefined(drawing_data.color) ? c_white : 
+						(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 0)] : drawing_data.color)), 
+					(is_undefined(drawing_data.color) ? c_white : 
+						(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 1)] : drawing_data.color)),
+					(is_undefined(drawing_data.color) ? c_white : 
+						(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 2)] : drawing_data.color)),
+					(is_undefined(drawing_data.color) ? c_white : 
+						(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 3)] : drawing_data.color)),
+					(is_undefined(drawing_data.alpha) ? 1 : drawing_data.alpha));
+				break;
 
-		case I18N_DRAW_TEXT.EXT_TRANSFORMED_COLORED:
-			draw_text_ext_transformed_colour(x, y, text, 
-				(is_undefined(drawing_data.sep) ? -1 : drawing_data.sep), 
-				(is_undefined(drawing_data.width) ? room_width : drawing_data.width), 
-				(is_undefined(drawing_data.scale) ? 1 : drawing_data.scale), 
-				(is_undefined(drawing_data.scale) ? 1 : drawing_data.scale), 
-				(is_undefined(drawing_data.rotation) ? 0 : drawing_data.rotation),
-				(is_undefined(drawing_data.color) ? c_white : 
-					(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 0)] : drawing_data.color)), 
-				(is_undefined(drawing_data.color) ? c_white : 
-					(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 1)] : drawing_data.color)),
-				(is_undefined(drawing_data.color) ? c_white : 
-					(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 2)] : drawing_data.color)),
-				(is_undefined(drawing_data.color) ? c_white : 
-					(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 3)] : drawing_data.color)),
-				(is_undefined(drawing_data.alpha) ? 1 : drawing_data.alpha));
-			break;
+			case I18N_DRAW_TEXT.EXT_TRANSFORMED_COLORED:
+				draw_text_ext_transformed_colour(x, y, text, 
+					(is_undefined(drawing_data.sep) ? -1 : drawing_data.sep), 
+					(is_undefined(drawing_data.width) ? room_width : drawing_data.width), 
+					(is_undefined(drawing_data.scale) ? 1 : drawing_data.scale), 
+					(is_undefined(drawing_data.scale) ? 1 : drawing_data.scale), 
+					(is_undefined(drawing_data.rotation) ? 0 : drawing_data.rotation),
+					(is_undefined(drawing_data.color) ? c_white : 
+						(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 0)] : drawing_data.color)), 
+					(is_undefined(drawing_data.color) ? c_white : 
+						(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 1)] : drawing_data.color)),
+					(is_undefined(drawing_data.color) ? c_white : 
+						(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 2)] : drawing_data.color)),
+					(is_undefined(drawing_data.color) ? c_white : 
+						(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 3)] : drawing_data.color)),
+					(is_undefined(drawing_data.alpha) ? 1 : drawing_data.alpha));
+				break;
+		}
 	}
 }
 
