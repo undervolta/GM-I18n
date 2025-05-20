@@ -7,7 +7,7 @@ global.i18n = i18n_create("g.i18n", "en", [
 	new I18nLocaleInit("ko", "한국어", "~/langs/ko.json") 
 	//new I18nLocaleInit("ar", "عربى", ["~/langs/ar1.json", "~/langs/ar2.json"]),
 ], {
-	debug: true,
+	debug: false,
 	hashed: true,
 	time: 0.5
 });
@@ -66,6 +66,47 @@ i18n_add_drawings("ko", ["button", "header", "desc"], [
 	new I18nDrawings(global.font_kr, fa_center, fa_middle, #000000, 0.65, 0, 1),
 	new I18nDrawings(global.font_kr, fa_left, fa_middle, #FFFFFF, 0.65, 0, 1),
 	new I18nDrawings(global.font_kr, fa_left, fa_top, #CCCCCC, 0.49, 0, 1, -1, 1198)
+]);
+
+
+// Add dictionaries
+i18n_add_dictionaries("en", [
+	["1", "one"],
+	["2", "two"],
+	["3", "three"],
+	["4", "four"],
+	["5", "five"],
+	["6", "six"],
+	["7", "seven"],
+	["8", "eight"],
+	["9", "nine"],
+	["10", "ten"]
+]);
+
+i18n_add_dictionaries("ja", [
+	["1", "一"],
+	["2", "二"],
+	["3", "三"],
+	["4", "四"],
+	["5", "五"],
+	["6", "六"],
+	["7", "七"],
+	["8", "八"],
+	["9", "九"],
+	["10", "十"]
+]);
+
+i18n_add_dictionaries("ko", [
+	["1", "하나"],
+	["2", "둘"],
+	["3", "셋"],
+	["4", "넷"],
+	["5", "다섯"],
+	["6", "여섯"],
+	["7", "일곱"],
+	["8", "여덟"],
+	["9", "아홉"],
+	["10", "십"]
 ]);
 
 

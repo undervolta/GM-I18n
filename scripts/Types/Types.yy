@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"scI18n",
+  "%Name":"Types",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"scI18n",
+  "name":"Types",
   "parent":{
     "name":"GM-I18n",
     "path":"folders/GM-I18n.yy",

@@ -3,7 +3,8 @@
 i18n_draw_message(41, 80, "@:title", , "title", "en");
 
 // Draw the description based on the active menu number
-var messages, sep, w, preset;
+var messages, w, preset;
+var sep = 32;
 var y_add = 0;
 
 switch (page) {
@@ -29,7 +30,6 @@ switch (page) {
 
 			i18n_draw_message(432, 176 + y_add, messages[i], , preset);
 			
-			sep = 32;
 			w = i18n_get_drawings_data(preset, I18N_DRAWING.WIDTH);
 			
 			y_add += string_height_ext(messages[i], sep, w) - 30 + ((i % 2 == 1) * 30);
@@ -43,7 +43,6 @@ switch (page) {
 
 			i18n_draw_message(432, 176 + y_add, messages[i], , preset);
 			
-			sep = 32;
 			w = i18n_get_drawings_data(preset, I18N_DRAWING.WIDTH);
 			
 			y_add += string_height_ext(messages[i], sep, w) - 30 + ((i % 2 == 1) * 30);
@@ -54,5 +53,51 @@ switch (page) {
 	
 		i18n_draw_message(432, 176 + y_add, "@:plural_guide", , "desc");
 	break;
+	case 4:		// Dictionary
+		messages = [menu_4.head, menu_4.desc];
 	
+		for (var i = 0; i < array_length(messages); i++) {
+			preset = ((i % 2 == 0) ? "header" : "desc");
+
+			i18n_draw_message(432, 176 + y_add, messages[i], , preset);
+			
+			w = i18n_get_drawings_data(preset, I18N_DRAWING.WIDTH);
+			
+			y_add += string_height_ext(messages[i], sep, w) - 30 + ((i % 2 == 1) * 30);
+		}
+	
+		i18n_draw_message(432, 176 + y_add, menu_4.test, , "desc");
+		y_add += string_height(menu_4.test) - 30;
+	
+		i18n_draw_message(432, 176 + y_add, "@:plural_guide", , "desc");
+	break;
+	case 5:		// Drawing
+		for (var i = 0; i < array_length(global.menu_5); i++) {
+			preset = ((i % 2 == 0) ? "header" : "desc");
+
+			i18n_draw_message(432, 176 + y_add, global.menu_5[i], , preset);
+			
+			w = i18n_get_drawings_data(preset, I18N_DRAWING.WIDTH);
+			
+			y_add += string_height_ext(global.menu_5[i], sep, w) - 30 + ((i % 2 == 1) * 30);
+		}
+	break;
+	case 6:		// Localized Asset
+		messages = [global.menu.menu_6.head_1, global.menu.menu_6.desc_1];
+	
+		for (var i = 0; i < array_length(messages); i++) {
+			preset = ((i % 2 == 0) ? "header" : "desc");
+
+			i18n_draw_message(432, 176 + y_add, messages[i], , preset);
+			
+			w = i18n_get_drawings_data(preset, I18N_DRAWING.WIDTH);
+			
+			y_add += string_height_ext(messages[i], sep, w) - 30 + ((i % 2 == 1) * 30);
+		}
+		
+		draw_sprite(menu_6_spr, 0, 745, 251 + y_add);
+		y_add += 182;
+		
+		i18n_draw_message(432, 176 + y_add, global.menu.menu_6.test_1, , "desc");
+	break;
 }

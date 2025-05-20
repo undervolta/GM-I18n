@@ -32,12 +32,14 @@ for (var i = 0; i < array_length(locales); i++) {
 }
 
 
-// Create message references 
+// Create messages with different style
+// Menu 1 (Translation)
 menu_1_head_1 = i18n_get_messages("menu_1.head_1", , "en");
 menu_1_desc_1 = i18n_get_messages("menu_1.desc_1", , "en");
 menu_1_head_2 = i18n_create_ref_message("menu_1_head_2", "menu_1.head_2");
 menu_1_desc_2 = i18n_create_ref_message("menu_1_desc_2", "menu_1.desc_2");
 
+// Menu 2 (Interpolation)
 menu_2 = {
 	head_1 : i18n_create_ref_message("menu_2.head_1", "menu_2.head_1"),
 	desc_1 : i18n_create_ref_message("menu_2.desc_1", "menu_2.desc_1"),
@@ -47,11 +49,12 @@ menu_2 = {
 	desc_3 : i18n_create_ref_message("menu_2.desc_3", "menu_2.desc_3")
 }
 
+// Menu 3 (Pluralization)
 menu_3 = [
 	i18n_create_ref_message("menu_3.0", "menu_3.head_1"),
 	i18n_create_ref_message("menu_3.1", "menu_3.desc_1"),
 	i18n_create_ref_message("menu_3.2", "menu_3.head_2"),
-	i18n_create_ref_message("menu_3.3", "menu_3.desc_2"),
+	i18n_create_ref_message("menu_3.3", "menu_3.desc_2")
 ]
 
 my_val = 0;
@@ -65,6 +68,54 @@ menu_3_test = i18n_create_ref_message("menu_3_test", "menu_3.test_1", {
 	},
 	plural_value : my_val
 });
+
+// Menu 4 (Dictionary)
+menu_4 = {
+	head : i18n_create_ref_message("menu_4.head", "menu_4.head_1"),
+	desc : i18n_create_ref_message("menu_4.desc", "menu_4.desc_1"),
+	test : i18n_create_ref_message("menu_4.test", "menu_4.test_1", {
+		qty : my_val,
+		plural : function (val) {
+			var result = (val <= 1) ? val : 2;
+			self.qty = val;
+			
+			return result;
+		},
+		plural_value : my_val
+	}),
+}
+
+// Menu 5 (Drawing)
+global.menu_5 = [
+	i18n_create_ref_message("global.menu_5.0", "menu_5.head_1"),
+	i18n_create_ref_message("global.menu_5.1", "menu_5.desc_1"),
+	i18n_create_ref_message("global.menu_5.2", "menu_5.head_2"),
+	i18n_create_ref_message("g.menu_5.3", "menu_5.desc_2"),
+	i18n_create_ref_message("g.menu_5.4", "menu_5.head_3"),
+	i18n_create_ref_message("g.menu_5.5", "menu_5.desc_3")
+]
+
+// Menu 6 (Localized Asset)
+global.menu = {
+	menu_6 : {
+		head_1 : i18n_create_ref_message("global.menu.menu_6.head_1", "menu_6.head_1"),
+		desc_1 : i18n_create_ref_message("g.menu.menu_6.desc_1", "menu_6.desc_1"),
+		test_1 : i18n_create_ref_message("global.menu.menu_6.test_1", "menu_6.test_1")
+	}
+};
+
+menu_6_spr = i18n_create_ref_asset("menu_6_spr", {
+	en: sSplashEn,
+	ja: sSplashJa,
+	ko: sSplashKo
+});
+
+menu_6_snd = i18n_create_ref_asset("menu_6_snd", {
+	en: soVoiceEn,
+	ja: soVoiceJa,
+	ko: soVoiceKo
+});
+
 
 /*from_ui = i18n_create_ref_message("from_ui", "lang")
 global.ui_text = i18n_create_ref_message("g.ui_text", "goodbye")

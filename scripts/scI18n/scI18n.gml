@@ -1,3 +1,41 @@
+/*
+ * name: GM-I18n
+ * desc: A powerful, open-source internationalization (i18n) library for GameMaker 2.3+
+ * author: @undervolta
+ * version: 0.1.0
+ * date: 2025-05-19
+ * 
+ * repo: https://github.com/undervolta/GM-I18n
+ * docs: https://github.com/undervolta/GM-I18n/wiki
+ * license: MIT
+ * 
+ * features:
+ *   - Comprehensive multi-language support with JSON-based locale files
+ *   - Automatic locale file loading with configurable timing
+ *   - Flexible translation system:
+ *     - Static translations for fixed text
+ *     - Dynamic translations with variable interpolation
+ *     - Real-time translation updates
+ *   - Advanced pluralization with customizable rules
+ *   - Dictionary system for managing related translations
+ *   - Rich text drawing system with:
+ *     - Multiple formatting presets
+ *     - Custom alignment and positioning
+ *     - Color and style options
+ *     - Scale and rotation support
+ *   - Asset localization for sprites, sounds, and other assets
+ *   - Debug mode with detailed logging and validation
+ *   - Optimized performance with optional hashing
+ * 
+ * dependencies: None
+ * compatibility: GameMaker 2.3+ - All platforms
+ */
+
+
+/// feather ignore GM1041
+/// feather ignore GM1044
+
+
 global.i18n_name = "";
 
 enum I18N_DRAWING {
@@ -9,8 +47,7 @@ enum I18N_DRAWING {
 	ROTATION,
 	ALPHA,
 	SEP,
-	WIDTH,
-	LINE_BREAK
+	WIDTH
 }
 
 enum I18N_DRAW_TEXT {
@@ -24,10 +61,15 @@ enum I18N_DRAW_TEXT {
 	EXT_TRANSFORMED_COLORED
 }
 
+enum I18N_REF {
+	ALL,
+	MESSAGES,
+	ASSETS
+}
 
-/// feather ignore GM1041
+
 /**
- * @desc Struct for initializing a locale
+ * @desc Struct constructor for initializing a locale
  * @param {String} lang_code Locale code (e.g. "en").
  * @param {String} lang_name Locale name (e.g. "English").
  * @param {String | Array<String>} [lang_file]="" Path to locale file(s), which will be loaded on initialization automatically (e.g. "~/langs/en.json").
@@ -58,7 +100,7 @@ function I18nLocaleInit(lang_code, lang_name, lang_file = "") constructor {
 
 
 /**
- * @desc (INTERNAL) Struct for loading locale files
+ * @desc (INTERNAL) Struct constructor for loading locale files
  * @param {Real | Array<Real> | Undefined} interval Time interval in seconds to load the next file.
  * @param {Struct.i18n_create | Bool} [i18n_struct]=false I18n struct reference.
  */
@@ -246,7 +288,7 @@ function I18nLoad(interval, i18n_struct = false) constructor {
 
 
 /**
- * @desc Struct for I18nDrawings
+ * @desc Struct constructor for I18nDrawings
  * @param {Asset.GMFont} [draw_font] Font asset.
  * @param {Constant.HAlign} [draw_halign] Horizontal alignment.
  * @param {Constant.VAlign} [draw_valign] Vertical alignment .
@@ -254,28 +296,24 @@ function I18nLoad(interval, i18n_struct = false) constructor {
  * @param {Real} [draw_scale] Drawing or text scale.
  * @param {Real} [draw_rotation] Drawing or text rotation.
  * @param {Real} [draw_alpha] Drawing or text opacity.
- * @param {Real} [draw_sep] Text separation.
- * @param {Real} [draw_width] Text width.
- * @param {Bool} [force_line_break]=false Force line break.
+ * @param {Real} [text_sep] Text separation.
+ * @param {Real} [text_width] Text width.
  */
-function I18nDrawings(draw_font = undefined, draw_halign = undefined, draw_valign = undefined, draw_color = undefined, draw_scale = undefined, draw_rotation = undefined, draw_alpha = undefined, draw_sep = undefined, draw_width = undefined, force_line_break = false) constructor  {
-	font = ((asset_get_type(draw_font) == asset_font) ? draw_font : undefined);
+function I18nDrawings(draw_font = undefined, draw_halign = undefined, draw_valign = undefined, draw_color = undefined, draw_scale = undefined, draw_rotation = undefined, draw_alpha = undefined, text_sep = undefined, text_width = undefined) constructor  {
+	font = (asset_get_type(draw_font) == asset_font) ? draw_font : undefined;
 	halign = draw_halign;
 	valign = draw_valign;
 	color = draw_color;
-	scale = (is_real(draw_scale) ? draw_scale : undefined);
-	rotation = (is_real(draw_rotation) ? draw_rotation : undefined);
-	alpha = (is_real(draw_alpha) ? draw_alpha : undefined);
-	sep = (is_real(draw_sep) ? draw_sep : -1);
-	width = (is_real(draw_width) ? draw_width : room_width);
-
-	// Optional
-	line_break = force_line_break;
+	scale = is_real(draw_scale) ? draw_scale : undefined;
+	rotation = is_real(draw_rotation) ? draw_rotation : undefined;
+	alpha = is_real(draw_alpha) ? draw_alpha : undefined;
+	sep = is_real(text_sep) ? text_sep : -1;
+	width = is_real(text_width) ? text_width : room_width;
 
 	// Set draw type
 	draw_type = I18N_DRAW_TEXT.NORMAL;
 
-	if (!(is_undefined(draw_sep) || is_undefined(draw_width))) {
+	if (!(is_undefined(text_sep) || is_undefined(text_width))) {
 		draw_type = I18N_DRAW_TEXT.EXTENDED;
 
 		if (!(is_undefined(draw_color) || is_undefined(draw_alpha))) {
@@ -294,7 +332,7 @@ function I18nDrawings(draw_font = undefined, draw_halign = undefined, draw_valig
 	} else if (!(is_undefined(draw_color) || is_undefined(draw_alpha))) {
 		draw_type = I18N_DRAW_TEXT.COLORED;
 
-		if (!(is_undefined(draw_sep) || is_undefined(draw_width))) {
+		if (!(is_undefined(text_sep) || is_undefined(text_width))) {
 			draw_type = I18N_DRAW_TEXT.EXT_COLORED;
 
 			if (!(is_undefined(draw_rotation) || is_undefined(draw_scale))) {
@@ -303,7 +341,7 @@ function I18nDrawings(draw_font = undefined, draw_halign = undefined, draw_valig
 		} else if (!(is_undefined(draw_rotation) || is_undefined(draw_scale))) {
 			draw_type = I18N_DRAW_TEXT.TRANSFORMED_COLORED;
 
-			if (!(is_undefined(draw_sep) || is_undefined(draw_width))) {
+			if (!(is_undefined(text_sep) || is_undefined(text_width))) {
 				draw_type = I18N_DRAW_TEXT.EXT_TRANSFORMED_COLORED;
 			}
 		}
@@ -313,10 +351,10 @@ function I18nDrawings(draw_font = undefined, draw_halign = undefined, draw_valig
 		if (!(is_undefined(draw_color) || is_undefined(draw_alpha))) {
 			draw_type = I18N_DRAW_TEXT.TRANSFORMED_COLORED;
 
-			if (!(is_undefined(draw_sep) || is_undefined(draw_width))) {
+			if (!(is_undefined(text_sep) || is_undefined(text_width))) {
 				draw_type = I18N_DRAW_TEXT.EXT_TRANSFORMED_COLORED;
 			}
-		} else if (!(is_undefined(draw_sep) || is_undefined(draw_width))) {
+		} else if (!(is_undefined(text_sep) || is_undefined(text_width))) {
 			draw_type = I18N_DRAW_TEXT.EXT_TRANSFORMED;
 
 			if (!(is_undefined(draw_color) || is_undefined(draw_alpha))) {
@@ -366,6 +404,11 @@ function i18n_create(var_name, default_locale, locales, options = false) {
 				refs: [],
 				keys: [],
 				data: []
+			},
+			assets: {
+				inst: [],
+				refs: [],
+				assets: []
 			}
 		},
 		debug: false,
@@ -509,7 +552,7 @@ function i18n_add_messages(locale, data, i18n = false, prefix = "") {
 /**
  * @desc Add localized dictionaries to a locale in the i18n struct
  * @param {String} locale Locale code (e.g. "en").
- * @param {Array<String> | Array<Array<String>>} data Localized dictionaries array (e.g. ["key", "value", ...] or [["key1", "value1"], ["key2", "value2"], ...]).
+ * @param {Array<Any> | Array<Array<Any>>} data Localized dictionaries array (e.g. ["key", "value"] or [["key1", "value1"], ["key2", "value2"], ...]).
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
  */
 function i18n_add_dictionaries(locale, data, i18n = false) {
@@ -558,7 +601,7 @@ function i18n_add_dictionaries(locale, data, i18n = false) {
  * @param {String | Array<String>} locale Locale code (e.g. "en").
  * @param {String | Array<String>} preset_name Drawing preset name (e.g "title").
  * @param {Struct.I18nDrawings | Array<Struct.I18nDrawings>} data Struct of I18nDrawings or array of these structs (e.g. new I18nDrawings(...)).
- * @param {Bool} [use_ref=true] Use the first I18nDrawings struct as a reference, instead of creating a new one. Only works if locale is an array.
+ * @param {Bool} [use_ref]=true Use the first I18nDrawings struct as a reference, instead of creating a new one. Only works if locale is an array.
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
  */
 function i18n_add_drawings(locale, preset_name, data, use_ref = true, i18n = false) {
@@ -666,8 +709,7 @@ function i18n_add_locales(code, i18n = false) {
 		i18n.data[$ code[i]] = {
 			messages: {},
 			dictionaries: {},
-			drawings: {},
-			options: {}
+			drawings: {}
 		};
 	}
 }
@@ -717,25 +759,25 @@ function i18n_locale_exists(locale, i18n = false) {
 
 /**
  * @desc Check if a message key is exists in the current locale
- * @param {String} key Key (e.g. "hello").
+ * @param {String} key Message key (e.g. "hello").
  * @param {String} [locale]="" Locale code (e.g. "en"). Leave it empty to use the current locale.
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
  * @returns {Bool} 
  */
-function i18n_key_exists(key, locale = "", i18n = false) {
+function i18n_message_exists(key, locale = "", i18n = false) {
 	// Guard clauses
 	if (!is_string(key)) {
-		show_debug_message("I18n ERROR - i18n_key_exists() - Key must be a string");
+		show_debug_message("I18n ERROR - i18n_message_exists() - Key must be a string");
 		exit;
 	}
 
 	if (!is_string(locale)) {
-		show_debug_message("I18n ERROR - i18n_key_exists() - Locale must be a string");
+		show_debug_message("I18n ERROR - i18n_message_exists() - Locale must be a string");
 		exit;
 	}
 
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_key_exists() - i18n must be a i18n struct");
+		show_debug_message("I18n ERROR - i18n_message_exists() - i18n must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
@@ -752,6 +794,7 @@ function i18n_key_exists(key, locale = "", i18n = false) {
 /**
  * @desc Get current locale
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
+ * @returns {String} 
  */
 function i18n_get_locale(i18n = false) {
 	// Guard clauses
@@ -769,6 +812,7 @@ function i18n_get_locale(i18n = false) {
 /**
  * @desc Get all initialized locales
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
+ * @returns {Array<Struct.I18nLocaleInit>} 
  */
 function i18n_get_locales(i18n = false) {
 	// Guard clauses
@@ -785,9 +829,9 @@ function i18n_get_locales(i18n = false) {
 
 /**
  * @desc Get all locales code
- * @param {Bool} [include_non_init=false] Include non initialized locales.
+ * @param {Bool} [include_non_init]=false Include non initialized locales.
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
- * @returns {Array<Any>} 
+ * @returns {Array<String>} 
  */
 function i18n_get_locales_code(include_non_init = false, i18n = false) {
 	// Guard clauses
@@ -817,7 +861,7 @@ function i18n_get_locales_code(include_non_init = false, i18n = false) {
 /**
  * @desc Get all initialized locales name
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
- * @returns {Array<Any>} 
+ * @returns {Array<String>} 
  */
 function i18n_get_locales_name(i18n = false) {
 	// Guard clauses
@@ -842,9 +886,10 @@ function i18n_get_locales_name(i18n = false) {
 /**
  * @desc Get localized message(s) based on key(s)
  * @param {String | Array<String>} key The message key that you want to get (e.g. "hello").
- * @param {Array<Any> | Struct | Real | Undefined} data The additional data for the message. Array (index-based) = [val1, val2, ...], or Struct (name-based) = {key1: val1, key2: val2, ... [, child: {key1: val1, ...}]} (child struct need to be set if it's an interpolation and it have additional data), or Real (pluralization) = number.
+ * @param {Array<Any> | Struct | Real | Undefined} [data] The additional data for the message. Array (index-based) = [val1, val2, ...], or Struct (name-based) = {key1: val1, key2: val2, ... [, child: {key1: val1, ...}]} (child struct need to be set if it's an interpolation and it have additional data), or Real (pluralization) = number.
  * @param {String} [locale]="" The locale that you want to get (e.g. "en"). Leave it empty to use the current locale.
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
+ * @returns {String | Array<String> | Any} 
  */
 function i18n_get_messages(key, data = undefined, locale = "", i18n = false) {
 	// Guard clauses
@@ -1082,7 +1127,7 @@ function i18n_get_messages(key, data = undefined, locale = "", i18n = false) {
  * @desc Get all drawing presets name from a locale
  * @param {String} [locale]="" The locale that you want to get (e.g. "en"). Leave it empty to use the current locale.
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
- * @returns {Array<String> | Array} 
+ * @returns {Array | Array<String>} 
  */
 function i18n_get_drawing_presets(locale = "", i18n = false) {
 	// Guard clauses
@@ -1115,7 +1160,7 @@ function i18n_get_drawing_presets(locale = "", i18n = false) {
 /**
  * @desc Update a drawing preset
  * @param {String} preset_name Drawing preset name (e.g "title").
- * @param {Array<Any> | Struct | Struct.I18nDrawings} data The data to update the drawing preset with (e.g. ["font", fArial], [["font", fArial], ["alpha", 1], ...], {font: fArial, alpha: 1, ...}).
+ * @param {Array<Any> | Struct} data The data to update the drawing preset with (e.g. ["font", fArial], [["font", fArial], ["alpha", 1], ...], {font: fArial, alpha: 1, ...}).
  * @param {String} [locale]="" Locale (e.g. "en"). Leave it empty to use the current locale.
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
  */
@@ -1283,7 +1328,7 @@ function i18n_get_drawings_data(preset_name, type, locale = "", i18n = false) {
  * @desc Create a reference to a message for a dynamic translations
  * @param {String} var_name This variable name (e.g. "text"). Structs are supported (e.g. "text.title").
  * @param {String} key Message key (e.g. "hello").
- * @param {Array<Any> | Struct | Real | Undefined} data The additional data for the message. Array (index-based) = [val1, val2, ...], or Struct (name-based) = {key1: val1, key2: val2, ... [, child: {key1: val1, ...}]} (child struct need to be set if it's an interpolation and it have additional data), or Real (pluralization) = number.
+ * @param {Array<Any> | Struct | Real | Undefined} [data] The additional data for the message. Array (index-based) = [val1, val2, ...], or Struct (name-based) = {key1: val1, key2: val2, ... [, child: {key1: val1, ...}]} (child struct need to be set if it's an interpolation and it have additional data), or Real (pluralization) = number.
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
  * @returns {String}
  */
@@ -1311,15 +1356,16 @@ function i18n_create_ref_message(var_name, key, data = undefined, i18n = false) 
 		i18n = variable_global_get(variable_global_get("i18n_name"));
 	}
 										
-	var name_split = string_split(var_name, ".", true);		
-	
 	// Check if it's a global variable
+	var name_split = string_split(var_name, ".", true);	
+
 	if (name_split[0] == "global" || name_split[0] == "g") {
 		array_push(i18n.refs.messages.inst, "global");
 	} else {
 		array_push(i18n.refs.messages.inst, id);
 	}
 
+	// Push the reference data
 	array_push(i18n.refs.messages.refs, var_name);
 	array_push(i18n.refs.messages.keys, key);
 	array_push(i18n.refs.messages.data, data);
@@ -1327,8 +1373,67 @@ function i18n_create_ref_message(var_name, key, data = undefined, i18n = false) 
 	return i18n_get_messages(key, data, i18n.locale, i18n);
 }
 
+
 /**
- * @desc (INTERNAL) Get a reference to a message
+ * @desc Create a reference to an asset for an unique asset for each locale
+ * @param {String} var_name This variable name (e.g. "text"). Structs are supported (e.g. "text.title").
+ * @param {Struct} locale_asset Struct of localized asset (e.g. {en: sprSplashEn, fr: sprSplashFr, ...}).
+ * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
+ * @returns {Any}
+ */
+function i18n_create_ref_asset(var_name, locale_asset, i18n = false) {
+	// Guard clauses
+	if (!is_string(var_name)) {
+		show_debug_message("I18n ERROR - i18n_create_ref_asset() - var_name must be a string");
+		exit;
+	}
+
+	if (!is_struct(locale_asset)) {
+		show_debug_message("I18n ERROR - i18n_create_ref_asset() - locale_asset must be a struct");
+		exit;
+	}
+	
+	if (!(is_struct(i18n) || is_bool(i18n))) {
+		show_debug_message("I18n ERROR - i18n_create_ref_message() - i18n must be a i18n struct");
+		exit;
+	} else if (is_bool(i18n)) {
+		i18n = variable_global_get(variable_global_get("i18n_name"));
+	}
+
+	// Check if the locale asset is valid
+	var asset_keys = struct_get_names(locale_asset);
+	var asset_type = asset_unknown;
+
+	for (var i = 0; i < array_length(asset_keys); i++) {
+		if (asset_type == asset_unknown) {
+			asset_type = asset_get_type(locale_asset[$ asset_keys[i]]);
+		}
+		
+		if (asset_type != asset_get_type(locale_asset[$ asset_keys[i]])) {
+			show_debug_message("I18n ERROR - i18n_create_ref_asset() - All assets must be the same type");
+			exit;
+		}
+	}
+										
+	// Check if it's a global variable
+	var name_split = string_split(var_name, ".", true);	
+
+	if (name_split[0] == "global" || name_split[0] == "g") {
+		array_push(i18n.refs.assets.inst, "global");
+	} else {
+		array_push(i18n.refs.assets.inst, id);
+	}
+
+	// Push the reference data
+	array_push(i18n.refs.assets.refs, var_name);
+	array_push(i18n.refs.assets.assets, locale_asset);
+
+	return ((struct_exists(locale_asset, i18n.locale)) ? locale_asset[$ i18n.locale] : ((struct_exists(locale_asset, i18n.default_locale)) ? locale_asset[$ i18n.default_locale] : noone));
+}
+
+
+/**
+ * @desc (INTERNAL) Get a reference to a message 
  * @param {Real} index The index of the reference.
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
  * @returns {Any}
@@ -1394,11 +1499,80 @@ function i18n_get_ref_message(index, i18n = false) {
 	return current_ref;
 }
 
+
+/**
+ * @desc (INTERNAL) Get a reference to an asset
+ * @param {Real} index The index of the reference.
+ * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
+ * @returns {Any}
+ */
+function i18n_get_ref_asset(index, i18n = false) {
+	// Guard clauses
+	if (!is_real(index)) {
+		show_debug_message("I18n ERROR - i18n_get_ref_asset() - index must be a real");
+		exit;
+	}
+
+	if (!(is_struct(i18n) || is_bool(i18n))) {
+		show_debug_message("I18n ERROR - i18n_get_ref_asset() - i18n must be a i18n struct");
+		exit;
+	} else if (is_bool(i18n)) {
+		i18n = variable_global_get(variable_global_get("i18n_name"));
+	}
+
+	// Track the asset reference based on the index
+	var root_ref = i18n.refs.assets.inst[index];
+	var current_ref = root_ref;
+	var name_split = string_split(i18n.refs.assets.refs[index], ".", true);
+	var to_update = name_split[array_length(name_split) - 1];
+
+	for (var i = ((root_ref == "global")); i < (array_length(name_split) - 1); i++) {
+		if (string_digits(name_split[i]) != "" && string_letters(name_split[i]) == "") {
+			show_debug_message($"I18n ERROR - i18n_get_ref_asset() - An array is only supported at the last reference level");
+			break;
+		}
+
+		if (root_ref == "global") {					// e.g ref = "global.text"
+			if (!is_struct(current_ref)) {
+				if (!variable_global_exists(name_split[i])) {
+					show_debug_message($"I18n ERROR - i18n_get_ref_asset() - Global variable {name_split[i]} doesn't exist");
+					break;
+				}
+			} else {
+				if (!struct_exists(current_ref, name_split[i])) {
+					show_debug_message($"I18n ERROR - i18n_get_ref_asset() - Struct {current_ref} member {name_split[i]} doesn't exist");
+					break;
+				}
+			}
+
+			current_ref = (i == 1) ? variable_global_get(name_split[i]) : current_ref[$ name_split[i]];
+		} else {
+			if (!is_struct(current_ref)) {
+				if (!variable_instance_exists(root_ref, name_split[i])) {
+					show_debug_message($"I18n ERROR - i18n_get_ref_asset() - Instance {root_ref} variable {name_split[i]} doesn't exist");
+					break;
+				}
+			} else {
+				if (!struct_exists(current_ref, name_split[i])) {
+					show_debug_message($"I18n ERROR - i18n_get_ref_asset() - Struct {current_ref} member {name_split[i]} doesn't exist");
+					break;
+				}
+			}
+			
+			current_ref = (i == 0) ? variable_instance_get(root_ref, name_split[i]) : current_ref[$ name_split[i]];
+		}
+	}
+
+	return current_ref;
+}
+
+
 /**
  * @desc Update all created references
+ * @param {Constant.I18N_REF} [type]=I18N_REF.ALL The type of reference to update (e.g. I18N_REF.MESSAGES).
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
  */
-function i18n_update_refs(i18n = false) {
+function i18n_update_refs(type = I18N_REF.ALL, i18n = false) {
 	// Guard clauses
 	if (!(is_struct(i18n) || is_bool(i18n))) {
 		show_debug_message("I18n ERROR - i18n_update_refs() - i18n must be a i18n struct");
@@ -1407,37 +1581,40 @@ function i18n_update_refs(i18n = false) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
 	}
 
-	var types = struct_get_names(i18n.refs);
+	var type_str = ["", "messages", "assets"];
+	var types = (type == I18N_REF.ALL) ? struct_get_names(i18n.refs) : [type_str[type]];
 	
 	for (var i = 0; i < array_length(types); i++) {
 		var to_delete = [];
 
-		switch (types[i]) {
-			case "messages":
-				for (var j = 0; j < array_length(i18n.refs[$ types[i]].inst); j++) {
-					var root_ref = i18n.refs[$ types[i]].inst[j];
-					var current_ref = i18n.refs[$ types[i]].inst[j];
-					var name_split = string_split(i18n.refs[$ types[i]].refs[j], ".", true);
-					var to_update = name_split[array_length(name_split) - 1];
+		for (var j = 0; j < array_length(i18n.refs[$ types[i]].inst); j++) {
+			var root_ref = i18n.refs[$ types[i]].inst[j];
+			var current_ref = i18n.refs[$ types[i]].inst[j];
+			var name_split = string_split(i18n.refs[$ types[i]].refs[j], ".", true);
+			var to_update = name_split[array_length(name_split) - 1];
+			var index = 0;
 
-					// Guard clauses
-					if (root_ref == "global") {					// e.g ref = "global.text"
-						if (array_length(name_split) < 2) {
-							show_debug_message($"I18n ERROR - i18n_update_refs() - Global variable member hasn't been specified");
-							array_push(to_delete, j);
-							continue;
-						}
-					} else if (!instance_exists(root_ref)) {		// e.g ref = "text"
-						// show_debug_message($"I18n ERROR - Instance {root_ref} doesn't exist");
-						array_push(to_delete, j);
-						continue;
-					}
-					
+			// Guard clauses
+			if (root_ref == "global") {					// e.g ref = "global.text"
+				if (array_length(name_split) < 2) {
+					show_debug_message($"I18n ERROR - i18n_update_refs() - Global variable member hasn't been specified");
+					array_push(to_delete, j);
+					continue;
+				}
+			} else if (!instance_exists(root_ref)) {		// e.g ref = "text"
+				// show_debug_message($"I18n ERROR - Instance {root_ref} doesn't exist");
+				array_push(to_delete, j);
+				continue;
+			}
+			
+			// Update references
+			switch (types[i]) {
+				case "messages":
 					// Track valid references
 					current_ref = i18n_get_ref_message(j, i18n);
 
 					// Update all references with the new message
-					var index = 0;
+					var localized_message = i18n_get_messages(i18n.refs[$ types[i]].keys[j], i18n.refs[$ types[i]].data[j], i18n.locale, i18n);
 
 					if (root_ref == "global") {
 						if (array_length(name_split) == 2) {
@@ -1446,13 +1623,13 @@ function i18n_update_refs(i18n = false) {
 								continue;
 							}
 
-							variable_global_set(to_update, i18n_get_messages(i18n.refs[$ types[i]].keys[j], i18n.refs[$ types[i]].data[j], i18n.locale, i18n));
+							variable_global_set(to_update, localized_message);
 						} else {
 							if (string_digits(to_update) != "" && string_letters(to_update) == "") {
 								index = real(to_update);
-								current_ref[index] = i18n_get_messages(i18n.refs[$ types[i]].keys[j], i18n.refs[$ types[i]].data[j], i18n.locale, i18n);
+								current_ref[index] = localized_message;
 							} else {
-								current_ref[$ to_update] = i18n_get_messages(i18n.refs[$ types[i]].keys[j], i18n.refs[$ types[i]].data[j], i18n.locale, i18n);
+								current_ref[$ to_update] = localized_message;
 							}
 						}
 					} else {
@@ -1463,26 +1640,93 @@ function i18n_update_refs(i18n = false) {
 								continue;
 							}
 
-							variable_instance_set(root_ref, to_update, i18n_get_messages(i18n.refs[$ types[i]].keys[j], i18n.refs[$ types[i]].data[j], i18n.locale, i18n));
+							variable_instance_set(root_ref, to_update, localized_message);
 						} else {
 							if (string_digits(to_update) != "" && string_letters(to_update) == "") {
 								index = real(to_update);
-								current_ref[index] = i18n_get_messages(i18n.refs[$ types[i]].keys[j], i18n.refs[$ types[i]].data[j], i18n.locale, i18n);
+								current_ref[index] = localized_message;
 							} else {
-								current_ref[$ to_update] = i18n_get_messages(i18n.refs[$ types[i]].keys[j], i18n.refs[$ types[i]].data[j], i18n.locale, i18n);
+								current_ref[$ to_update] = localized_message;
 							}
 						}
 					}
-				}
-			break;
+					break;
+
+				case "assets":
+					// Track valid references
+					current_ref = i18n_get_ref_asset(j, i18n);
+					
+					// Get the localized asset
+					var localized_asset = (struct_exists(i18n.refs[$ types[i]].assets[j], i18n.locale)) ? i18n.refs[$ types[i]].assets[j][$ i18n.locale] : noone;
+
+					if (localized_asset == noone) {
+						if (struct_exists(i18n.refs[$ types[i]].assets[j], i18n.default_locale)) {
+							localized_asset = i18n.refs[$ types[i]].assets[j][$ i18n.default_locale];
+
+							if (i18n.debug) {
+								show_debug_message($"I18n WARNING - i18n_update_refs() - Asset {i18n.refs[$ types[i]].refs[j]} doesn't have a {i18n.locale} locale, using {i18n.default_locale} locale instead");
+							}
+						} else if (i18n.debug) {
+							show_debug_message($"I18n ERROR - i18n_update_refs() - Asset {i18n.refs[$ types[i]].refs[j]} doesn't have a {i18n.locale} locale, and {i18n.default_locale} locale doesn't exist");
+							continue;
+						}
+					}
+
+					// Update all references with the new asset
+					if (root_ref == "global") {
+						if (array_length(name_split) == 2) {
+							if (string_digits(to_update) != "" && string_letters(to_update) == "") {
+								show_debug_message($"I18n ERROR - i18n_update_refs() - An array isn't supported as a global variable member");
+								continue;
+							}
+
+							variable_global_set(to_update, localized_asset);
+						} else {
+							if (string_digits(to_update) != "" && string_letters(to_update) == "") {
+								index = real(to_update);
+								current_ref[index] = localized_asset;
+							} else {
+								current_ref[$ to_update] = localized_asset;
+							}
+						}
+					} else {
+						if (array_length(name_split) == 1) {
+							if (string_digits(to_update) != "" && string_letters(to_update) == "") {
+								show_debug_message(name_split)
+								show_debug_message($"I18n ERROR - i18n_update_refs() - An array isn't supported as an instance variable member");
+								continue;
+							}
+
+							variable_instance_set(root_ref, to_update, localized_asset);
+						} else {
+							if (string_digits(to_update) != "" && string_letters(to_update) == "") {
+								index = real(to_update);
+								current_ref[index] = localized_asset;
+							} else {
+								current_ref[$ to_update] = localized_asset;
+							}
+						}
+					}
+					break;
+			}
 		}
 
 		// Delete invalid refs
 		for (var j = array_length(to_delete) - 1; j >= 0; j--) {
 			array_delete(i18n.refs[$ types[i]].inst, to_delete[j], 1);
 			array_delete(i18n.refs[$ types[i]].refs, to_delete[j], 1);
-			array_delete(i18n.refs[$ types[i]].keys, to_delete[j], 1);
-			array_delete(i18n.refs[$ types[i]].data, to_delete[j], 1);
+
+			if (struct_exists(i18n.refs[$ types[i]], "keys")) {
+				array_delete(i18n.refs[$ types[i]].keys, to_delete[j], 1);
+			}
+
+			if (struct_exists(i18n.refs[$ types[i]], "data")) {
+				array_delete(i18n.refs[$ types[i]].data, to_delete[j], 1);
+			}
+
+			if (struct_exists(i18n.refs[$ types[i]], "assets")) {
+				array_delete(i18n.refs[$ types[i]].assets, to_delete[j], 1);
+			}
 		}
 	}
 }
@@ -1492,7 +1736,7 @@ function i18n_update_refs(i18n = false) {
  * @desc Update pluralization value on reference(s)
  * @param {String} var_name Variable name based on the var_name in i18n_create_ref_message() (e.g. "text"). Structs are supported (e.g. "text.title").
  * @param {Real} value The new pluralization value (e.g. 1).
- * @param {Bool} [update_refs=false] Update i18n references.
+ * @param {Bool} [update_refs]=false Update i18n references.
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
  */
 function i18n_update_plurals(var_name, value, update_refs = false, i18n = false) {
@@ -1534,9 +1778,9 @@ function i18n_update_plurals(var_name, value, update_refs = false, i18n = false)
 		exit;
 	}
 
+	// Update pluralization value
 	var target_ref = i18n.refs.messages.data[ref_index];
 
-	// Update pluralization value
 	if (is_real(target_ref)) {
 		target_ref = value;
 	} else if (is_struct(target_ref)) {
@@ -1555,8 +1799,158 @@ function i18n_update_plurals(var_name, value, update_refs = false, i18n = false)
 
 	// Update i18n references
 	if (update_refs) {
-		i18n_update_refs(i18n);
+		i18n_update_refs(I18N_REF.MESSAGES, i18n);
 	}
+}
+
+
+/**
+ * @desc Get a static message that created using i18n_create_ref_message()
+ * @param {String} var_name Variable name based on the var_name in i18n_create_ref_message() (e.g. "text"). Structs are supported (e.g. "text.title").
+ * @param {String | Id.Instance | Asset.GMObject} [ref]="" Reference name or instance id based on the ref in i18n_create_ref_message() (e.g. "text"). Recommended to pass "global" if the reference is a global variable, or instance id if the reference is created in an instance.
+ * @param {String} [locale]="" Locale code (e.g "en"). Leave it empty to get the message in the current locale.
+ * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
+ */
+function i18n_get_message_from_ref(var_name, ref = "", locale = "", i18n = false) {
+	// Guard clauses
+	if (!is_string(var_name)) {
+		show_debug_message("I18n ERROR - i18n_get_message_from_ref() - var_name must be a string");
+		exit;
+	}
+
+	if (!(is_string(ref) || typeof(ref) == "reference")) {
+		show_debug_message("I18n ERROR - i18n_get_message_from_ref() - ref must be a string, instance id, or asset id");
+		exit;
+	}
+
+	if (!is_string(locale)) {
+		show_debug_message("I18n ERROR - i18n_get_message_from_ref() - Locale must be a string");
+		exit;
+	}
+
+	if (!(is_struct(i18n) || is_bool(i18n))) {
+		show_debug_message("I18n ERROR - i18n_get_message_from_ref() - i18n must be a i18n struct");
+		exit;
+	} else if (is_bool(i18n)) {
+		i18n = variable_global_get(variable_global_get("i18n_name"));
+	}
+
+	if (locale == "") {
+		locale = i18n.locale;
+	}
+
+	// Check if reference(s) exists, and store the index of the reference
+	var ref_index = -1;
+
+	if (is_string(ref)) {
+		if (ref == "g") {
+			ref = "global";
+		} else if (asset_get_index(ref) != -1) {
+			ref = asset_get_index(ref);
+		} else {
+			ref = "";
+
+			if (i18n.debug) {
+				show_debug_message($"I18n WARNING - i18n_get_message_from_ref() - Asset {ref} doesn't exist, using the first matching var_name instead");
+			}
+		}
+	} else if (!instance_exists(ref)) {
+		ref = "";
+
+		if (i18n.debug) {
+			show_debug_message($"I18n WARNING - i18n_get_message_from_ref() - Instance/asset {ref} doesn't exist, using the first matching var_name instead");
+		}
+	}
+	
+	for (var i = 0; i < array_length(i18n.refs.messages.refs); i++) {
+		if (((ref == "") || (ref == i18n.refs.messages.inst[i])) && (var_name == i18n.refs.messages.refs[i])) {
+			ref_index = i;
+			break;
+		}
+	}
+
+	if (ref_index == -1) {
+		show_debug_message($"I18n ERROR - i18n_get_message_from_ref() - Reference {var_name} doesn't exist");
+		return "";
+	}
+
+	// Return the message
+	return i18n_get_messages(i18n.refs.messages.keys[ref_index], i18n.refs.messages.data[ref_index], locale, i18n);
+}
+
+
+/**
+ * @desc Get a static asset that created using i18n_create_ref_asset()
+ * @param {String} var_name Variable name based on the var_name in i18n_create_ref_asset() (e.g. "text"). Structs are supported (e.g. "text.title").
+ * @param {String | Id.Instance | Asset.GMObject} [ref]="" Reference name or instance id based on the ref in i18n_create_ref_asset() (e.g. "text"). Recommended to pass "global" if the reference is a global variable, or instance id if the reference is created in an instance.
+ * @param {String} [locale]="" Locale code (e.g "en"). Leave it empty to get the asset in the current locale.
+ * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
+ */
+function i18n_get_asset_from_ref(var_name, ref = "", locale = "", i18n = false) {
+	// Guard clauses
+	if (!is_string(var_name)) {
+		show_debug_message("I18n ERROR - i18n_get_asset_from_ref() - var_name must be a string");
+		exit;
+	}
+
+	if (!(is_string(ref) || typeof(ref) == "reference")) {
+		show_debug_message("I18n ERROR - i18n_get_asset_from_ref() - ref must be a string, instance id, or asset id");
+		exit;
+	}
+
+	if (!is_string(locale)) {
+		show_debug_message("I18n ERROR - i18n_get_asset_from_ref() - Locale must be a string");
+		exit;
+	}
+
+	if (!(is_struct(i18n) || is_bool(i18n))) {
+		show_debug_message("I18n ERROR - i18n_get_asset_from_ref() - i18n must be a i18n struct");
+		exit;
+	} else if (is_bool(i18n)) {
+		i18n = variable_global_get(variable_global_get("i18n_name"));
+	}
+
+	if (locale == "") {
+		locale = i18n.locale;
+	}
+
+	// Check if reference(s) exists, and store the index of the reference
+	var ref_index = -1;
+	
+	if (is_string(ref)) {
+		if (ref == "g") {
+			ref = "global";
+		} else if (asset_get_index(ref) != -1) {
+			ref = asset_get_index(ref);
+		} else {
+			ref = "";
+
+			if (i18n.debug) {
+				show_debug_message($"I18n WARNING - i18n_get_asset_from_ref() - Asset {ref} doesn't exist, using the first matching var_name instead");
+			}
+		}
+	} else if (!instance_exists(ref)) {
+		ref = "";
+
+		if (i18n.debug) {
+			show_debug_message($"I18n WARNING - i18n_get_asset_from_ref() - Instance/asset {ref} doesn't exist, using the first matching var_name instead");
+		}
+	}
+	
+	for (var i = 0; i < array_length(i18n.refs.assets.refs); i++) {
+		if (((ref == "") || (ref == i18n.refs.assets.inst[i])) && (var_name == i18n.refs.assets.refs[i])) {
+			ref_index = i;
+			break;
+		}
+	}
+
+	if (ref_index == -1) {
+		show_debug_message($"I18n ERROR - i18n_get_asset_from_ref() - Reference {var_name} doesn't exist");
+		return noone;
+	}
+
+	// Return the asset
+	return i18n.refs.assets.assets[ref_index];
 }
 
 
@@ -1586,7 +1980,7 @@ function i18n_set_default_message(message, i18n = false) {
 /**
  * @desc Change current locale
  * @param {String} code Locale code (e.g. "en").
- * @param {Bool} [update_refs=true] Update i18n references.
+ * @param {Bool} [update_refs]=true Update i18n references.
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
  */
 function i18n_set_locale(code, update_refs = true, i18n = false) {
@@ -1613,7 +2007,7 @@ function i18n_set_locale(code, update_refs = true, i18n = false) {
 
 	// Update i18n references
 	if (update_refs) {
-		i18n_update_refs(i18n);
+		i18n_update_refs(I18N_REF.ALL, i18n);
 	}
 }
 
@@ -1621,7 +2015,7 @@ function i18n_set_locale(code, update_refs = true, i18n = false) {
 /**
  * @desc Use a drawing preset
  * @param {String} preset_name Drawing preset name (e.g "title").
- * @param {String} [locale=""] Locale code (e.g "en"). Leave it empty to mark it as dynamic locale.
+ * @param {String} [locale]="" Locale code (e.g "en"). Leave it empty to mark it as dynamic locale.
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
  */
 function i18n_use_drawing(preset_name, locale = "", i18n = false) {
@@ -1685,9 +2079,9 @@ function i18n_use_drawing(preset_name, locale = "", i18n = false) {
  * @param {Real} x X position.
  * @param {Real} y Y position.
  * @param {String} text The text to draw. Can be any text, including message from i18n_get_message() (e.g. "Hello World!"), or a message reference variable (created by i18n_create_ref_message()). Use "@:" prefix to use this as message key (e.g. "@:hello").
- * @param {Real | Array<Any> | undefined} [data=undefined] Data to pass to the message (e.g. 1, ["Hello World!"]). Struct isn't supported in this function.
- * @param {String} [preset_name=""] Drawing preset name to use (e.g "title").
- * @param {String} [locale=""] Locale code (e.g "en"). Leave it empty to mark it as dynamic locale.
+ * @param {Real | Array<Any> | undefined} [data] Data to pass to the message (e.g. 1, ["Hello World!"]). Struct isn't supported in this function.
+ * @param {String} [preset_name]="" Drawing preset name to use (e.g "title").
+ * @param {String} [locale]="" Locale code (e.g "en"). Leave it empty to mark it as dynamic locale.
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
  */
 function i18n_draw_message(x, y, text, data = undefined, preset_name = "", locale = "", i18n = false) {
@@ -1737,27 +2131,6 @@ function i18n_draw_message(x, y, text, data = undefined, preset_name = "", local
 
 	if (preset_name != "") {
 		drawing_data = i18n_use_drawing(preset_name, locale, i18n);
-	}
-
-	// Check if the drawing's forced line break is enabled
-	if (!is_undefined(drawing_data)) {
-		if (drawing_data.line_break) {
-			var text_split = string_split(text, " ", true);
-			var current_str = "";
-			var result = "";
-
-			for (var i = 0; i < string_length(text); i++) {
-				if (string_width(current_str + string_char_at(text, i + 1)) <= drawing_data.width) {
-					current_str += string_char_at(text, i + 1);
-				} else {
-					result += current_str + "\n";
-					current_str = "";
-				}
-			}
-			
-			result += current_str;
-			text = result;
-		}
 	}
 	
 	// Draw message
