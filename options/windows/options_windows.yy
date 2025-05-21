@@ -6,7 +6,7 @@
   "option_windows_borderless":false,
   "option_windows_company_info":"Undervolta",
   "option_windows_copyright_info":"MIT",
-  "option_windows_copy_exe_to_dest":false,
+  "option_windows_copy_exe_to_dest":true,
   "option_windows_description_info":"GM-I18n Demo",
   "option_windows_disable_sandbox":false,
   "option_windows_display_cursor":true,

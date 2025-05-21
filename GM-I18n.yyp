@@ -29,6 +29,10 @@
   ],
   "ForcedPrefabProjectReferences":[],
   "IncludedFiles":[
+    {"$GMIncludedFile":"","%Name":"License-NotoSans.txt","CopyToMask":-1,"filePath":"datafiles/fonts","name":"License-NotoSans.txt","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
+    {"$GMIncludedFile":"","%Name":"License-NotoSansArabic.txt","CopyToMask":-1,"filePath":"datafiles/fonts","name":"License-NotoSansArabic.txt","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
+    {"$GMIncludedFile":"","%Name":"License-NotoSansJP.txt","CopyToMask":-1,"filePath":"datafiles/fonts","name":"License-NotoSansJP.txt","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
+    {"$GMIncludedFile":"","%Name":"License-NotoSansKR.txt","CopyToMask":-1,"filePath":"datafiles/fonts","name":"License-NotoSansKR.txt","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"NotoSansArabic-Medium.ttf","CopyToMask":-1,"filePath":"datafiles/fonts","name":"NotoSansArabic-Medium.ttf","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"NotoSansJP-Medium.ttf","CopyToMask":-1,"filePath":"datafiles/fonts","name":"NotoSansJP-Medium.ttf","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"NotoSansKR-Medium.ttf","CopyToMask":-1,"filePath":"datafiles/fonts","name":"NotoSansKR-Medium.ttf","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
