@@ -1,6 +1,6 @@
 ![Banner](img/Banner.webp)
 
-### A powerful, open-source internationalization (i18n) library for GameMaker 2.3+
+**A powerful, open-source internationalization (i18n) library for GameMaker 2.3+**
 
 ## Features
 
@@ -23,7 +23,7 @@
 
 ## Supported GameMaker Versions
 
-### This library have been tested and working on:
+This library have been tested and working on:
 
 - Windows VM
 	- IDE
@@ -36,7 +36,7 @@
 	- Runtime
 		- v2024.13.1.242
 
-### It should work on other versions of GameMaker 2.3+ too. Please let me know on the [tested versions page](https://github.com/undervolta/GM-I18n/issues) if you tested it on other versions and it works.
+It should work on other versions of GameMaker 2.3+ too. Please let me know on the [tested versions page](https://github.com/undervolta/GM-I18n/issues) if you tested it on other versions and it works.
 
 ## Installation
 
@@ -47,7 +47,7 @@
 
 ## Usage Example
 
-### Initialize the i18n system
+**Initialize the i18n system**
 ```gml
 // objController - Create Event
 
@@ -62,7 +62,7 @@ global.i18n = i18n_create("g.i18n", "en", [
 global.font_ja = font_add(working_directory + "fonts/NotoSansJP-Medium.ttf", 32, 0, 0, 32, 127);
 ```
 
-### Load the locale files
+**Load the locale files**
 ```gml
 // objController - Step Event
 
@@ -70,7 +70,7 @@ global.font_ja = font_add(working_directory + "fonts/NotoSansJP-Medium.ttf", 32,
 i18n_update_loader();
 ```
 
-### Create message references
+**Create message references**
 ```gml
 // objMyObject - Create Event
 
@@ -82,7 +82,7 @@ test_msg_arr = [
 ]
 ```
 
-### Draw the message
+**Draw the message**
 ```gml
 // objMyObject - Draw Event
 
@@ -94,7 +94,7 @@ draw_text(0, 32, test_msg_arr[0]);
 i18n_draw_message(x, y, "@:btn_text");
 ```
 
-### Update the locale
+**Update the locale**
 ```gml
 // objMyObject - Left Released Event
 
@@ -105,7 +105,7 @@ i18n_set_locale("ja);
 
 ## Documentation
 
-### The usage example above is just a basic example. You can do more with this library. You can find the full documentation [here](https://undervolta.github.io/GM-I18n/docs/index.html).
+The usage example above is just a basic example. You can do more with this library. You can find the full documentation [here](https://undervolta.github.io/GM-I18n/docs/index.html).
 
 ## Questions & Feature Requests
 
@@ -113,11 +113,9 @@ If you have any questions or feature requests, please feel free to open an issue
 
 ## Contributing
 
-### Pull requests are welcome, as long as you're not breaking the existing code. For major changes, please open an issue first to discuss what you would like to change.
+Pull requests are welcome, as long as you're not breaking the existing code. For major changes, please open an issue first to discuss what you would like to change.
 
-### Please make sure to test the code before submitting a pull request.
-
-### Please also make sure to follow the code style of the project.
+Please make sure to test the code before submitting a pull request. Please also make sure to follow the code style of the project.
 
 ## Support
 
