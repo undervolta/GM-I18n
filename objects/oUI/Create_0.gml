@@ -106,12 +106,14 @@ global.menu = {
 
 menu_6_spr = i18n_create_ref_asset("menu_6_spr", {
 	en: sSplashEn,
+	idn: sSplashId,
 	ja: sSplashJa,
 	ko: sSplashKo
 });
 
 menu_6_snd = i18n_create_ref_asset("menu_6_snd", {
 	en: soVoiceEn,
+	idn: soVoiceId,
 	ja: soVoiceJa,
 	ko: soVoiceKo
 });

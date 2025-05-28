@@ -3,29 +3,11 @@
  * desc: A powerful, open-source internationalization (i18n) library for GameMaker 2.3+
  * author: @undervolta
  * version: 0.1.0
- * date: 2025-05-19
+ * date: 2025-05-24
  * 
  * repo: https://github.com/undervolta/GM-I18n
  * docs: https://github.com/undervolta/GM-I18n/wiki
  * license: MIT
- * 
- * features:
- *   - Comprehensive multi-language support with JSON-based locale files
- *   - Automatic locale file loading with configurable timing
- *   - Flexible translation system:
- *     - Static translations for fixed text
- *     - Dynamic translations with variable interpolation
- *     - Real-time translation updates
- *   - Advanced pluralization with customizable rules
- *   - Dictionary system for managing related translations
- *   - Rich text drawing system with:
- *     - Multiple formatting presets
- *     - Custom alignment and positioning
- *     - Color and style options
- *     - Scale and rotation support
- *   - Asset localization for sprites, sounds, and other assets
- *   - Debug mode with detailed logging and validation
- *   - Optimized performance with optional hashing
  * 
  * dependencies: None
  * compatibility: GameMaker 2.3+ - All platforms
@@ -34,6 +16,7 @@
 
 /// feather ignore GM1041
 /// feather ignore GM1044
+/// feather ignore GM1045
 
 
 global.i18n_name = "";
@@ -1810,6 +1793,7 @@ function i18n_update_plurals(var_name, value, update_refs = false, i18n = false)
  * @param {String | Id.Instance | Asset.GMObject} [ref]="" Reference name or instance id based on the ref in i18n_create_ref_message() (e.g. "text"). Recommended to pass "global" if the reference is a global variable, or instance id if the reference is created in an instance.
  * @param {String} [locale]="" Locale code (e.g "en"). Leave it empty to get the message in the current locale.
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
+ * @returns {String}
  */
 function i18n_get_message_from_ref(var_name, ref = "", locale = "", i18n = false) {
 	// Guard clauses
@@ -1818,7 +1802,7 @@ function i18n_get_message_from_ref(var_name, ref = "", locale = "", i18n = false
 		exit;
 	}
 
-	if (!(is_string(ref) || typeof(ref) == "reference")) {
+	if (!(is_string(ref) || typeof(ref) == "ref")) {
 		show_debug_message("I18n ERROR - i18n_get_message_from_ref() - ref must be a string, instance id, or asset id");
 		exit;
 	}
@@ -1885,6 +1869,7 @@ function i18n_get_message_from_ref(var_name, ref = "", locale = "", i18n = false
  * @param {String | Id.Instance | Asset.GMObject} [ref]="" Reference name or instance id based on the ref in i18n_create_ref_asset() (e.g. "text"). Recommended to pass "global" if the reference is a global variable, or instance id if the reference is created in an instance.
  * @param {String} [locale]="" Locale code (e.g "en"). Leave it empty to get the asset in the current locale.
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
+ * @returns {Struct | undefined}
  */
 function i18n_get_asset_from_ref(var_name, ref = "", locale = "", i18n = false) {
 	// Guard clauses
@@ -1893,7 +1878,7 @@ function i18n_get_asset_from_ref(var_name, ref = "", locale = "", i18n = false) 
 		exit;
 	}
 
-	if (!(is_string(ref) || typeof(ref) == "reference")) {
+	if (!(is_string(ref) || typeof(ref) == "ref")) {
 		show_debug_message("I18n ERROR - i18n_get_asset_from_ref() - ref must be a string, instance id, or asset id");
 		exit;
 	}
@@ -1946,7 +1931,7 @@ function i18n_get_asset_from_ref(var_name, ref = "", locale = "", i18n = false) 
 
 	if (ref_index == -1) {
 		show_debug_message($"I18n ERROR - i18n_get_asset_from_ref() - Reference {var_name} doesn't exist");
-		return noone;
+		return undefined;
 	}
 
 	// Return the asset
@@ -2017,6 +2002,7 @@ function i18n_set_locale(code, update_refs = true, i18n = false) {
  * @param {String} preset_name Drawing preset name (e.g "title").
  * @param {String} [locale]="" Locale code (e.g "en"). Leave it empty to mark it as dynamic locale.
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
+ * @returns {Struct | undefined}
  */
 function i18n_use_drawing(preset_name, locale = "", i18n = false) {
 	// Guard clauses

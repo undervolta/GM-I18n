@@ -13,7 +13,7 @@ switch (page) {
 	
 		for (var i = 0; i < array_length(messages); i++) {
 			preset = ((i % 2 == 0) ? "header" : "desc");
-
+			
 			i18n_draw_message(432, 176 + y_add, messages[i], , preset, ((i <= 1) ? "en" : ""));
 			
 			sep = i18n_get_drawings_data(preset, I18N_DRAWING.SEP);

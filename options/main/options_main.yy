@@ -18,7 +18,7 @@
   "option_sci_usesci":true,
   "option_spine_licence":false,
   "option_steam_app_id":"0",
-  "option_template_description":"",
+  "option_template_description":"Demo for GM-I18n library",
   "option_template_icon":"${options_dir}/main/template_icon.png",
   "option_template_image":"${base_options_dir}/main/template_image.png",
   "option_window_colour":255,

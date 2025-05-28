@@ -1,6 +1,6 @@
 ![Banner](img/Banner.webp)
 
-**A powerful, open-source internationalization (i18n) library for GameMaker 2.3+**
+<b style="text-align: center;">A powerful, open-source internationalization (i18n) library for GameMaker 2.3+</b>
 
 ## Features
 
@@ -25,16 +25,10 @@
 
 This library have been tested and working on:
 
-- Windows VM
-	- IDE
-		- v2024.13.1.193
-	- Runtime
-		- v2024.13.1.242
-- Windows YYC
-	- IDE
-		- v2024.13.1.193
-	- Runtime
-		- v2024.13.1.242
+| Platform    | IDE            | Runtime        |
+|-------------|----------------|----------------|
+| Windows VM  | v2024.13.1.193 | v2024.13.1.242 |
+| Windows YYC | v2024.13.1.193 | v2024.13.1.242 |
 
 It should work on other versions of GameMaker 2.3+ too. Please let me know on the [tested versions page](https://github.com/undervolta/GM-I18n/issues) if you tested it on other versions and it works.
 
@@ -99,7 +93,7 @@ i18n_draw_message(x, y, "@:btn_text");
 // objMyObject - Left Released Event
 
 // Update the locale, all references will be updated automatically
-i18n_set_locale("ja);
+i18n_set_locale("ja");
 ```
 
 
@@ -109,7 +103,9 @@ The usage example above is just a basic example. You can do more with this libra
 
 ## Questions & Feature Requests
 
-If you have any questions or feature requests, please feel free to open an issue on the [GitHub repository](https://github.com/undervolta/GM-I18n/issues). I'll try my best to answer your questions and implement your feature requests. But, please don't expect too much, I'm not a professional programmer and I'm doing this in my free time.
+If you have any questions or suggestions, feel free to start a discussion on the [GitHub repository](https://github.com/undervolta/GM-I18n/discussions). If you have any feature requests or you want to report a bug, feel free to open an issue on the [GitHub repository](https://github.com/undervolta/GM-I18n/issues). 
+
+I'll try my best to answer your questions and implement your feature requests. But, please don't expect too much, I'm not a professional programmer and I'm doing this in my free time.
 
 ## Contributing
 
@@ -119,9 +115,9 @@ Please make sure to test the code before submitting a pull request. Please also 
 
 ## Support
 
-If you like this project, please consider supporting me on [Ko-fi](https://ko-fi.com/undervolta) or [Trakteer](https://trakteer.id/undervolta). Your support is greatly appreciated!
+If you like this project, please consider supporting me on [Ko-fi](https://ko-fi.com/undervolta) or [Trakteer](https://trakteer.id/undervolta). Don't forget to leave a star! Your support is greatly appreciated!
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the [MIT License](https://github.com/undervolta/GM-I18n/blob/main/LICENSE). 
 

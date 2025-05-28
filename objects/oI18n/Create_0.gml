@@ -3,6 +3,7 @@
 // Initialize i18n
 global.i18n = i18n_create("g.i18n", "en", [
 	new I18nLocaleInit("en", "English", "~/langs/en.json"),
+	new I18nLocaleInit("idn", "Bhs Indonesia", "~/langs/id.json"),
 	new I18nLocaleInit("ja", "日本語", "~/langs/ja.json"),
 	new I18nLocaleInit("ko", "한국어", "~/langs/ko.json") 
 	//new I18nLocaleInit("ar", "عربى", ["~/langs/ar1.json", "~/langs/ar2.json"]),
@@ -11,7 +12,6 @@ global.i18n = i18n_create("g.i18n", "en", [
 	hashed: false,
 	time: 0.5
 });
-
 
 // Add hardcoded messages to en locale. Great for mandatory initial messages.
 i18n_add_messages("en", {
@@ -44,12 +44,16 @@ i18n_add_messages("en", {
 
 
 // Create non-regular fonts
-global.font_ja = font_add(working_directory + "fonts/NotoSansJP-Medium.ttf", 32, 0, 0, 32, 127);
-global.font_kr = font_add(working_directory + "fonts/NotoSansKR-Medium.ttf", 32, 0, 0, 32, 127);
+//global.font_ja = font_add(working_directory + "fonts/NotoSansJP-Medium.ttf", 32, 0, 0, 32, 127);
+//global.font_ko = font_add(working_directory + "fonts/NotoSansKR-Medium.ttf", 32, 0, 0, 32, 127);
+
+// For HTML5
+global.font_ja = font_add("fonts/NotoSansJP-Medium.ttf", 32, 0, 0, 32, 127);
+global.font_ko = font_add("fonts/NotoSansKR-Medium.ttf", 32, 0, 0, 32, 127);
 
 
 // Add drawing presets for each locale
-i18n_add_drawings("en", ["title", "button", "header", "desc"], [
+i18n_add_drawings(["en", "idn"], ["title", "button", "header", "desc"], [
 	new I18nDrawings(fNotoSansSemiBold, fa_left, fa_middle, #FFFFFF, 1.14, 0, 1),
 	new I18nDrawings(fNotoSansSemiBold, fa_center, fa_middle, #000000, 0.65, 0, 1),
 	new I18nDrawings(fNotoSansSemiBold, fa_left, fa_middle, #FFFFFF, 0.65, 0, 1),
@@ -63,11 +67,15 @@ i18n_add_drawings("ja", ["button", "header", "desc"], [
 ]);
 
 i18n_add_drawings("ko", ["button", "header", "desc"], [
-	new I18nDrawings(global.font_kr, fa_center, fa_middle, #000000, 0.65, 0, 1),
-	new I18nDrawings(global.font_kr, fa_left, fa_middle, #FFFFFF, 0.65, 0, 1),
-	new I18nDrawings(global.font_kr, fa_left, fa_top, #CCCCCC, 0.49, 0, 1, -1, 1198)
+	new I18nDrawings(global.font_ko, fa_center, fa_middle, #000000, 0.65, 0, 1),
+	new I18nDrawings(global.font_ko, fa_left, fa_middle, #FFFFFF, 0.65, 0, 1),
+	new I18nDrawings(global.font_ko, fa_left, fa_top, #CCCCCC, 0.49, 0, 1, -1, 1198)
 ]);
 
+// Refresh the drawing preset if it's running on browser
+if (os_browser != browser_not_a_browser) {
+	alarm_set(0, game_get_speed(gamespeed_fps) * 2);	// delay in seconds
+}
 
 // Add dictionaries
 i18n_add_dictionaries("en", [
@@ -81,6 +89,19 @@ i18n_add_dictionaries("en", [
 	["8", "eight"],
 	["9", "nine"],
 	["10", "ten"]
+]);
+
+i18n_add_dictionaries("idn", [
+	["1", "satu"],
+	["2", "dua"],
+	["3", "tiga"],
+	["4", "empat"],
+	["5", "lima"],
+	["6", "enam"],
+	["7", "tujuh"],
+	["8", "delapan"],
+	["9", "sembilan"],
+	["10", "sepuluh"]
 ]);
 
 i18n_add_dictionaries("ja", [
