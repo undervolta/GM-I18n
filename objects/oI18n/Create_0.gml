@@ -43,13 +43,13 @@ i18n_add_messages("en", {
 });
 
 
-// Create non-regular fonts
-//global.font_ja = font_add(working_directory + "fonts/NotoSansJP-Medium.ttf", 32, 0, 0, 32, 127);
-//global.font_ko = font_add(working_directory + "fonts/NotoSansKR-Medium.ttf", 32, 0, 0, 32, 127);
+// Create non-latin fonts
+global.font_ja = font_add(working_directory + "fonts/NotoSansJP-Medium.ttf", 32, 0, 0, 32, 127);
+global.font_ko = font_add(working_directory + "fonts/NotoSansKR-Medium.ttf", 32, 0, 0, 32, 127);
 
 // For HTML5
-global.font_ja = font_add("fonts/NotoSansJP-Medium.ttf", 32, 0, 0, 32, 127);
-global.font_ko = font_add("fonts/NotoSansKR-Medium.ttf", 32, 0, 0, 32, 127);
+//global.font_ja = font_add("fonts/NotoSansJP-Medium.ttf", 32, 0, 0, 32, 127);
+//global.font_ko = font_add("fonts/NotoSansKR-Medium.ttf", 32, 0, 0, 32, 127);
 
 
 // Add drawing presets for each locale
@@ -138,7 +138,7 @@ i18n_add_dictionaries("ko", [
 ]);*/
 
 
-/*i18n_add_messages("en", {
+i18n_add_messages("en", {
 	lang: "English",
 	this_lang: "[[lang]] is currently in use. [[hello]]",
 	hello: "Hello world!",
@@ -170,7 +170,7 @@ i18n_add_dictionaries("ko", [
 	error_message: "An error occurred: {error_code}"
 })
 
-i18n_add_locales(["id", "kr", "cn"]);*/
+//i18n_add_locales(["id", "kr", "cn"]);
  
 // i18n_add_drawings("en", "preset1", new I18nDrawings(fNotoSansMedium, fa_left, fa_middle, #FFFFFF, 1, 0, 1));
 // i18n_add_drawings(["en", "id"], "preset2", new I18nDrawings(fNotoSansMedium, fa_left, fa_middle, , , 1));

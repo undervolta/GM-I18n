@@ -1,7 +1,7 @@
 /// @description Insert description here
 //show_debug_message(global.i18n);
-/*var hello = i18n_get_messages("hello");
-var potion = i18n_get_messages("items.potion", , "ja");
+var hello = i18n_get_messages("hello");
+var potion = i18n_get_messages("items.potion", , "en");
 var welcome = i18n_get_messages("welcome", ["GM-I18n", "Dev"]);
 
 var dev = "Developer";
@@ -50,7 +50,7 @@ show_debug_message($"npc3 = {npc3}")
 show_debug_message($"error = {error}")
 show_debug_message($"error_num = {error_num}")
 show_debug_message($"cond = {cond}")
-show_debug_message($"ref_npc_6 = {ref_npc_6}")*/
+//show_debug_message($"ref_npc_6 = {ref_npc_6}")
 
 /*show_debug_message($"data = {global.i18n.refs.messages.data}")
 show_debug_message($"ref_npc_5 old = {ref_npc_5}")

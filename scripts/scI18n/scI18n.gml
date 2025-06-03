@@ -943,25 +943,23 @@ function i18n_get_messages(key, data = undefined, locale = "", i18n = false) {
 					}
 				} else if (is_struct(data)) {			// Pluralization by struct (need "plural" key (e.g {plural: 1}, {plural: function(number) {return number}, plural_value: 1}, ...))
 					if (struct_exists(data, "plural")) {
-						if (struct_exists(data, "plural_value")) {
-							if (is_real(data.plural)) {
-								result[i] = string_trim(raw_plural[max(i18n.plural_start_at, floor(data.plural - i18n.plural_start_at))]);
-								
-								if (i18n.debug && (data.plural < i18n.plural_start_at || data.plural > array_length(raw_plural) - 1 + i18n.plural_start_at)) {
+						if (is_real(data.plural)) {
+							result[i] = string_trim(raw_plural[max(i18n.plural_start_at, floor(data.plural - i18n.plural_start_at))]);
+							
+							if (i18n.debug && (data.plural < i18n.plural_start_at || data.plural > array_length(raw_plural) - 1 + i18n.plural_start_at)) {
+								show_debug_message($"I18n WARNING - i18n_get_messages() - Pluralization index out of range");
+							}
+						} else if (is_method(data.plural) && struct_exists(data, "plural_value")) {
+							var plural_result = data.plural(data.plural_value);
+
+							if (is_real(plural_result)) {
+								result[i] = string_trim(raw_plural[max(i18n.plural_start_at, floor(plural_result - i18n.plural_start_at))]);
+
+								if (i18n.debug && (plural_result < i18n.plural_start_at || plural_result > array_length(raw_plural) - 1 + i18n.plural_start_at)) {
 									show_debug_message($"I18n WARNING - i18n_get_messages() - Pluralization index out of range");
 								}
-							} else if (is_method(data.plural)) {
-								var plural_result = data.plural(data.plural_value);
-
-								if (is_real(plural_result)) {
-									result[i] = string_trim(raw_plural[max(i18n.plural_start_at, floor(plural_result - i18n.plural_start_at))]);
-
-									if (i18n.debug && (plural_result < i18n.plural_start_at || plural_result > array_length(raw_plural) - 1 + i18n.plural_start_at)) {
-										show_debug_message($"I18n WARNING - i18n_get_messages() - Pluralization index out of range");
-									}
-								} else if (i18n.debug) {
-									show_debug_message($"I18n ERROR - i18n_get_messages() - Pluralization method must return a real number");
-								}
+							} else if (i18n.debug) {
+								show_debug_message($"I18n ERROR - i18n_get_messages() - Pluralization method must return a real number");
 							}
 						} else if (i18n.debug) {
 							show_debug_message($"I18n ERROR - i18n_get_messages() - Pluralization struct doesn't have a 'plural_value' key");
