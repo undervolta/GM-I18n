@@ -2,7 +2,7 @@
  * name: GM-I18n
  * desc: A powerful, open-source internationalization (i18n) library for GameMaker 2.3+
  * author: @undervolta
- * version: 0.1.0
+ * version: 0.1.1
  * date: 2025-05-24
  * 
  * repo: https://github.com/undervolta/GM-I18n
@@ -949,7 +949,7 @@ function i18n_get_messages(key, data = undefined, locale = "", i18n = false) {
 							if (i18n.debug && (data.plural < i18n.plural_start_at || data.plural > array_length(raw_plural) - 1 + i18n.plural_start_at)) {
 								show_debug_message($"I18n WARNING - i18n_get_messages() - Pluralization index out of range");
 							}
-						} else if (is_method(data.plural) && struct_exists(data, "plural_value")) {
+						} else if (is_callable(data.plural) && struct_exists(data, "plural_value")) {
 							var plural_result = data.plural(data.plural_value);
 
 							if (is_real(plural_result)) {
@@ -1039,11 +1039,12 @@ function i18n_get_messages(key, data = undefined, locale = "", i18n = false) {
 									var replace_str = string_split(result_str, " ");
 									
 									// Replace result with the dictionary
+									var current_locale = (locale == "") ? i18n.locale : locale;
 									for (var k = 0; k < array_length(replace_str); k++) {
-										if (struct_exists_from_hash(i18n.data[$ i18n.locale].dictionaries, variable_get_hash(replace_str[k]))) {
-											result_str = string_replace(result_str, replace_str[k], struct_get_from_hash(i18n.data[$ i18n.locale].dictionaries, variable_get_hash(replace_str[k])));
+										if (struct_exists_from_hash(i18n.data[$ current_locale].dictionaries, variable_get_hash(replace_str[k]))) {
+											result_str = string_replace(result_str, replace_str[k], struct_get_from_hash(i18n.data[$ current_locale].dictionaries, variable_get_hash(replace_str[k])));
 										} else if (i18n.debug) {
-											show_debug_message($"I18n WARNING - i18n_get_messages() - {replace_str[k]} dictionary doesn't exists in {i18n.locale} locale");
+											show_debug_message($"I18n WARNING - i18n_get_messages() - {replace_str[k]} dictionary doesn't exists in {current_locale} locale");
 										}
 									}
 									

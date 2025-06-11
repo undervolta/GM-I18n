@@ -8,7 +8,7 @@ global.i18n = i18n_create("g.i18n", "en", [
 	new I18nLocaleInit("ko", "한국어", "~/langs/ko.json") 
 	//new I18nLocaleInit("ar", "عربى", ["~/langs/ar1.json", "~/langs/ar2.json"]),
 ], {
-	debug: false,
+	debug: true,
 	hashed: false,
 	time: 0.5
 });
@@ -130,6 +130,23 @@ i18n_add_dictionaries("ko", [
 	["10", "십"]
 ]);
 
+i18n_add_dictionaries("en", [
+    ["item.map", "Village Map"],
+    ["apple box", "box of apples"]
+]);
+
+i18n_add_dictionaries("idn", [
+    ["ticket", "tiket"],
+	["apple", "apel"],
+    ["item.map", "Peta Desa"],
+    ["apple box", "kotak apel"]
+]);
+
+i18n_add_dictionaries("ja", [
+    ["item.map", "村の地図"],
+    ["ticket", "チケット"],
+    ["apple box", "リンゴの箱"]
+]);
 
 /*i18n_add_drawings("ar", ["button", "header", "desc"], [
 	new I18nDrawings(font_add(working_directory + "fonts/NotoSansArabic-SemiBold.ttf", 32, 0, 0, 32, 127), fa_center, fa_middle, #000000, 0.65, 0, 1),
@@ -167,7 +184,65 @@ i18n_add_messages("en", {
 	},
 	error_num: "${num}. [[error_check]]",
 	error_check: "I18n - lang {locale} - [[error_message]]",
-	error_message: "An error occurred: {error_code}"
+	error_message: "An error occurred: {error_code}",
+	
+	welcome: "Welcome to {village} village, {name}! [[welcome_2]]",
+    welcome_2: "Hope you enjoy your stay in this village!",
+    shop: {
+        template_1: "Are you sure you want to buy this {count} {item}",
+        cant_buy: "You can't afford this {name}.",
+        buyable: "[[shop.template_1]]? | [[shop.template_1]]{suffix}?",
+        confirm: "[[shop.cant_buy]] | [[shop.buyable]]",
+        confirm_2: "[[shop.cant_buy]] | [[shop.buyable]] [[shop.confirm_resc]]",
+        confirm_resc: "Your {0} is {1}."
+    },
+    item: {
+        owned: "You already have {count} {item}.",
+        not_owned: "You don't have this {item}. [[shop.confirm]]",
+        apple: "Apple",
+        apple_trait: "{adj} Apple",
+        bamboo: "Bamboo",
+        bamboo_trait: "{adj} Bamboo",
+        potion: "Potion",
+        potion_trait: "{adj} Potion",
+        chicken: "Chicken",
+        chicken_trait: "{0} Chicken",
+        duck: "Duck",
+        duck_trait: "{0} Duck"
+    },
+ 	dialog: {
+        npc_1: "Do you have 20 [[item.apple]]s? How about trading them with me for 5 [[item.bamboo]]s?",
+        npc_2: "Welcome to my shop! Take a look at this [[item.apple_trait]], [[item.bamboo_trait]], and [[item.potion_trait]]. Do you want to buy any of them?",
+        npc_3: "Ah, how about [[item.chicken_trait]] and [[item.duck_trait]] then?",
+		npc_4: {
+            num_1: "Is this your first time to visit our village? [[dialog.npc_4.num_2]]",
+            num_2: "Huh, really?\nThen, [[welcome]]",
+        },
+		npc_5: "Sorry, your {resc}s is not enough to buy this [[item.bamboo_trait]]. | Do you want to buy [[item.bamboo_trait]] for {plural_value} {resc}s, sir? I'll add a [[item.apple_trait]] for you as a bonus!"
+    },
+
+	greet: "Hello, {name}!",
+    ask: "Do you want this ${item}?",
+	dialog: {
+        npc_1: "Please ask ${chief_name} for help.",
+        npc_2: "Is it your first time here, {name}? Let me show you around. Here's a ${item} for you.",
+        npc_3: "You need at least {plural_value} ${item}{suffix} to enter the cave. | Spend {plural_value} ${item}{suffix} to enter the cave?",
+        npc_4: "My brother was trapped in the cave. I need to find him. Can you help me? [[dialog.npc_5]]",
+        npc_5: "I'll reward you with a ${sp_item} if you can find him."
+    }
+})
+
+i18n_add_messages("idn", {
+	greet: "Halo, {name}!",
+    ask: "Apakah kamu ingin {item} ini?",
+    ask_2: "Apakah kamu ingin ${item} ini?",
+    dialog: {
+        npc_1: "Apakah kamu ",
+        npc_2: "Ini pertama kalinya kamu di sini, {name}? Mari saya tunjukkan sekeliling. Ini ${item} untukmu.",
+        npc_3: "Kamu butuh setidaknya {plural_value} ${item} untuk masuk ke gua. | Habiskan {plural_value} ${item} untuk masuk ke gua?",
+        npc_4: "Saudaraku terjebak di dalam gua. Aku perlu menemukannya. Bisakah kamu membantuku? [[dialog.npc_5]]",
+        npc_5: "Aku akan memberimu ${sp_item} jika kamu bisa menemukannya."
+    }
 })
 
 //i18n_add_locales(["id", "kr", "cn"]);
