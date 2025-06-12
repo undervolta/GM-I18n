@@ -177,7 +177,7 @@ show_debug_message(npc5);*/
 
 /*i18n_update_plurals("not_owned.child", 0)
 show_debug_message(not_owned);*/
-show_debug_message($"dict idn = {global.i18n.data.idn.dictionaries}")
+
 // dictionaries
 var ask1 = i18n_get_messages("ask", {
 	item: "apple"
@@ -189,3 +189,10 @@ var ask2 = i18n_get_messages("ask_2", {
 
 show_debug_message(ask1);
 show_debug_message(ask2);
+show_debug_message(npc1);
+show_debug_message(my_struct.npc2);
+
+i18n_update_plurals("global.npc3", oUI.my_val, true);
+show_debug_message(global.npc3);
+show_debug_message(global.gb_struct.npc4);
+show_debug_message(global.gb_struct.arr[0]);

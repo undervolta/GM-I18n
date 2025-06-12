@@ -1036,16 +1036,15 @@ function i18n_get_messages(key, data = undefined, locale = "", i18n = false) {
 										end_at[k] += string_length(result_str) - string_length(placeholder);
 									}
 								} else {						// Dictionary placeholder
-									var replace_str = string_split(result_str, " ");
-									
-									// Replace result with the dictionary
 									var current_locale = (locale == "") ? i18n.locale : locale;
-									for (var k = 0; k < array_length(replace_str); k++) {
-										if (struct_exists_from_hash(i18n.data[$ current_locale].dictionaries, variable_get_hash(replace_str[k]))) {
-											result_str = string_replace(result_str, replace_str[k], struct_get_from_hash(i18n.data[$ current_locale].dictionaries, variable_get_hash(replace_str[k])));
-										} else if (i18n.debug) {
-											show_debug_message($"I18n WARNING - i18n_get_messages() - {replace_str[k]} dictionary doesn't exists in {current_locale} locale");
-										}
+
+									// Replace result with the dictionary
+									var replace_str = result_str;
+									
+									if (struct_exists_from_hash(i18n.data[$ current_locale].dictionaries, variable_get_hash(replace_str))) {
+										result_str = string_replace(result_str, replace_str, struct_get_from_hash(i18n.data[$ current_locale].dictionaries, variable_get_hash(replace_str)));
+									} else if (i18n.debug) {
+										show_debug_message($"I18n WARNING - i18n_get_messages() - {replace_str} dictionary doesn't exists in {current_locale} locale");
 									}
 									
 									// Update the position of the next placeholder

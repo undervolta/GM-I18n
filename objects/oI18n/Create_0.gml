@@ -8,7 +8,7 @@ global.i18n = i18n_create("g.i18n", "en", [
 	new I18nLocaleInit("ko", "한국어", "~/langs/ko.json") 
 	//new I18nLocaleInit("ar", "عربى", ["~/langs/ar1.json", "~/langs/ar2.json"]),
 ], {
-	debug: true,
+	debug: false,
 	hashed: false,
 	time: 0.5
 });
@@ -132,21 +132,18 @@ i18n_add_dictionaries("ko", [
 
 i18n_add_dictionaries("en", [
     ["item.map", "Village Map"],
-    ["apple box", "box of apples"]
+    ["apple_box", "box of apples"],
+	["Will of the Adventurer", "A skill that increases the user's attack power by 10% for 30 seconds"],
 ]);
 
 i18n_add_dictionaries("idn", [
     ["ticket", "tiket"],
 	["apple", "apel"],
     ["item.map", "Peta Desa"],
-    ["apple box", "kotak apel"]
+    ["apple_box", "kotak apel"],
+	["Will of the Adventurer", "Sebuah skill yang meningkatkan kekuatan serangan pengguna sebesar 10% selama 30 detik"]
 ]);
 
-i18n_add_dictionaries("ja", [
-    ["item.map", "村の地図"],
-    ["ticket", "チケット"],
-    ["apple box", "リンゴの箱"]
-]);
 
 /*i18n_add_drawings("ar", ["button", "header", "desc"], [
 	new I18nDrawings(font_add(working_directory + "fonts/NotoSansArabic-SemiBold.ttf", 32, 0, 0, 32, 127), fa_center, fa_middle, #000000, 0.65, 0, 1),
@@ -226,9 +223,10 @@ i18n_add_messages("en", {
 	dialog: {
         npc_1: "Please ask ${chief_name} for help.",
         npc_2: "Is it your first time here, {name}? Let me show you around. Here's a ${item} for you.",
-        npc_3: "You need at least {plural_value} ${item}{suffix} to enter the cave. | Spend {plural_value} ${item}{suffix} to enter the cave?",
+        npc_3: "You need at least {count} ${item}{suffix} to enter the cave. | Spend {plural_value} ${item}{suffix} to enter the cave?",
         npc_4: "My brother was trapped in the cave. I need to find him. Can you help me? [[dialog.npc_5]]",
-        npc_5: "I'll reward you with a ${sp_item} if you can find him."
+        npc_5: "I'll reward you with a ${sp_item} if you can find him.",
+		npc_6: "Take this \"{item}\" skill book. It's ${item}."
     }
 })
 
@@ -237,13 +235,51 @@ i18n_add_messages("idn", {
     ask: "Apakah kamu ingin {item} ini?",
     ask_2: "Apakah kamu ingin ${item} ini?",
     dialog: {
-        npc_1: "Apakah kamu ",
+        npc_1: "Harap tanyakan bantuan kepada ${chief_name}.",
         npc_2: "Ini pertama kalinya kamu di sini, {name}? Mari saya tunjukkan sekeliling. Ini ${item} untukmu.",
-        npc_3: "Kamu butuh setidaknya {plural_value} ${item} untuk masuk ke gua. | Habiskan {plural_value} ${item} untuk masuk ke gua?",
+        npc_3: "Kamu butuh setidaknya {count} ${item} untuk masuk ke gua. | Habiskan {plural_value} ${item} untuk masuk ke gua?",
         npc_4: "Saudaraku terjebak di dalam gua. Aku perlu menemukannya. Bisakah kamu membantuku? [[dialog.npc_5]]",
-        npc_5: "Aku akan memberimu ${sp_item} jika kamu bisa menemukannya."
+        npc_5: "Aku akan memberimu ${sp_item} jika kamu bisa menemukannya.",
+		npc_6: "Ambil buku keterampilan \"{item}\" ini. Ini ${item}."
     }
 })
+
+player_name = "John";
+
+npc1 = i18n_create_ref_message("npc1", "dialog.npc_1", {
+	chief_name : "Budi"
+})
+
+my_struct = {
+	npc2 : i18n_create_ref_message("my_struct.npc2", "dialog.npc_2", {
+		name : player_name,
+		item : "item.map"
+	})
+}
+
+global.npc3 = i18n_create_ref_message("global.npc3", "dialog.npc_3", {
+	plural : function(val) {
+		return (val >= 3) ? 1 : 0;
+	},
+	plural_value : 0,
+
+	item : "ticket",
+	count : 3,
+	suffix : "s"
+})
+
+global.gb_struct = {
+	npc4 : i18n_create_ref_message("g.gb_struct.npc4", "dialog.npc_4", {
+		child : {
+			sp_item : "apple_box"
+		}
+	}),
+	arr : [
+		i18n_create_ref_message("global.gb_struct.arr.0", "dialog.npc_6", {
+			item : "Will of the Adventurer"
+		})
+	]
+}
 
 //i18n_add_locales(["id", "kr", "cn"]);
  
