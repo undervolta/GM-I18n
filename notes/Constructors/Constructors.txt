@@ -1,0 +1,73 @@
+// GM-I18n v0.1.1
+// gm-i18n.lefinitas.com/v0/api-reference/constructors
+
+function I18nLocaleInit(
+    lang_code: string,
+    lang_name: string,
+    lang_file?: string | string[]       // default = ""
+): I18nLocaleInit
+
+interface I18nLocaleInit {
+    code: string,
+    name: string,
+    file?: string | string[]
+}
+
+
+function I18nLoad(
+    interval: number | number[],
+    i18n?: I18n | boolean           // default = false (using global i18n struct)
+): I18nLoad
+
+interface I18nLoad {
+    i18n: I18n,
+    files: string[],
+    files_locale: string[],
+    max_step: number,               // integer
+    step: number,                   // integer
+    step_index: number,             // integer
+    step_time: number[],            // integer[]
+    time: number | number[],
+    dt: () => number,
+    update: (
+        use_delta_time?: boolean    // default = false
+    ) => void,
+    load: (
+        filename: string,
+        locale: string
+    ) => void,
+    flatten: (
+        struct: {
+            [key: string]: string
+        },
+        i18n: I18n,
+        locale?: string,            // default = ""
+        prefix?: string             // default = ""
+    ) => void
+}
+
+
+function I18nDrawings(
+    draw_font?: Font,
+    draw_halign?: fa_left | fa_center | fa_right,
+    draw_valign?: fa_top | fa_middle | fa_bottom,
+    draw_color?: number | number[],     // color constants, or color gradient [c1, c2, c3, c4]
+    draw_scale?: number,
+    draw_rotation?: number,
+    draw_alpha?: number,                // 0 - 1
+    text_sep?: number,                  // default = -1
+    text_width?: number                 // default = room_width
+): I18nDrawings
+
+interface I18nDrawings {
+    alpha?: number,                     // 0 - 1
+    color?: number | number[],          // color constants, or color gradient [c1, c2, c3, c4]
+    draw_type: I18N_DRAW_TEXT,
+    font?: Font,
+    halign?: fa_left | fa_center | fa_right,
+    rotation?: number,
+    scale?: number,
+    sep: number,                        // default = -1
+    valign?: fa_top | fa_middle | fa_bottom,
+    width: number                       // default = room_width
+}

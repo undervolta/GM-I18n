@@ -1,0 +1,234 @@
+// GM-I18n v0.1.1
+// gm-i18n.lefinitas.com/v0/api-reference/functions
+
+function i18n_add_dictionaries(
+    locale: string,
+    data: [string, string] | [string, string][],    // [key, value] or [[key1, value1], [key2, value2], ...]
+    i18n?: I18n | boolean                           // default = false (using global i18n struct)
+): void
+
+function i18n_add_drawings(
+    locale: string | string[],
+    preset_name: string | string[],
+    data: I18nDrawings | I18nDrawings[],
+    use_ref?: boolean,            // default = true
+    i18n?: I18n | boolean         // default = false (using global i18n struct)
+): void
+
+function i18n_add_locales(
+    code: string | string[],
+    i18n?: I18n | boolean         // default = false (using global i18n struct)
+): void
+
+function i18n_add_messages(
+    locale: string,
+    data: {
+        [key: string]: string
+    },
+    i18n?: I18n | boolean         // default = false (using global i18n struct)
+): void
+
+function i18n_create(
+    var_name: string,                           // variable name to store the i18n system
+    default_locale: string,                     // default/fallback language code
+    locales: I18nLocaleInit[],                  // array of `I18nLocaleInit` struct to initialize the available locales
+    options?: boolean | {                       // default = false (no options)
+        debug?: boolean,                        // toggle debug mode, default = false
+        default_message?: string,               // default message, default = ""
+        hashed: boolean,                        // enable hashed message, default = true
+        linked_end?: string,                    // linked message end delimiter, default = "]"
+        linked_start?: string,                  // linked message start delimiter, default = "["
+        plural_delimiter?: string,              // plural message delimiter, default = "|"
+        plural_start_at?: number,               // plural message starting index, default = 0
+        time?: number | number[] | boolean      // locale files loading interval, default = false (load all files at once)
+    }
+): I18n
+
+function i18n_create_ref_asset(
+    var_name: string,
+    locale_asset: { [locale_code: string]: Asset },
+    i18n?: I18n | boolean                           // default = false (using global i18n struct)
+): Asset
+
+function i18n_create_ref_message(
+    var_name: string,
+    key: string,
+    data?: number | any[] | { [key: string]: any },
+    i18n?: I18n | boolean                           // default = false (using global i18n struct)
+): string
+
+function i18n_draw_message(
+    x: number,
+    y: number,
+    text: string,
+    data?: number | any[],
+    preset_name?: string,
+    locale?: string,                // default = "" (use the current locale)
+    i18n?: I18n | boolean           // default = false (using global i18n struct)
+): void
+
+function i18n_get_asset_from_ref(
+    var_name: string,
+    ref: "global" | Instance | Object,
+    locale?: string,                    // default = "" (use the current locale)
+    i18n?: I18n | boolean               // default = false (using global i18n struct)
+): Asset
+
+function i18n_get_drawing_preset(
+    locale?: string,                // default = "" (use the current locale)
+    i18n?: I18n | boolean           // default = false (using global i18n struct)
+): string[]
+
+function i18n_get_drawings(
+    preset_name: string | string[],
+    locale?: string,                // default = "" (use the current locale)
+    i18n?: I18n | boolean           // default = false (using global i18n struct)
+): I18nDrawings | I18nDrawings[]
+
+function i18n_get_drawings_data(
+    preset_name: string,
+    type: I18N_DRAWING,             // I18N_DRAWING enum
+    locale?: string,                // default = "" (use the current locale)
+    i18n?: I18n | boolean           // default = false (using global i18n struct)
+): number | Font | undefined
+
+function i18n_get_locale(
+    i18n?: I18n | boolean           // default = false (using global i18n struct)
+): string
+
+function i18n_get_locales(
+    i18n?: I18n | boolean           // default = false (using global i18n struct)
+): I18nLocaleInit[]
+
+function i18n_get_locales_code(
+    include_non_init?: boolean,     // default = false
+    i18n?: I18n | boolean           // default = false (using global i18n struct)
+): string[]
+
+function i18n_get_locales_name(
+    i18n?: I18n | boolean           // default = false (using global i18n struct)
+): string[]
+
+function i18n_get_message_from_ref(
+    var_name: string,
+    ref: "global" | Instance | Object,
+    locale?: string,                    // default = "" (use the current locale)
+    i18n?: I18n | boolean               // default = false (using global i18n struct)
+): string
+
+function i18n_get_messages(
+    key: string | string[],
+    data?: number | any[] | { [key: string]: any },
+    locale?: string,                // default = "" (use the current locale)
+    i18n?: I18n | boolean           // default = false (using global i18n struct)
+): string | string[]
+
+function i18n_get_ref_asset(
+    index: number,
+    i18n?: I18n | boolean               // default = false (using global i18n struct)
+): Instance | Struct | "global"
+
+function i18n_get_ref_message(
+    index: number,
+    i18n?: I18n | boolean               // default = false (using global i18n struct)
+): Instance | Struct | "global"
+
+function i18n_is_ready(
+    i18n?: I18n | boolean           // default = false (using global i18n struct)
+): boolean
+
+function i18n_locale_exists(
+    locale: string,
+    i18n?: I18n | boolean           // default = false (using global i18n struct)
+): boolean
+
+function i18n_message_exists(
+    key: string,
+    locale: string,                 // default = "" (use the current locale)
+    i18n?: I18n | boolean           // default = false (using global i18n struct)
+): boolean
+
+function i18n_set_default_message(
+    message: string,
+    i18n?: I18n | boolean           // default = false (using global i18n struct)
+): void
+
+function i18n_set_locale(
+    code: string,
+    update_refs?: boolean,         // default = true
+    i18n?: I18n | boolean          // default = false (using global i18n struct)
+): void
+
+function i18n_update_drawings(
+    preset_name: string,
+    data: [string, (number | Font)] | [string, (number | Font)][] | [key: string]: (number | Font),
+    locale?: string,                // default = "" (use the current locale)
+    i18n?: I18n | boolean           // default = false (using global i18n struct)
+): void
+
+function i18n_update_loader(
+    use_delta_time?: boolean,       // default = false
+    i18n?: I18n | boolean           // default = false (using global i18n struct)
+): void
+
+function i18n_update_plurals(
+    var_name: string,
+    value: number,
+    update_refs?: boolean,         // default = false
+    i18n?: I18n | boolean          // default = false (using global i18n struct)
+): void
+
+function i18n_update_refs(
+    type?: I18N_REF,                // default = I18N_REF.ALL (update both message and asset)
+    i18n?: I18n | boolean           // default = false (using global i18n struct)
+): void
+
+function i18n_use_drawing(
+    preset_name: string,
+    locale?: string,                // default = "" (use the current locale)
+    i18n?: I18n | boolean           // default = false (using global i18n struct)
+): void
+
+
+interface I18n {
+    data: {
+        [locale_code: string]: {
+            dictionaries: {
+                [key: number]: string               // key = dictionary key (hashed automatically)
+            },
+            drawings: {
+                [preset_name: string]: I18nDrawings
+            },
+            messages: {
+                [key: string | number]: string      // key = message key
+            }
+        }
+    },
+    debug: boolean,                     // debug mode
+    default_locale: string,             // default/fallback language
+    default_message: string,            // default message
+    hashed: boolean,                    // enable hashed message
+    linked_end: string,                 // linked message end delimiter
+    linked_start: string,               // linked message start delimiter
+    loader: I18nLoad,                   // locale files loader (become undefined after all files are loaded)
+    locale: string,                     // selected/current language
+    locales: I18nLocaleInit[],          // available locales from `locales` parameter
+    name: string,                       // variable name to store the i18n system
+    plural_delimiter: string,           // plural message delimiter
+    plural_start_at: number,            // plural message starting index
+    refs: {
+        messages: {
+            inst: (Instance | "global")[],
+            refs: string[],
+            keys: string[],
+            data: (number | any[] | {[key: string]: any})[],
+        },
+        assets: {
+            inst: (Instance | "global")[],
+            refs: string[],
+            assets: {[key: string]: Asset}[]
+        }
+    },
+    scope: "global" | "instance",       // scope of the i18n system
+    time: number | number[] | boolean   // locale files loading interval
+}

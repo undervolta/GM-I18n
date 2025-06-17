@@ -557,6 +557,11 @@ function i18n_add_dictionaries(locale, data, i18n = false) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
 	}
 
+	if (struct_exists(i18n.data, locale)) {
+		show_debug_message("I18n ERROR - i18n_add_dictionaries() - Locale does not exist: " + locale);
+		exit;
+	}
+
 	if (!is_array(data[0])) {
 		data = [data];
 	}
@@ -1243,8 +1248,14 @@ function i18n_get_drawings(preset_name, locale = "", i18n = false) {
 		for (var i = 0; i < array_length(preset_name); i++) {
 			if (struct_exists(i18n.data[$ locale].drawings, preset_name[i])) {
 				array_push(result, i18n.data[$ locale].drawings[$ preset_name[i]]);
+			} else if (struct_exists(i18n.data[$ i18n.default_locale].drawings, preset_name[i])) {
+				if (i18n.debug) {
+					show_debug_message($"I18n WARNING - i18n_get_drawings() - {preset_name[i]} drawing preset doesn't exists in current locale, using default locale instead");
+				}
+				
+				array_push(result, i18n.data[$ i18n.default_locale].drawings[$ preset_name[i]]);
 			} else {
-				array_push(result, {})
+				array_push(result, new I18nDrawings());
 				show_debug_message($"I18n ERROR - i18n_get_drawings() - {preset_name[i]} drawing preset doesn't exists");
 			}
 		}
@@ -1293,15 +1304,21 @@ function i18n_get_drawings_data(preset_name, type, locale = "", i18n = false) {
 		locale = i18n.locale;
 	}
 	
-	if (!struct_exists(i18n.data[$ locale].drawings, preset_name)) {
-		show_debug_message($"I18n ERROR - i18n_get_drawings_data() - {preset_name} drawing preset doesn't exists");
-		exit;
-	}
-
 	// Return the drawing data
 	var names = ["font", "halign", "valign", "color", "scale", "rotation", "alpha", "sep", "width"];
-	
-	return i18n.data[$ locale].drawings[$ preset_name][$ names[type]];
+
+	if (struct_exists(i18n.data[$ locale].drawings, preset_name)) {
+		return i18n.data[$ locale].drawings[$ preset_name][$ names[type]];
+	} else if (struct_exists(i18n.data[$ i18n.default_locale].drawings, preset_name)) {
+		if (i18n.debug) {
+			show_debug_message($"I18n WARNING - i18n_get_drawings_data() - {preset_name} drawing preset doesn't exists in current locale, using default locale instead");
+		}
+
+		return i18n.data[$ locale].drawings[$ i18n.default_locale][$ names[type]];
+	} else {
+		show_debug_message($"I18n ERROR - i18n_get_drawings_data() - {preset_name} drawing preset doesn't exists");
+		return;
+	}
 }
 
 
@@ -1788,7 +1805,7 @@ function i18n_update_plurals(var_name, value, update_refs = false, i18n = false)
 /**
  * @desc Get a static message that created using i18n_create_ref_message()
  * @param {String} var_name Variable name based on the var_name in i18n_create_ref_message() (e.g. "text"). Structs are supported (e.g. "text.title").
- * @param {String | Id.Instance | Asset.GMObject} [ref]="" Reference name or instance id based on the ref in i18n_create_ref_message() (e.g. "text"). Recommended to pass "global" if the reference is a global variable, or instance id if the reference is created in an instance.
+ * @param {String | Id.Instance | Asset.GMObject} [ref]="" Reference name or instance id based on the ref in i18n_create_ref_message() (e.g. "text"). Recommended to pass "global" if the reference is created in a global variable, or instance id if the reference is created in an instance.
  * @param {String} [locale]="" Locale code (e.g "en"). Leave it empty to get the message in the current locale.
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
  * @returns {String}
@@ -1863,8 +1880,8 @@ function i18n_get_message_from_ref(var_name, ref = "", locale = "", i18n = false
 
 /**
  * @desc Get a static asset that created using i18n_create_ref_asset()
- * @param {String} var_name Variable name based on the var_name in i18n_create_ref_asset() (e.g. "text"). Structs are supported (e.g. "text.title").
- * @param {String | Id.Instance | Asset.GMObject} [ref]="" Reference name or instance id based on the ref in i18n_create_ref_asset() (e.g. "text"). Recommended to pass "global" if the reference is a global variable, or instance id if the reference is created in an instance.
+ * @param {String} var_name Variable name based on the var_name in i18n_create_ref_asset() function (e.g. "text"). Structs are supported (e.g. "text.title").
+ * @param {String | Id.Instance | Asset.GMObject} [ref]="" Reference name or instance id based on the ref in i18n_create_ref_asset() function. Recommended to pass "global" if the reference is created in a global variable, or instance id if the reference is created in an instance.
  * @param {String} [locale]="" Locale code (e.g "en"). Leave it empty to get the asset in the current locale.
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
  * @returns {Struct | undefined}

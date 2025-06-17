@@ -1,0 +1,11 @@
+{
+  "$GMNotes":"",
+  "%Name":"Functions",
+  "name":"Functions",
+  "parent":{
+    "name":"GM-I18n",
+    "path":"folders/GM-I18n.yy",
+  },
+  "resourceType":"GMNotes",
+  "resourceVersion":"2.0",
+}
