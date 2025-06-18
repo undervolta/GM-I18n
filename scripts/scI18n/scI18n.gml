@@ -557,7 +557,7 @@ function i18n_add_dictionaries(locale, data, i18n = false) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
 	}
 
-	if (struct_exists(i18n.data, locale)) {
+	if (!struct_exists(i18n.data, locale)) {
 		show_debug_message("I18n ERROR - i18n_add_dictionaries() - Locale does not exist: " + locale);
 		exit;
 	}

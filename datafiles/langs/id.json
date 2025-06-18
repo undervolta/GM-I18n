@@ -1,5 +1,6 @@
 {
     "lang": "Bhs Indonesia",
+    "bug": "Ada beberapa masalah dengan platform HTML5",
 	"plural_guide": "Tekan panah atas atau bawah untuk mengubah nilai plural",
 	"menu_1": {
 		"title": "Terjemahan",

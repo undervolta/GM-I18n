@@ -11,4 +11,6 @@ for (var i = 0; i < array_length(to_refresh); i++) {
 	}
 }
 
+refreshed = true;
+
 //show_debug_message($"ja.drawings = {global.i18n.data.ja.drawings}")

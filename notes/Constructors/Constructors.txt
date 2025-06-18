@@ -8,9 +8,9 @@ function I18nLocaleInit(
 ): I18nLocaleInit
 
 interface I18nLocaleInit {
-    code: string,
-    name: string,
-    file?: string | string[]
+    code: string;
+    name: string;
+    file?: string | string[];
 }
 
 
@@ -20,22 +20,22 @@ function I18nLoad(
 ): I18nLoad
 
 interface I18nLoad {
-    i18n: I18n,
-    files: string[],
-    files_locale: string[],
-    max_step: number,               // integer
-    step: number,                   // integer
-    step_index: number,             // integer
-    step_time: number[],            // integer[]
-    time: number | number[],
-    dt: () => number,
+    i18n: I18n;
+    files: string[];
+    files_locale: string[];
+    max_step: number;               // integer
+    step: number;                   // integer
+    step_index: number;             // integer
+    step_time: number[];            // integer[]
+    time: number | number[];
+    dt: () => number;
     update: (
         use_delta_time?: boolean    // default = false
-    ) => void,
+    ) => void;
     load: (
         filename: string,
         locale: string
-    ) => void,
+    ) => void;
     flatten: (
         struct: {
             [key: string]: string
@@ -43,7 +43,7 @@ interface I18nLoad {
         i18n: I18n,
         locale?: string,            // default = ""
         prefix?: string             // default = ""
-    ) => void
+    ) => void;
 }
 
 
@@ -60,14 +60,14 @@ function I18nDrawings(
 ): I18nDrawings
 
 interface I18nDrawings {
-    alpha?: number,                     // 0 - 1
-    color?: number | number[],          // color constants, or color gradient [c1, c2, c3, c4]
-    draw_type: I18N_DRAW_TEXT,
-    font?: Font,
-    halign?: fa_left | fa_center | fa_right,
-    rotation?: number,
-    scale?: number,
-    sep: number,                        // default = -1
-    valign?: fa_top | fa_middle | fa_bottom,
-    width: number                       // default = room_width
+    alpha?: number;                     // 0 - 1
+    color?: number | number[];          // color constants, or color gradient [c1, c2, c3, c4]
+    draw_type: I18N_DRAW_TEXT;
+    font?: Font;
+    halign?: fa_left | fa_center | fa_right;
+    rotation?: number;
+    scale?: number;
+    sep: number;                        // default = -1
+    valign?: fa_top | fa_middle | fa_bottom;
+    width: number;                      // default = room_width
 }

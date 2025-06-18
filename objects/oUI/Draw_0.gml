@@ -1,6 +1,15 @@
 /// @description UI
 
 i18n_draw_message(41, 80, "@:title", , "title", "en");
+draw_set_color(#CCCCCC);
+draw_set_valign(fa_bottom);
+draw_text_transformed(410, 106, version, 0.6, 0.6, 0);
+
+if (oI18n.refreshed && os_browser != browser_not_a_browser) {
+	draw_set_halign(fa_right);
+	draw_set_font(i18n_get_drawings_data("desc", I18N_DRAWING.FONT));
+	draw_text_transformed(room_width - 35, 111, bug_1, 0.4, 0.4, 0);
+}
 
 // Draw the description based on the active menu number
 var messages, w, preset;

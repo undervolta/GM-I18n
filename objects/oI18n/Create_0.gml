@@ -17,6 +17,7 @@ global.i18n = i18n_create("g.i18n", "en", [
 i18n_add_messages("en", {
 	lang: "English",
 	title: "GM-I18n Demo",
+	bug: "There are some issues with HTML5 platform",
 	plural_guide: "Press arrow up or down to change the plural value",
 	menu_1: {
 		title: "Translation",
@@ -44,13 +45,16 @@ i18n_add_messages("en", {
 
 
 // Create non-latin fonts
-global.font_ja = font_add(working_directory + "fonts/NotoSansJP-Medium.ttf", 32, 0, 0, 32, 127);
-global.font_ko = font_add(working_directory + "fonts/NotoSansKR-Medium.ttf", 32, 0, 0, 32, 127);
+if (os_browser == browser_not_a_browser) {
+	global.font_ja = font_add(working_directory + "fonts/NotoSansJP-Medium.ttf", 32, 0, 0, 32, 127);
+	global.font_ko = font_add(working_directory + "fonts/NotoSansKR-Medium.ttf", 32, 0, 0, 32, 127);
+} else {
+	// For HTML5
+	global.font_ja = font_add("fonts/NotoSansJP-Medium.ttf", 32, 0, 0, 32, 127);
+	global.font_ko = font_add("fonts/NotoSansKR-Medium.ttf", 32, 0, 0, 32, 127);
+}
 
-// For HTML5
-//global.font_ja = font_add("fonts/NotoSansJP-Medium.ttf", 32, 0, 0, 32, 127);
-//global.font_ko = font_add("fonts/NotoSansKR-Medium.ttf", 32, 0, 0, 32, 127);
-
+refreshed = false;
 
 // Add drawing presets for each locale
 i18n_add_drawings(["en", "idn"], ["title", "button", "header", "desc"], [

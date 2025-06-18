@@ -5,6 +5,7 @@ menu_list = [];
 btn_list = [];
 
 page = 1;
+version = "v0.1.1";
 
 // Create menu
 var inst_layer = layer_get_id("Instances");
@@ -18,6 +19,8 @@ for (var i = 0; i < 6; i++) {
 	array_push(menu_list, menu);
 }
 
+// Create docs button
+instance_create_layer(room_width - 154, (os_browser == browser_not_a_browser) ? 80 : 63, inst_layer, oBtnDocs);
 
 // Create locale/language switcher
 var locales = i18n_get_locales_code();
@@ -33,6 +36,9 @@ for (var i = 0; i < array_length(locales); i++) {
 
 
 // Create messages with different style
+// Issue
+bug_1 = i18n_create_ref_message("bug_1", "bug");
+
 // Menu 1 (Translation)
 menu_1_head_1 = i18n_get_messages("menu_1.head_1", , "en");
 menu_1_desc_1 = i18n_get_messages("menu_1.desc_1", , "en");

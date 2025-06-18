@@ -56,6 +56,7 @@
     {"id":{"name":"Constants","path":"notes/Constants/Constants.yy",},},
     {"id":{"name":"Constructors","path":"notes/Constructors/Constructors.yy",},},
     {"id":{"name":"Functions","path":"notes/Functions/Functions.yy",},},
+    {"id":{"name":"oBtnDocs","path":"objects/oBtnDocs/oBtnDocs.yy",},},
     {"id":{"name":"oBtnLocale","path":"objects/oBtnLocale/oBtnLocale.yy",},},
     {"id":{"name":"oI18n","path":"objects/oI18n/oI18n.yy",},},
     {"id":{"name":"oMenu","path":"objects/oMenu/oMenu.yy",},},
