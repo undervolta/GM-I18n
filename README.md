@@ -41,6 +41,18 @@ I'll try my best to answer your questions and implement your feature requests. B
 
 ---
 
+<!-- ## To-Do List
+
+- [ ] Add more tests
+
+--- -->
+
+## Changelog
+
+See the [changelog](https://github.com/undervolta/GM-I18n/blob/main/CHANGELOG.md) for more information about the changes in each version.
+
+---
+
 ## Contributing
 
 How to contribute to this project:
@@ -56,6 +68,14 @@ Please make sure to follow the code style of the project.
 For major changes, please open an issue first to discuss what you would like to change. 
 
 ---
+
+<!-- ## Acknowledgements
+
+I want to thank the following people for their contributions to this project:
+
+- [Abc](https://github.com/Abc) for his help in testing and providing feedback.
+
+--- -->
 
 ## Support
 
