@@ -1,0 +1,50 @@
+{
+    "lang": "Bhs Indonesia",
+    "bug": "Ada beberapa masalah dengan platform HTML5",
+	"plural_guide": "Tekan panah atas atau bawah untuk mengubah nilai plural",
+	"menu_1": {
+		"title": "Terjemahan",
+		"head_1": "Terjemahan Teks Statis",
+		"desc_1": "Kalimat ini bersifat statis. Kalimat ini akan diterjemahkan ke lokal yang dipilih. Mengubah lokal tidak akan memengaruhi kalimat ini.",
+		"head_2": "Terjemahan Teks Dinamis",
+		"desc_2": "Kalimat ini bersifat dinamis. Kalimat ini akan diterjemahkan ke lokal yang dipilih secara default. Mengubah lokal akan memengaruhi kalimat ini. Jika kunci pesan yang diberikan tidak ada di lokal yang dipilih, maka akan menggunakan lokal default."
+	},
+	"menu_2": {
+		"title": "Interpolasi",
+		"head_1": "Interpolasi Data Berindeks",
+		"desc_1": "Menginterpolasi pesan menggunakan data array. Cara ini mudah dan cepat, tetapi tidak terlalu fleksibel dibandingkan interpolasi bernama. Berguna untuk menginterpolasi teks tanpa perlu pasangan kunci-nilai. Interpolasi ini tidak mendukung pluralisasi, kamus, dan pesan bertingkat.",
+		"head_2": "Interpolasi Data Bernama",
+		"desc_2": "Menginterpolasi pesan menggunakan data struct. Cara ini lebih fleksibel, tetapi membutuhkan konfigurasi lebih dibandingkan interpolasi berindeks. Berguna untuk menginterpolasi teks dengan pasangan kunci-nilai. Interpolasi ini juga mendukung pluralisasi, kamus, dan pesan bertingkat.",
+		"head_3": "Pesan Tertaut",
+		"desc_3": "Interpolasi data bernama juga mendukung interpolasi pesan. Jadi, kamu bisa memasukkan kunci pesan lain di dalam pesan yang diinterpolasi. Ini berguna agar kamu tidak perlu menulis pesan yang sama berulang kali."
+	},
+	"menu_3": {
+		"title": "Pluralisasi",
+		"head_1": "Pluralisasi Dasar",
+		"desc_1": "Atur template pesan untuk pluralisasi. Kemudian, kamu bisa memilih pesan berdasarkan nilai plural, atau struct dengan \"plural\" sebagai kunci.",
+		"head_2": "Pluralisasi Real-Time",
+		"desc_2": "Buat referensi i18n dan kirimkan data sebagai struct dengan \"plural\" sebagai metode, dan \"plural_value\" sebagai nilainya. Metode ini berguna untuk pluralisasi secara real-time.",
+		"test_1": "Kamu tidak punya apel. | Kamu punya 1 apel. | Kamu punya {qty} apel."
+	},
+	"menu_4": {
+		"title": "Kamus",
+		"head_1": "Kamus",
+		"desc_1": "Pada dasarnya, ini digunakan untuk menerjemahkan kata atau frasa di dalam pesan yang diterjemahkan (menggunakan interpolasi data bernama). Ini berguna untuk memadukan pesan terjemahan dengan pesan non-alfabet. Lihat perbedaannya dengan pluralisasi tradisional.",
+		"test_1": "Kamu tidak punya apel. | Kamu punya satu apel. | Kamu punya ${qty} apel."
+	},
+	"menu_5": {
+		"title": "Menggambar",
+		"head_1": "Menggambar Langsung",
+		"desc_1": "Kirimkan kunci pesan dan data ke fungsi gambar i18n untuk menggambar pesan secara langsung. Cara ini bagus untuk terjemahan teks sederhana.",
+		"head_2": "Preset Menggambar",
+		"desc_2": "kamu bisa mengirimkan nama preset ke fungsi gambar i18n untuk menggambar pesan dengan preset. Cara ini bagus untuk terjemahan teks berbasis tema atau bagian.",
+		"head_3": "Referensi Pesan",
+		"desc_3": "Menggunakan variabel referensi pesan daripada kunci pesan adalah cara terbaik untuk terjemahan teks secara real-time."
+	},
+	"menu_6": {
+		"title": "Aset Terlokalisasi",
+		"head_1": "Aset yang Didukung",
+		"desc_1": "Semua jenis aset didukung untuk lokalisasi. Namun, biasanya digunakan untuk sprite, suara, atau objek.",
+		"test_1": "Tekan tombol spasi untuk memutar suara terlokalisasi"
+	}
+}

@@ -1,0 +1,50 @@
+{
+	"title": "GM-I18n Demo",
+    "lang": "English",
+	"plural_guide": "Press arrow up or down to change the plural value",
+	"menu_1": {
+		"title": "Translation",
+		"head_1": "Static Text Translation",
+		"desc_1": "This sentence is static. It will be translated to the selected locale. Changing the locale won't affect this sentence.",
+		"head_2": "Dynamic Text Translation",
+		"desc_2": "This sentence is dynamic. It will be translated to the selected locale by default. Changing the locale will affect this sentence. If the passed key message doesn't exist in the selected locale, it will use the default locale instead."
+	},
+	"menu_2": {
+		"title": "Interpolation",
+		"head_1": "Indexed Data Interpolation",
+		"desc_1": "Interpolate message using an array of data. It's easy and fast, but it's not very flexible compared to named interpolation. Useful for interpolating text without the need of a key-value pair. This interpolation doesn't support pluralization, dictionary, and nested messages.",
+		"head_2": "Named Data Interpolation",
+		"desc_2": "Interpolate message using a struct of data. It's more flexible, but it's need more configuration compared to indexed interpolation. Useful for interpolating text with a key-value pair. This interpolation also supports pluralization, dictionary, and nested messages.",
+		"head_3": "Linked Message",
+		"desc_3": "Named data interpolation also supports message interpolation. So, you can insert other message key(s) inside the interpolated message. It's useful so you don't need to write the same message multiple times."
+	},
+	"menu_3": {
+		"title": "Pluralization",
+		"head_1": "Basic Pluralization",
+		"desc_1": "Set a template message for pluralization. And then, you can select the message by the plural value, or a struct with the \"plural\" as the key.",
+		"head_2": "Real-Time Pluralization",
+		"desc_2": "Create a i18n reference and pass the data as a struct with the \"plural\" as the method, and the \"plural_value\" as the value. This method is useful for real-time pluralization.",
+		"test_1": "You don't have any apples. | You have 1 apple. | You have {qty} apples."
+	},
+	"menu_4": {
+		"title": "Dictionary",
+		"head_1": "Dictionary",
+		"desc_1": "Basically, it's used for translating a word or phrase within a translated message (using the named data interpolation). It's useful for blending the translated message with the non-alphabetical message. Look the difference with the traditional pluralization.",
+		"test_1": "You don't have any apples. | You have one apple. | You have ${qty} apples."
+	},
+	"menu_5": {
+		"title": "Drawing",
+		"head_1": "Direct Drawing",
+		"desc_1": "Pass the message key and the data to the i18n draw function to draw the message directly. It's great for simple text translation.",
+		"head_2": "Drawing Preset",
+		"desc_2": "You can pass the preset name to the i18n draw function to draw the message with a preset. It's great for theme-based or section-based text translation.",
+		"head_3": "Message Reference",
+		"desc_3": "Using a message reference variable instead of the message key is the best way for real-time text translation."
+	},
+	"menu_6": {
+		"title": "Localized Assets",
+		"head_1": "Supported Assets",
+		"desc_1": "All asset types are supported for localization. Though, it's usually used for sprites, sounds, or objects.",
+		"test_1": "Press space bar to play the localized sound"
+	}
+}
