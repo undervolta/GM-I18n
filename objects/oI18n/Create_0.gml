@@ -9,7 +9,7 @@ global.i18n = i18n_create("g.i18n", "en", [
 	//new I18nLocaleInit("ar", "عربى", ["~/langs/ar1.json", "~/langs/ar2.json"]),
 ], {
 	debug: false,
-	hashed: false,
+	hashed: true,
 	time: 0.5
 });
 
