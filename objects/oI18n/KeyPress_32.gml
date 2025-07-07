@@ -179,7 +179,7 @@ show_debug_message(npc5);*/
 show_debug_message(not_owned);*/
 
 // dictionaries
-var ask1 = i18n_get_messages("ask", {
+/*var ask1 = i18n_get_messages("ask", {
 	item: "apple"
 }, "idn");
 
@@ -196,3 +196,6 @@ i18n_update_plurals("global.npc3", oUI.my_val, true);
 show_debug_message(global.npc3);
 show_debug_message(global.gb_struct.npc4);
 show_debug_message(global.gb_struct.arr[0]);
+*/
+
+show_debug_message($"cache.ids = {global.i18n.cache.ids}")

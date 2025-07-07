@@ -10,6 +10,7 @@ global.i18n = i18n_create("g.i18n", "en", [
 ], {
 	debug: false,
 	hashed: true,
+	cached: false,
 	time: 0.5
 });
 
@@ -249,6 +250,7 @@ i18n_add_messages("idn", {
 })
 
 player_name = "John";
+
 
 npc1 = i18n_create_ref_message("npc1", "dialog.npc_1", {
 	chief_name : "Budi"

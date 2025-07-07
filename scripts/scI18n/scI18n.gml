@@ -2,11 +2,11 @@
  * name: GM-I18n
  * desc: A powerful, open-source internationalization (i18n) library for GameMaker 2.3+
  * author: @undervolta
- * version: 0.1.1
- * date: 2025-05-24
+ * version: 0.2.0
+ * date: 2025-07-05
  * 
  * repo: https://github.com/undervolta/GM-I18n
- * docs: https://github.com/undervolta/GM-I18n/wiki
+ * docs: https://gm-i18n.lefinitas.com
  * license: MIT
  * 
  * dependencies: None
@@ -17,6 +17,7 @@
 /// feather ignore GM1041
 /// feather ignore GM1044
 /// feather ignore GM1045
+/// feather ignore GM1063
 
 
 global.i18n_name = "";
@@ -60,11 +61,11 @@ enum I18N_REF {
 function I18nLocaleInit(lang_code, lang_name, lang_file = "") constructor {
 	// Guard clauses
 	if (!is_string(lang_code)) {
-		show_debug_message("I18n ERROR - I18nLocaleInit - Locale code must be a string");
+		show_debug_message($"I18n ERROR - I18nLocaleInit({lang_code}, {lang_name}, {lang_file}) - `lang_code` must be a string");
 		exit;
 	}
 	if (!is_string(lang_name)) {
-		show_debug_message("I18n ERROR - I18nLocaleInit - Locale name must be a string");
+		show_debug_message($"I18n ERROR - I18nLocaleInit({lang_code}, {lang_name}, {lang_file}) - `lang_name` must be a string");
 		exit;
 	}
 
@@ -74,7 +75,7 @@ function I18nLocaleInit(lang_code, lang_name, lang_file = "") constructor {
 
 	if (lang_file != "") {
 		if (!(is_string(lang_file) || is_array(lang_file))) {
-			show_debug_message("I18n ERROR - I18nLocaleInit - Locale file must be a string or an array of strings");
+			show_debug_message($"I18n ERROR - I18nLocaleInit({lang_code}, {lang_name}, {lang_file}) - `lang_file` must be a string or an array of strings");
 			exit;
 		}
 		file = lang_file;
@@ -90,13 +91,13 @@ function I18nLocaleInit(lang_code, lang_name, lang_file = "") constructor {
 function I18nLoad(interval, i18n_struct = false) constructor {
 	// Guard clauses
 	if (!(is_numeric(interval) || is_array(interval))) {
-		show_debug_message("I18n ERROR - I18nLoad - Load interval must be numeric");
+		show_debug_message($"I18n ERROR - I18nLoad({interval}) - `interval` must be numeric");
 		exit;
 	}
 	
 	i18n = i18n_struct;
 	if (!(is_struct(i18n_struct) || is_bool(i18n_struct))) {
-		show_debug_message("I18n ERROR - I18nLoad - i18n must be a i18n struct");
+		show_debug_message($"I18n ERROR - I18nLoad({interval}) - `i18n_struct` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n_struct)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
@@ -197,12 +198,12 @@ function I18nLoad(interval, i18n_struct = false) constructor {
 	static load = function(filename, locale) {
 		// Guard clauses
 		if (!is_string(filename)) {
-			show_debug_message("I18n ERROR - I18nLoad.load() - JSON filename must be a string");
+			show_debug_message($"I18n ERROR - I18nLoad.load({filename}, {locale}) - `filename` must be a string");
 			exit;
 		}
 
 		if (string_pos(".json", filename) == 0) {
-			show_debug_message($"I18n ERROR - I18nLoad.load() - \"{filename}\" is not a valid file");
+			show_debug_message($"I18n ERROR - I18nLoad.load({filename}, {locale}) - \"{filename}\" is not a valid JSON file");
 			exit;
 		}
 
@@ -217,13 +218,13 @@ function I18nLoad(interval, i18n_struct = false) constructor {
 		file_loc = root + string_copy(filename, 3, string_length(filename) - 2);
 
 		if (!file_exists(file_loc)) {
-			show_debug_message("I18n ERROR - I18nLoad.load() - JSON file does not exist: " + file_loc);
+			show_debug_message($"I18n ERROR - I18nLoad.load({filename}, {locale}) - \"{filename}\" JSON file does not exist");
 			exit;
 		}
 		
 		var file = file_text_open_read(file_loc);
 		if (file == -1) {
-			show_debug_message("I18n ERROR - I18nLoad.load() - Could not open JSON file: " + file_loc);
+			show_debug_message($"I18n ERROR - I18nLoad.load({filename}, {locale}) - Could not open \"{filename}\" JSON file");
 			exit;
 		}
 
@@ -240,10 +241,10 @@ function I18nLoad(interval, i18n_struct = false) constructor {
 			var json_struct = json_parse(json_string);
 			flatten(json_struct, i18n, locale);
 			if (i18n.debug) {
-				show_debug_message($"I18n SUCCESS - I18nLoad.load() - Successfully loaded JSON: {filename}");
+				show_debug_message($"I18n SUCCESS - I18nLoad.load({filename}, {locale}) - Successfully loaded \"{filename}\" JSON file");
 			}
 		} catch (e) {
-			show_debug_message("I18n ERROR - I18nLoad.load() - Failed to parse JSON: " + string(e));
+			show_debug_message($"I18n ERROR - I18nLoad.load({filename}, {locale}) - Failed to parse \"{filename}\" JSON file: " + string(e));
 			exit;
 		}
 	}
@@ -395,11 +396,15 @@ function i18n_create(var_name, default_locale, locales, options = false) {
 			}
 		},
 		cache: {
+			ids: [],
+			values: [],
 			keys: [],
-			values: []
+			data: [],
+			locales: []
 		},
 		debug: false,
 		hashed: true,
+		cached: false,
 		default_message: "",
 		plural_delimiter: "|",
 		plural_start_at: 0,
@@ -881,9 +886,10 @@ function i18n_get_locales_name(i18n = false) {
  * @param {Array<Any> | Struct | Real | Undefined} [data] The additional data for the message. Array (index-based) = [val1, val2, ...], or Struct (name-based) = {key1: val1, key2: val2, ... [, child: {key1: val1, ...}]} (child struct need to be set if it's an interpolation and it have additional data), or Real (pluralization) = number.
  * @param {String} [locale]="" The locale that you want to get (e.g. "en"). Leave it empty to use the current locale.
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
+ * @param {Bool} [skip_cache]=true (INTERNAL) Skip cache if it's true.
  * @returns {String | Array<String> | Any} 
  */
-function i18n_get_messages(key, data = undefined, locale = "", i18n = false) {
+function i18n_get_messages(key, data = undefined, locale = "", i18n = false, skip_cache = true) {
 	// Guard clauses
 	if (!(is_string(key) || is_array(key))) {
 		show_debug_message("I18n ERROR - i18n_get_messages() - key must be a string");
@@ -920,57 +926,67 @@ function i18n_get_messages(key, data = undefined, locale = "", i18n = false) {
 
 	// Get message(s)
 	var cache_name = "";
-	var full_cache = false;
+	var cache_id = 0;
+	var full_cache = true;
 
 	for (var i = 0; i < array_length(key); i++) {
 		// Get message from locale, from cached data first
-		cache_name = string("{0}_{1}_{2}", locale, key[i], data);
-		full_cache = false;
+		if (i18n.cached) {
+			cache_name = string("{0}_{1}_{2}", locale, key[i], data);
+			cache_id = variable_get_hash(cache_name);
+			full_cache = false;
 
-		if (array_contains(i18n.cache.keys, variable_get_hash(cache_name))) {		// with data
-			array_push(result, i18n_use_cache(cache_name));
-			full_cache = true;
-		} else {
-			cache_name = string("{0}_{1}", locale, key[i]);
+			if (array_contains(i18n.cache.ids, cache_id)) {				// with data
+				array_push(result, i18n_use_cache(cache_id, i18n));
+				full_cache = true;
+			} else {
+				cache_name = string("{0}_{1}", locale, key[i]);
 
-			if (array_contains(i18n.cache.keys, variable_get_hash(cache_name))) {	// no data
-				array_push(result, i18n_use_cache(cache_name));
-			} else {																// no cache
-				if (struct_exists(i18n.data[$ locale].messages, key[i])) {
-					cache_name = "1";
-					array_push(result, (!i18n.hashed)
-										? i18n.data[$ locale].messages[$ key[i]]
-										: struct_get_from_hash(i18n.data[$ locale].messages, variable_get_hash(key[i])));
-				} else if (struct_exists(i18n.data[$ i18n.default_locale].messages, key[i])) {
-					cache_name = "2";
-					array_push(result, (!i18n.hashed) 
-										? i18n.data[$ i18n.default_locale].messages[$ key[i]] 
-										: struct_get_from_hash(i18n.data[$ i18n.default_locale].messages, variable_get_hash(key[i])));
-					if (i18n.debug) {
-						show_debug_message($"I18n WARNING - i18n_get_messages() - {key[i]} message key doesn't exists in {locale} locale, use default locale instead");
-					}
-				} else {
-					array_push(result, i18n.default_message);
-					if (i18n.debug) {
-						show_debug_message($"I18n ERROR - i18n_get_messages() - {key[i]} message key doesn't exists in {locale} locale");
-					}
+				if (array_contains(i18n.cache.ids, cache_id)) {			// without data
+					array_push(result, i18n_use_cache(cache_id, i18n));
 				}
+			}
+		} else {
+			if (struct_exists(i18n.data[$ locale].messages, key[i])) {
+				cache_name = "1";
+				array_push(result, (!i18n.hashed)
+									? i18n.data[$ locale].messages[$ key[i]]
+									: struct_get_from_hash(i18n.data[$ locale].messages, variable_get_hash(key[i])));
+			} else if (struct_exists(i18n.data[$ i18n.default_locale].messages, key[i])) {
+				cache_name = "2";
+				array_push(result, (!i18n.hashed) 
+									? i18n.data[$ i18n.default_locale].messages[$ key[i]] 
+									: struct_get_from_hash(i18n.data[$ i18n.default_locale].messages, variable_get_hash(key[i])));
+				if (i18n.debug) {
+					show_debug_message($"I18n WARNING - i18n_get_messages() - {key[i]} message key doesn't exists in {locale} locale, use default locale instead");
+				}
+			} else {
+				array_push(result, i18n.default_message);
+				if (i18n.debug) {
+					show_debug_message($"I18n ERROR - i18n_get_messages() - {key[i]} message key doesn't exists in {locale} locale");
+				}
+			}
 
-				// Create cache if possible
-				if (cache_name == "1" || cache_name == "2") {
-					cache_name = string("{0}_{1}_{2}", locale, key[i], data);
-					if (variable_get_hash(cache_name) <= 2147483647) {			// full cache
-						i18n_create_cache(cache_name, result[array_length(result) - 1], i18n);
-						//if (i18n.debug) {
-							show_debug_message($"I18n SUCCESS - i18n_get_messages({key[i]}, {data}, {locale}) - Message fully cached with id {variable_get_hash(cache_name)}");
-						//}
-					} else {													// partial cache
-						cache_name = string("{0}_{1}", locale, key[i]);
-						if (variable_get_hash(cache_name) <= 2147483647) {
-							i18n_create_cache(cache_name, result[array_length(result) - 1], i18n);
-							//if (i18n.debug) {
-								show_debug_message($"I18n SUCCESS - i18n_get_messages({key[i]}, {data}, {locale}) - Message partially cached with id {variable_get_hash(cache_name)}");
-							//}
+			// Create cache if possible
+			if (skip_cache <= 0 && (cache_name == "1" || cache_name == "2")) {
+				cache_name = string("{0}_{1}_{2}", locale, key[i], data);
+				cache_id = variable_get_hash(cache_name);
+
+				if (cache_id <= 2147483647) {			// full cache
+					i18n_create_cache(key[i], data, locale, undefined, i18n);
+
+					if (i18n.debug) {
+						show_debug_message($"I18n SUCCESS - i18n_get_messages({key[i]}, {data}, {locale}) - Message fully cached with id {variable_get_hash(cache_name)}");
+					}
+				} else {													// partial cache
+					cache_name = string("{0}_{1}", locale, key[i]);
+					cache_id = variable_get_hash(cache_name);
+
+					if (cache_id <= 2147483647) {
+						i18n_create_cache(key[i], undefined, locale, undefined, i18n);
+
+						if (i18n.debug) {
+							show_debug_message($"I18n SUCCESS - i18n_get_messages({key[i]}, {data}, {locale}) - Message partially cached with id {variable_get_hash(cache_name)}");
 						}
 					}
 				}
@@ -1115,7 +1131,7 @@ function i18n_get_messages(key, data = undefined, locale = "", i18n = false) {
 										: (struct_exists(data, "child") ? data.child : undefined);
 							
 							if (struct_exists(i18n.data[$ i18n.locale].messages, current_str)) {
-								result_str = i18n_get_messages(current_str, child, i18n.locale, i18n);
+								result_str = i18n_get_messages(current_str, child, i18n.locale, i18n, skip_cache);
 								
 								for (var k = j+1; k < array_length(end_at); k++) {
 									start_at[k] += string_length(result_str) - string_length(placeholder);
@@ -1123,7 +1139,7 @@ function i18n_get_messages(key, data = undefined, locale = "", i18n = false) {
 								}
 								result[i] = string_replace(result[i], placeholder, result_str);
 							} else if (struct_exists(i18n.data[$ i18n.default_locale].messages, current_str)) {
-								result_str = i18n_get_messages(current_str, child, i18n.default_locale, i18n);
+								result_str = i18n_get_messages(current_str, child, i18n.default_locale, i18n, skip_cache);
 								
 								for (var k = j+1; k < array_length(end_at); k++) {
 									start_at[k] += string_length(result_str) - string_length(placeholder);
@@ -2294,7 +2310,7 @@ function i18n_choose(data, locale = "", single_use = false, i18n = false) {
 	}
 
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_cache_exists({name}) - `i18n` must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_choose({name}) - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = i18n_global;
@@ -2405,146 +2421,120 @@ function binary_search_insert_pos(array, target) {
 
 /**
  * @desc Check if cache exists in I18n system
- * @param {String} name Name of the cache (e.g. "cache_name").
+ * @param {Real} cache_id Id of the cache (e.g. variable_get_hash("my_cache")).
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
  * @return {Bool}
  */
-function i18n_cache_exists(name, i18n = false) {
+function i18n_cache_exists(cache_id, i18n = false) {
 	// Guard clause
-	if (!is_string(name)) {
-		show_debug_message($"I18n ERROR - i18n_cache_exists({name}) - `name` must be string");
+	if (!is_numeric(cache_id)) {
+		show_debug_message($"I18n ERROR - i18n_cache_exists({cache_id}) - `cache_id` must be a number");
 		exit;
 	}
 
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_cache_exists({name}) - `i18n` must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_cache_exists({cache_id}) - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = i18n_global;
 	}
 
 	// Check if cache exists
-	return array_contains(i18n.cache.keys, variable_get_hash(name));
+	return array_contains(i18n.cache.ids, cache_id);
 }
 
 
 /**
- * @desc Create cache in I18n system
- * @param {String | Array<String>} name Name of the cache (e.g. "cache_name" or ["cache_name1", "cache_name2"]).
- * @param {String | Array<String>} value Value of the cache (e.g. "value" or ["value1", "value2"]).
+ * @desc Create message cache in I18n system
+ * @param {String} key Message key used to access the cache (e.g. "hello").
+ * @param {Array<Any> | Struct | Real | Undefined} [data] The additional data for the message. Array (index-based) = [val1, val2, ...], or Struct (name-based) = {key1: val1, key2: val2, ... [, child: {key1: val1, ...}]} (child struct need to be set if it's an interpolation and it have additional data), or Real (pluralization) = number.
+ * @param {String} [locale]="" The locale that you want to get (e.g. "en"). Leave it empty to use the current locale.
+ * @param {String} value Direct value to set in cache (e.g. "Hello World!"). Leave it empty to get the value from the message.
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
  */
-function i18n_create_cache(name, value, i18n = false) {
+function i18n_create_cache(key, data = undefined, locale = "", value = "", i18n = false) {
 	// Guard clause
-	if (!(is_string(name) || is_array(name))) {
-		show_debug_message($"I18n ERROR - i18n_create_cache({name}, {value}) - `name` must be string or array of strings");
+	if (!is_string(key)) {
+		show_debug_message($"I18n ERROR - i18n_create_cache({key}, {data}, {locale}, {value}) - `key` must be a string");
 		exit;
-	}
-	if (is_array(name)) {
-		for (var i = 0; i < array_length(name); i++) {
-			if (!is_string(name[i])) {
-				show_debug_message($"I18n ERROR - i18n_create_cache({name}, {value}) - index {i} of `name` must be string");
-				exit;
-			}
-		}
 	}
 
-	if (!(is_string(value) || is_array(value))) {
-		show_debug_message($"I18n ERROR - i18n_create_cache({name}, {value}) - `value` must be string or array of strings");
+	if (!is_undefined(data) && !(is_array(data) || is_struct(data) || is_real(data))) {
+		show_debug_message($"I18n ERROR - i18n_create_cache({key}, {data}, {locale}, {value}) - `data` must be an array, struct, or real");
 		exit;
 	}
-	if (is_array(value)) {
-		for (var i = 0; i < array_length(value); i++) {
-			if (!is_string(value[i])) {
-				show_debug_message($"I18n ERROR - i18n_create_cache({name}, {value}) - index {i} of `value` must be string");
-				exit;
-			}
-		}
+
+	if (!is_string(locale)) {
+		show_debug_message($"I18n ERROR - i18n_create_cache({key}, {data}, {locale}, {value}) - `locale` must be a string");
+		exit;
+	}
+	
+	if (!is_string(value)) {
+		show_debug_message($"I18n ERROR - i18n_create_cache({key}, {data}, {locale}, {value}) - `value` must be a string");
+		exit;
 	}
 	
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_create_cache({name}, {value}) - `i18n` must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_create_cache({key}, {value}, {locale}, {value}) - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
 	}
 
-
-	// Change to array
-	if (is_string(name)) {
-		name = [name];
-	}
-	if (is_string(value)) {
-		value = [value];
-	}
-
-	// Check if the pairs are the same length
-	if (array_length(name) != array_length(value)) {
-		if (array_length(name) > array_length(value)) {
-			for (var i = array_length(name) - 1; i > array_length(value); i--) {
-				array_delete(name, i, 1);
-			}
-			if (i18n.debug) {
-				show_debug_message($"I18n WARNING - i18n_create_cache({name}, {value}) - `name` and `value` are not the same length, the excess names are removed");
-			}
-		} else {
-			for (var i = array_length(value) - 1; i > array_length(name); i--) {
-				array_delete(value, i, 1);
-			}
-			if (i18n.debug) {
-				show_debug_message($"I18n WARNING - i18n_create_cache({name}, {value}) - `name` and `value` are not the same length, the excess values are removed");
-			}
-		}
-	}
-
 	// Create cache
-	if (array_length(i18n.cache.keys) == 0) {
-		for (var i = 0; i < array_length(name); i++) {
-			i18n.cache.keys[i] = variable_get_hash(name[i]);
-		}
-		i18n.cache.values = value;
-	} else {
-		var index = 0;
+	if (value = "") {
+		value = i18n_get_messages(key, data, locale, i18n, 1);
+	}
 
-		for (var i = 0; i < array_length(name); i++) {
-			index = binary_search_insert_pos(i18n.cache.keys, variable_get_hash(name[i]));
-			array_insert(i18n.cache.keys, index, variable_get_hash(name[i]));
-			array_insert(i18n.cache.values, index, value[i]);
-		}
+	var cache_id = variable_get_hash(string("{0}_{1}_{2}", locale, key, data));
+	
+	if (array_length(i18n.cache.ids) == 0) {
+		i18n.cache.ids = [cache_id];
+		i18n.cache.values = [value];
+		i18n.cache.keys = [key];
+		i18n.cache.data = [data];
+		i18n.cache.locales = [locale];
+	} else {
+		var index = binary_search_insert_pos(i18n.cache.ids, cache_id);
+		array_insert(i18n.cache.ids, index, cache_id);
+		array_insert(i18n.cache.values, index, value);
+		array_insert(i18n.cache.keys, index, key);
+		array_insert(i18n.cache.data, index, data);
+		array_insert(i18n.cache.locales, index, locale);
 	}
 }
 
 
 /**
  * @desc Use the cache in I18n system
- * @param {String | Array<String>} name Name of the cache (e.g. "cache_name" or ["cache_name1", "cache_name2"]).
+ * @param {Real | Array<Real>} cache_id name Id of the cache (e.g. variable_get_hash("my_cache")).
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
  * @return {String | Array<String>}
  */
-function i18n_use_cache(name, i18n = false) {
+function i18n_use_cache(cache_id, i18n = false) {
 	// Guard clause
-	if (!(is_string(name) || is_array(name))) {
-		show_debug_message($"I18n ERROR - i18n_use_cache({name}) - `name` must be string or array of strings");
+	if (!(is_numeric(cache_id) || is_array(cache_id))) {
+		show_debug_message($"I18n ERROR - i18n_use_cache({cache_id}) - `cache_id` must be a number or array of number");
 		exit;
 	}
-	if (is_array(name)) {
-		for (var i = 0; i < array_length(name); i++) {
-			if (!is_string(name[i])) {
-				show_debug_message($"I18n ERROR - i18n_use_cache({name}) - index {i} of `name` must be string");
+	if (is_array(cache_id)) {
+		for (var i = 0; i < array_length(cache_id); i++) {
+			if (!is_numeric(cache_id[i])) {
+				show_debug_message($"I18n ERROR - i18n_use_cache({cache_id}) - index {i} of `cache_id` must be a number");
 				exit;
 			}
 		}
 	}
 
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_create_cache({name}, {value}) - `i18n` must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_use_cache({cache_id}, {value}) - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
 	}
 
-	if (is_string(name)) {
-		name = [name];
+	if (is_numeric(cache_id)) {
+		cache_id = [cache_id];
 	}
 
 
@@ -2552,16 +2542,61 @@ function i18n_use_cache(name, i18n = false) {
 	var result = [];
 	var index = 0;
 
-	for (var i = 0; i < array_length(name); i++) {
-		index = binary_search(i18n.cache.keys, variable_get_hash(name[i]));
-		array_push(result, index == -1 ? name[i] : i18n.cache.values[index]);
+	for (var i = 0; i < array_length(cache_id); i++) {
+		index = binary_search(i18n.cache.ids, cache_id[i]);
+		array_push(result, index == -1 ? string("{0}_{1}", i18n.cache.locales[i], i18n.cache.keys[i]) : i18n.cache.values[index]);
 
 		if (index == -1 && i18n.debug) {
-			show_debug_message($"I18n WARNING - i18n_use_cache({name}) - {name[i]} not found in cache");
+			show_debug_message($"I18n WARNING - i18n_use_cache({cache_id}) - {cache_id[i]} not found in cache");
 		}
 	}
 
 	return array_length(result) == 1 ? result[0] : result;
+}
+
+
+/**
+ * @desc Update the cache in I18n system
+ * @param {Real} cache_id name Id of the cache (e.g. variable_get_hash("my_cache")).
+ * @param {String} [value]="" The new value to set in cache (e.g. "Hello World!"). Leave it empty to get the value from the message.
+ * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
+ */
+function i18n_update_cache(cache_id, value = "", i18n = false) {
+	// Guard clause
+	if (!is_numeric(cache_id)) {
+		show_debug_message($"I18n ERROR - i18n_update_cache({cache_id}, {value}) - `cache_id` must be string");
+		exit;
+	}
+
+	if (!is_string(value)) {
+		show_debug_message($"I18n ERROR - i18n_update_cache({cache_id}, {value}) - `value` must be a string");
+		exit;
+	}
+
+	if (!(is_struct(i18n) || is_bool(i18n))) {
+		show_debug_message($"I18n ERROR - i18n_update_cache({cache_id}, {value}) - `i18n` must be a i18n struct");
+		exit;
+	} else if (is_bool(i18n)) {
+		i18n = variable_global_get(variable_global_get("i18n_name"));
+	}
+
+	// Update cache
+	var index = binary_search(i18n.cache.ids, cache_id);
+
+	
+	if (index != -1) {
+		if (value == "") {
+			value = i18n_get_messages(i18n.cache.keys[index], i18n.cache.data[index], i18n.cache.locales[index], i18n);
+		}
+
+		i18n.cache.values[index] = value;
+
+		if (i18n.debug) {
+			show_debug_message($"I18n SUCCESS - i18n_update_cache({cache_id}, {value}) - {cache_id} updated in the cache");
+		}
+	} else if (i18n.debug) {
+		show_debug_message($"I18n WARNING - i18n_update_cache({cache_id}, {value}) - {cache_id} not found in the cache, no update done");
+	}
 }
 
 
@@ -2581,4 +2616,3 @@ function i18n_clear_cache(i18n = false) {
 	i18n.cache.keys = [];
 	i18n.cache.values = [];
 }
-
