@@ -10,7 +10,7 @@ global.i18n = i18n_create("g.i18n", "en", [
 ], {
 	debug: false,
 	hashed: true,
-	cached: false,
+	cached: true,
 	time: 0.5
 });
 

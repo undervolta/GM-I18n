@@ -1,16 +1,16 @@
 /// @description Testing
 //show_debug_message(global.i18n);
-/*var hello = i18n_get_messages("hello");
-var potion = i18n_get_messages("items.potion", , "en");
-var welcome = i18n_get_messages("welcome", ["GM-I18n", "Dev"]);
+/*var hello = i18n_get_messages("hello", , , , true);
+var potion = i18n_get_messages("items.potion", , "en", true);
+var welcome = i18n_get_messages("welcome", ["GM-I18n", "Dev"], , , true);
 
 var dev = "Developer";
 var welcome2 = i18n_get_messages("welcome", {
 	name: dev	
-}, "ar");
+}, "idn", , true);
 
-var this_lang = i18n_get_messages("this_lang", {});
-var npc3 = i18n_get_messages("dialog.npc_3", {
+var this_lang = i18n_get_messages("this_lang", {}, , , true);
+/*var npc3 = i18n_get_messages("dialog.npc_3", {
 	name: dev,
 	child: ["GM-I18n", "Dev"]
 });
@@ -197,5 +197,14 @@ show_debug_message(global.npc3);
 show_debug_message(global.gb_struct.npc4);
 show_debug_message(global.gb_struct.arr[0]);
 */
+var choose_test = i18n_choose({
+	en: "Test",
+	idn: "Tes"	
+}, , false)
+show_debug_message($"choose = {choose_test}")
 
 show_debug_message($"cache.ids = {global.i18n.cache.ids}")
+show_debug_message($"title cache id = {i18n_get_cache_id("title", , "en")}")
+show_debug_message($"npc1 variable cache id = {i18n_get_cache_id_from_ref("npc1", instance_id_get(self))}")
+
+i18n_update_cache(i18n_get_cache_id("title", , "en"), "Cihuy!")

@@ -2,8 +2,8 @@
  * name: GM-I18n
  * desc: A powerful, open-source internationalization (i18n) library for GameMaker 2.3+
  * author: @undervolta
- * version: 0.2.0
- * date: 2025-07-05
+ * version: 0.2.1
+ * date: 2025-07-12
  * 
  * repo: https://github.com/undervolta/GM-I18n
  * docs: https://gm-i18n.lefinitas.com
@@ -346,6 +346,79 @@ function I18nDrawings(draw_font = undefined, draw_halign = undefined, draw_valig
 			}
 		}
 	}
+}
+
+
+/** 
+ * @desc Search the target value index in array using binary search
+ * @param {Array<Any>} array Array to search
+ * @param {Any} target Target value to search
+ * @return {Real}
+ */
+function binary_search(array, target) {
+	// Guard clause
+	if (!is_array(array)) {
+		show_debug_message($"ERROR - binary_search({array}, {target}) - `array` must be array");
+		return -1;
+	}
+	if (array_length(array) == 0) {
+		return -1;
+	}
+
+	// Binary search
+    var left = 0;
+    var right = array_length(array) - 1;
+    
+    while (left <= right) {
+        var mid = left + floor((right - left) / 2);
+        
+        if (array[mid] == target) {
+            return mid;
+        }
+        else if (array[mid] < target) {
+            left = mid + 1;
+        }
+        else {
+            right = mid - 1;
+        }
+    }
+    
+    return -1;
+}
+
+
+/** 
+ * @desc Search the index where target value should be inserted using binary search
+ * @param {Array<any>} array Array to search
+ * @param {Any} target Target value to search
+ * @return {Real}
+ */
+function binary_search_insert_pos(array, target) {
+	// Guard clause
+	if (!is_array(array)) {
+		show_debug_message($"I18n ERROR - binary_search_insert_pos({array}, {target}) - `array` must be array");
+		return -1;
+	}
+	if (array_length(array) == 0) {
+		return -1;
+	}
+
+	// Binary search
+    var left = 0;
+    var right = array_length(array);
+    
+    while (left < right) {
+        var mid = left + (right - left) / 2;
+        
+        if (array[mid] < target) {
+            left = mid + 1;
+        }
+        else {
+            right = mid;
+        }
+    }
+    
+    return left;
 }
 
 
@@ -886,10 +959,10 @@ function i18n_get_locales_name(i18n = false) {
  * @param {Array<Any> | Struct | Real | Undefined} [data] The additional data for the message. Array (index-based) = [val1, val2, ...], or Struct (name-based) = {key1: val1, key2: val2, ... [, child: {key1: val1, ...}]} (child struct need to be set if it's an interpolation and it have additional data), or Real (pluralization) = number.
  * @param {String} [locale]="" The locale that you want to get (e.g. "en"). Leave it empty to use the current locale.
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
- * @param {Bool} [skip_cache]=true (INTERNAL) Skip cache if it's true.
+ * @param {Bool} [create_cache]=false (INTERNAL) Skip cache if it's true.
  * @returns {String | Array<String> | Any} 
  */
-function i18n_get_messages(key, data = undefined, locale = "", i18n = false, skip_cache = true) {
+function i18n_get_messages(key, data = undefined, locale = "", i18n = false, create_cache = false) {
 	// Guard clauses
 	if (!(is_string(key) || is_array(key))) {
 		show_debug_message("I18n ERROR - i18n_get_messages() - key must be a string");
@@ -926,27 +999,34 @@ function i18n_get_messages(key, data = undefined, locale = "", i18n = false, ski
 
 	// Get message(s)
 	var cache_name = "";
-	var cache_id = 0;
+	var cache_id = -1;
 	var full_cache = true;
 
 	for (var i = 0; i < array_length(key); i++) {
 		// Get message from locale, from cached data first
+		full_cache = false;
+		
 		if (i18n.cached) {
 			cache_name = string("{0}_{1}_{2}", locale, key[i], data);
 			cache_id = variable_get_hash(cache_name);
-			full_cache = false;
-
+			
 			if (array_contains(i18n.cache.ids, cache_id)) {				// with data
 				array_push(result, i18n_use_cache(cache_id, i18n));
 				full_cache = true;
+				continue;
 			} else {
 				cache_name = string("{0}_{1}", locale, key[i]);
+				cache_id = variable_get_hash(cache_name);
 
 				if (array_contains(i18n.cache.ids, cache_id)) {			// without data
 					array_push(result, i18n_use_cache(cache_id, i18n));
+				} else {
+					cache_id = -1;
 				}
 			}
-		} else {
+		} 
+	
+		if (cache_id == -1) {
 			if (struct_exists(i18n.data[$ locale].messages, key[i])) {
 				cache_name = "1";
 				array_push(result, (!i18n.hashed)
@@ -968,7 +1048,7 @@ function i18n_get_messages(key, data = undefined, locale = "", i18n = false, ski
 			}
 
 			// Create cache if possible
-			if (skip_cache <= 0 && (cache_name == "1" || cache_name == "2")) {
+			if (i18n.cached && create_cache && (cache_name == "1" || cache_name == "2")) {
 				cache_name = string("{0}_{1}_{2}", locale, key[i], data);
 				cache_id = variable_get_hash(cache_name);
 
@@ -1131,7 +1211,7 @@ function i18n_get_messages(key, data = undefined, locale = "", i18n = false, ski
 										: (struct_exists(data, "child") ? data.child : undefined);
 							
 							if (struct_exists(i18n.data[$ i18n.locale].messages, current_str)) {
-								result_str = i18n_get_messages(current_str, child, i18n.locale, i18n, skip_cache);
+								result_str = i18n_get_messages(current_str, child, i18n.locale, i18n, create_cache);
 								
 								for (var k = j+1; k < array_length(end_at); k++) {
 									start_at[k] += string_length(result_str) - string_length(placeholder);
@@ -1139,7 +1219,7 @@ function i18n_get_messages(key, data = undefined, locale = "", i18n = false, ski
 								}
 								result[i] = string_replace(result[i], placeholder, result_str);
 							} else if (struct_exists(i18n.data[$ i18n.default_locale].messages, current_str)) {
-								result_str = i18n_get_messages(current_str, child, i18n.default_locale, i18n, skip_cache);
+								result_str = i18n_get_messages(current_str, child, i18n.default_locale, i18n, create_cache);
 								
 								for (var k = j+1; k < array_length(end_at); k++) {
 									start_at[k] += string_length(result_str) - string_length(placeholder);
@@ -1423,7 +1503,7 @@ function i18n_create_ref_message(var_name, key, data = undefined, i18n = false) 
 	array_push(i18n.refs.messages.keys, key);
 	array_push(i18n.refs.messages.data, data);
 
-	return i18n_get_messages(key, data, i18n.locale, i18n);
+	return i18n_get_messages(key, data, i18n.locale, i18n, true);
 }
 
 
@@ -2182,7 +2262,26 @@ function i18n_draw_message(x, y, text, data = undefined, preset_name = "", local
 	}
 
 	if (string_pos("@:", text) == 1) {
-		text = i18n_get_messages(string_copy(text, 3, string_length(text) - 2), data, locale, i18n);
+		var key = string_copy(text, 3, string_length(text) - 2);
+		var cache_name = string("{0}_{1}_{2}", locale, key, data);
+		var cache_id = variable_get_hash(cache_name);
+		
+		if (i18n.cached) {
+			if (array_contains(i18n.cache.ids, cache_id)) {				// with data
+				text = i18n_use_cache(cache_id, i18n);
+			} else {
+				cache_name = string("{0}_{1}", locale, key);
+				cache_id = variable_get_hash(cache_name);
+
+				if (array_contains(i18n.cache.ids, cache_id)) {			// without data
+					text = i18n_use_cache(cache_id, i18n);
+				} else {
+					text = i18n_get_messages(key, data, locale, i18n, !struct_exists(i18n, "loader"));
+				}
+			}
+		} else {
+			text = i18n_get_messages(key, data, locale, i18n);
+		}
 	}
 
 	if (preset_name != "") {
@@ -2313,7 +2412,7 @@ function i18n_choose(data, locale = "", single_use = false, i18n = false) {
 		show_debug_message($"I18n ERROR - i18n_choose({name}) - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
-		i18n = i18n_global;
+		i18n = variable_global_get(variable_global_get("i18n_name"));
 	}
 
 	if (locale == "") {
@@ -2321,101 +2420,25 @@ function i18n_choose(data, locale = "", single_use = false, i18n = false) {
 	}
 
 	// Choose the correct data
-	var result = struct_exists(i18n.data, locale) ? data[$ locale] : (struct_exists(i18n.data, i18n.default_locale) ? data[$ i18n.default_locale] : ""); 
-	
-	if (struct_exists(i18n.data, locale)) {
-		result = data[$ locale];
-	} else if (struct_exists(i18n.data, default_locale)) {
-		result = data[$ i18n.default_locale];
-		if (i18n.debug) {
-			show_debug_message($"I18n WARNING - i18n_choose({data}, {locale}, {single_use}) - `{locale}` locale not found, using default locale {i18n.default_locale} instead");
-		}
-		
-	} else {
-		result = "";
-		if (i18n.debug) {
-			show_debug_message($"I18n WARNING - i18n_choose({data}, {locale}, {single_use}) - `{locale}` locale not found and `{i18n.default_locale}` default locale found, returning empty string");
+	if (!struct_exists(data, locale)) {
+		if (struct_exists(data, i18n.default_locale)) {
+			locale = i18n.default_locale;
+			if (i18n.debug) {
+				show_debug_message($"I18n WARNING - i18n_choose({data}, {locale}, {single_use}) - `{locale}` locale not found, using default locale `{i18n.default_locale}` instead");
+			}
+		} else {
+			if (i18n.debug) {
+				show_debug_message($"I18n WARNING - i18n_choose({data}, {locale}, {single_use}) - `{locale}` locale not found and `{i18n.default_locale}` default locale not found, returning empty string");
+			}
+			return "";
 		}
 	}
 
 	if (single_use) {
 		delete data;
 	}
-
-	return result; 
-}
-
-
-/** 
- * @desc Search the target value index in array using binary search
- * @param {Array<Any>} array Array to search
- * @param {Any} target Target value to search
- * @return {Real}
- */
-function binary_search(array, target) {
-	// Guard clause
-	if (!is_array(array)) {
-		show_debug_message($"I18n ERROR - binary_search({array}, {target}) - `array` must be array");
-		return -1;
-	}
-	if (array_length(array) == 0) {
-		return -1;
-	}
-
-	// Binary search
-    var left = 0;
-    var right = array_length(array) - 1;
-    
-    while (left <= right) {
-        var mid = left + (right - left) / 2;
-        
-        if (array[mid] == target) {
-            return mid;
-        }
-        else if (array[mid] < target) {
-            left = mid + 1;
-        }
-        else {
-            right = mid - 1;
-        }
-    }
-    
-    return -1;
-}
-
-
-/** 
- * @desc Search the index where target value should be inserted using binary search
- * @param {Array<any>} array Array to search
- * @param {Any} target Target value to search
- * @return {Real}
- */
-function binary_search_insert_pos(array, target) {
-	// Guard clause
-	if (!is_array(array)) {
-		show_debug_message($"I18n ERROR - binary_search_insert_pos({array}, {target}) - `array` must be array");
-		return -1;
-	}
-	if (array_length(array) == 0) {
-		return -1;
-	}
-
-	// Binary search
-    var left = 0;
-    var right = array_length(array);
-    
-    while (left < right) {
-        var mid = left + (right - left) / 2;
-        
-        if (array[mid] < target) {
-            left = mid + 1;
-        }
-        else {
-            right = mid;
-        }
-    }
-    
-    return left;
+	
+	return data[$ locale];
 }
 
 
@@ -2441,6 +2464,118 @@ function i18n_cache_exists(cache_id, i18n = false) {
 
 	// Check if cache exists
 	return array_contains(i18n.cache.ids, cache_id);
+}
+
+
+/**
+ * @desc Get cache id for a message in I18n system
+ * @param {String} key Message key used to access the cache (e.g. "hello").
+ * @param {Array<Any> | Struct | Real | Undefined} [data] The additional data for the message. Array (index-based) = [val1, val2, ...], or Struct (name-based) = {key1: val1, key2: val2, ... [, child: {key1: val1, ...}]}, or Real (pluralization).
+ * @param {String} [locale]="" The locale that you want to get (e.g. "en"). Leave it empty to use the current locale.
+ * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
+ * @returns {Real}
+ */
+function i18n_get_cache_id(key, data = undefined, locale = "", i18n = false) {
+	// Guard clause
+	if (!is_string(key)) {
+		show_debug_message($"I18n ERROR - i18n_get_cache_id({key}, {data}, {locale}) - `key` must be a string");
+		exit;
+	}
+
+	if (!is_undefined(data) && !(is_array(data) || is_struct(data) || is_real(data))) {
+		show_debug_message($"I18n ERROR - i18n_get_cache_id({key}, {data}, {locale}) - `data` must be an array, struct, or real");
+		exit;
+	}
+
+	if (!is_string(locale)) {
+		show_debug_message($"I18n ERROR - i18n_get_cache_id({key}, {data}, {locale}) - `locale` must be a string");
+		exit;
+	}
+
+	if (!(is_struct(i18n) || is_bool(i18n))) {
+		show_debug_message($"I18n ERROR - i18n_get_cache_id({key}, {data}, {locale}) - `i18n` must be a i18n struct");
+		exit;
+	} else if (is_bool(i18n)) {
+		i18n = variable_global_get(variable_global_get("i18n_name"));
+	}
+
+	return variable_get_hash(string("{0}_{1}_{2}", locale, key, data));
+} 
+
+
+/**
+ * @desc Get the cache id for a message reference in I18n system
+ * @param {String} var_name Variable name based on the var_name in i18n_create_ref_message() (e.g. "text"). Structs are supported (e.g. "text.title").
+ * @param {String | Id.Instance | Asset.GMObject} [ref]="" Reference name or instance id based on the ref in i18n_create_ref_message() (e.g. "text"). Recommended to pass "global" if the reference is created in a global variable, or instance id if the reference is created in an instance.
+ * @param {String} [locale]="" Locale code (e.g "en"). Leave it empty to get the message in the current locale.
+ * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
+ * @returns {Real}
+ */
+function i18n_get_cache_id_from_ref(var_name, ref = "", locale = "", i18n = false) {
+	// Guard clauses
+	if (!is_string(var_name)) {
+		show_debug_message($"I18n ERROR - i18n_get_cache_id_from_ref({var_name}, {ref}, {locale}) - `var_name` must be a string");
+		exit;
+	}
+
+	if (!(is_string(ref) || typeof(ref) == "ref")) {
+		show_debug_message("I18n ERROR - i18n_get_cache_id_from_ref({var_name}, {ref}, {locale}) - `ref` must be a string, instance id, or asset id");
+		exit;
+	}
+
+	if (!is_string(locale)) {
+		show_debug_message("I18n ERROR - i18n_get_cache_id_from_ref({var_name}, {ref}, {locale}) - `locale` must be a string");
+		exit;
+	}
+
+	if (!(is_struct(i18n) || is_bool(i18n))) {
+		show_debug_message("I18n ERROR - i18n_get_cache_id_from_ref({var_name}, {ref}, {locale}) - `i18n` must be a i18n struct");
+		exit;
+	} else if (is_bool(i18n)) {
+		i18n = variable_global_get(variable_global_get("i18n_name"));
+	}
+
+	if (locale == "") {
+		locale = i18n.locale;
+	}
+
+	// Check if the reference exists, and store the index of the reference
+	var ref_index = -1;
+
+	if (is_string(ref)) {
+		if (ref == "g") {
+			ref = "global";
+		} else if (asset_get_index(ref) != -1) {
+			ref = asset_get_index(ref);
+		} else {
+			ref = "";
+
+			if (i18n.debug) {
+				show_debug_message($"I18n WARNING - i18n_get_cache_id_from_ref({var_name}, {ref}, {locale}) - `{ref}` asset doesn't exist, using the first matching `var_name` instead");
+			}
+		}
+	} else if (!instance_exists(ref)) {
+		ref = "";
+
+		if (i18n.debug) {
+			show_debug_message($"I18n WARNING - i18n_get_cache_id_from_ref({var_name}, {ref}, {locale}) - `{ref}` instance/asset doesn't exist, using the first matching `var_name` instead");
+		}
+	}
+	
+	for (var i = 0; i < array_length(i18n.refs.messages.refs); i++) {
+		if (((ref == "") || (ref == i18n.refs.messages.inst[i])) && (var_name == i18n.refs.messages.refs[i])) {
+			ref_index = i;
+			break;
+		}
+	}
+
+	if (ref_index == -1) {
+		show_debug_message($"I18n ERROR - i18n_get_cache_id_from_ref({var_name}, {ref}, {locale}) - `{var_name}` reference doesn't exist");
+		return 0;
+	}
+
+	// Return the cache id
+	return variable_get_hash(string("{0}_{1}_{2}", locale, i18n.refs.messages.keys[ref_index], i18n.refs.messages.data[ref_index]));
 }
 
 
@@ -2483,7 +2618,7 @@ function i18n_create_cache(key, data = undefined, locale = "", value = "", i18n 
 
 	// Create cache
 	if (value = "") {
-		value = i18n_get_messages(key, data, locale, i18n, 1);
+		value = i18n_get_messages(key, data, locale, i18n, false);
 	}
 
 	var cache_id = variable_get_hash(string("{0}_{1}_{2}", locale, key, data));
@@ -2495,12 +2630,24 @@ function i18n_create_cache(key, data = undefined, locale = "", value = "", i18n 
 		i18n.cache.data = [data];
 		i18n.cache.locales = [locale];
 	} else {
-		var index = binary_search_insert_pos(i18n.cache.ids, cache_id);
-		array_insert(i18n.cache.ids, index, cache_id);
-		array_insert(i18n.cache.values, index, value);
-		array_insert(i18n.cache.keys, index, key);
-		array_insert(i18n.cache.data, index, data);
-		array_insert(i18n.cache.locales, index, locale);
+		var index = -1;
+		if (!array_contains(i18n.cache.ids, cache_id)) {
+			index = binary_search_insert_pos(i18n.cache.ids, cache_id);
+			
+			array_insert(i18n.cache.ids, index, cache_id);
+			array_insert(i18n.cache.values, index, value);
+			array_insert(i18n.cache.keys, index, key);
+			array_insert(i18n.cache.data, index, data);
+			array_insert(i18n.cache.locales, index, locale);
+		} else {
+			index = array_get_index(i18n.cache.ids, cache_id);
+			
+			i18n.cache.ids[index] = cache_id;
+			i18n.cache.values[index] = value;
+			i18n.cache.keys[index] = key;
+			i18n.cache.data[index] = data;
+			i18n.cache.locales[index] = locale;
+		}
 	}
 }
 
@@ -2541,13 +2688,15 @@ function i18n_use_cache(cache_id, i18n = false) {
 	// Get the value
 	var result = [];
 	var index = 0;
-
-	for (var i = 0; i < array_length(cache_id); i++) {
-		index = binary_search(i18n.cache.ids, cache_id[i]);
-		array_push(result, index == -1 ? string("{0}_{1}", i18n.cache.locales[i], i18n.cache.keys[i]) : i18n.cache.values[index]);
-
-		if (index == -1 && i18n.debug) {
-			show_debug_message($"I18n WARNING - i18n_use_cache({cache_id}) - {cache_id[i]} not found in cache");
+	
+	if (array_length(i18n.cache.ids) > 0) {
+		for (var i = 0; i < array_length(cache_id); i++) {
+			index = array_get_index(i18n.cache.ids, cache_id[i]); 
+			array_push(result, index == -1 ? string("{0}_{1}", i18n.cache.locales[i], i18n.cache.keys[i]) : i18n.cache.values[index]);
+	
+			if (index == -1 && i18n.debug) {
+				show_debug_message($"I18n WARNING - i18n_use_cache({cache_id}) - {cache_id[i]} not found in cache");
+			}
 		}
 	}
 
@@ -2557,8 +2706,8 @@ function i18n_use_cache(cache_id, i18n = false) {
 
 /**
  * @desc Update the cache in I18n system
- * @param {Real} cache_id name Id of the cache (e.g. variable_get_hash("my_cache")).
- * @param {String} [value]="" The new value to set in cache (e.g. "Hello World!"). Leave it empty to get the value from the message.
+ * @param {Real} cache_id name Id of the cache (from i18n_get_cache_id()).
+ * @param {String} [value]="" The new value to set in cache (e.g. "Hello World!"). Leave it empty to update the value based on the cached message key and data.
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
  */
 function i18n_update_cache(cache_id, value = "", i18n = false) {
@@ -2581,9 +2730,8 @@ function i18n_update_cache(cache_id, value = "", i18n = false) {
 	}
 
 	// Update cache
-	var index = binary_search(i18n.cache.ids, cache_id);
+	var index = array_get_index(i18n.cache.ids, cache_id);
 
-	
 	if (index != -1) {
 		if (value == "") {
 			value = i18n_get_messages(i18n.cache.keys[index], i18n.cache.data[index], i18n.cache.locales[index], i18n);
@@ -2613,6 +2761,10 @@ function i18n_clear_cache(i18n = false) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
 	}
 
-	i18n.cache.keys = [];
+	i18n.cache.ids = [];
 	i18n.cache.values = [];
+	i18n.cache.keys = [];
+	i18n.cache.data = [];
+	i18n.cache.locales = [];
 }
+
