@@ -2,8 +2,8 @@
  * name: GM-I18n
  * desc: A powerful, open-source internationalization (i18n) library for GameMaker 2.3+
  * author: @undervolta
- * version: 0.2.1
- * date: 2025-07-12
+ * version: 1.0.0-rc.1
+ * date: 2025-07-13
  * 
  * repo: https://github.com/undervolta/GM-I18n
  * docs: https://gm-i18n.lefinitas.com
@@ -283,67 +283,70 @@ function I18nLoad(interval, i18n_struct = false) constructor {
  * @param {Real} [text_sep] Text separation.
  * @param {Real} [text_width] Text width.
  */
-function I18nDrawings(draw_font = undefined, draw_halign = undefined, draw_valign = undefined, draw_color = undefined, draw_scale = undefined, draw_rotation = undefined, draw_alpha = undefined, text_sep = undefined, text_width = undefined) constructor  {
+function I18nDrawings(draw_font = undefined, draw_halign = undefined, draw_valign = undefined, draw_color = undefined, draw_scale = undefined, draw_rotation = undefined, draw_alpha = undefined, text_sep = undefined, text_width = undefined, is_template = false) constructor  {
 	font = (asset_get_type(draw_font) == asset_font) ? draw_font : undefined;
 	halign = draw_halign;
 	valign = draw_valign;
 	color = draw_color;
-	scale = is_real(draw_scale) ? draw_scale : undefined;
-	rotation = is_real(draw_rotation) ? draw_rotation : undefined;
 	alpha = is_real(draw_alpha) ? draw_alpha : undefined;
+	scale = is_real(draw_scale) ? draw_scale : 1;
+	rotation = is_real(draw_rotation) ? draw_rotation : 0;
 	sep = is_real(text_sep) ? text_sep : -1;
 	width = is_real(text_width) ? text_width : room_width;
+
+	// Member validation
+	if (!(halign == fa_left || halign == fa_center || halign == fa_right)) {
+		show_debug_message("I18n ERROR - I18nDrawings() - `draw_halign` must be a valid horizontal alignment constant, defaulting to `fa_left`");
+		halign = is_template ? undefined : fa_left;
+	}
+	if (!(valign == fa_top || valign == fa_middle || valign == fa_bottom)) {
+		show_debug_message("I18n ERROR - I18nDrawings() - `draw_valign` must be a valid vertical alignment constant, defaulting to `fa_top`");
+		valign = is_template ? undefined : fa_top;
+	}
+	if (!(is_numeric(color) || is_array(color))) {
+		show_debug_message("I18n ERROR - I18nDrawings() - `draw_color` must be a valid color constant or array, defaulting to `c_white`");
+		color = is_template ? undefined : c_white;
+	}
+	if (is_array(color)) {
+		if (array_length(color) < 4) {
+			show_debug_message($"I18n ERROR - I18nDrawings() - `draw_color` array must have 4 elements, filling the missing elemnts with the last color");
+			repeat (4 - array_length(color)) {
+				array_push(color, color[array_length(color) - 1]);
+			}
+		}
+	}
 
 	// Set draw type
 	draw_type = I18N_DRAW_TEXT.NORMAL;
 
-	if (!(is_undefined(text_sep) || is_undefined(text_width))) {
+	if (!(is_undefined(sep) || is_undefined(width))) {
 		draw_type = I18N_DRAW_TEXT.EXTENDED;
+	}
 
-		if (!(is_undefined(draw_color) || is_undefined(draw_alpha))) {
-			draw_type = I18N_DRAW_TEXT.EXT_COLORED;
-
-			if (!(is_undefined(draw_rotation) || is_undefined(draw_scale))) {
-				draw_type = I18N_DRAW_TEXT.EXT_TRANSFORMED_COLORED;
+	if (!(is_undefined(color) || is_undefined(alpha))) {
+		if (!is_template) {
+			if (is_undefined(color)) {
+				color = c_white;
 			}
-		} else if (!(is_undefined(draw_rotation) || is_undefined(draw_scale))) {
-			draw_type = I18N_DRAW_TEXT.EXT_TRANSFORMED;
-
-			if (!(is_undefined(draw_color) || is_undefined(draw_alpha))) {
-				draw_type = I18N_DRAW_TEXT.EXT_TRANSFORMED_COLORED;
+			if (is_undefined(alpha)) {
+				alpha = 1;
 			}
 		}
-	} else if (!(is_undefined(draw_color) || is_undefined(draw_alpha))) {
-		draw_type = I18N_DRAW_TEXT.COLORED;
 
-		if (!(is_undefined(text_sep) || is_undefined(text_width))) {
-			draw_type = I18N_DRAW_TEXT.EXT_COLORED;
-
-			if (!(is_undefined(draw_rotation) || is_undefined(draw_scale))) {
-				draw_type = I18N_DRAW_TEXT.EXT_TRANSFORMED_COLORED;
-			}
-		} else if (!(is_undefined(draw_rotation) || is_undefined(draw_scale))) {
-			draw_type = I18N_DRAW_TEXT.TRANSFORMED_COLORED;
-
-			if (!(is_undefined(text_sep) || is_undefined(text_width))) {
-				draw_type = I18N_DRAW_TEXT.EXT_TRANSFORMED_COLORED;
+		if (is_array(color)) {
+			switch (draw_type) {
+				case I18N_DRAW_TEXT.NORMAL: draw_type = I18N_DRAW_TEXT.COLORED; break;
+				case I18N_DRAW_TEXT.EXTENDED: draw_type = I18N_DRAW_TEXT.EXT_COLORED; break;
 			}
 		}
-	} else if (!(is_undefined(draw_rotation) || is_undefined(draw_scale))) {
-		draw_type = I18N_DRAW_TEXT.TRANSFORMED;
+	}
 
-		if (!(is_undefined(draw_color) || is_undefined(draw_alpha))) {
-			draw_type = I18N_DRAW_TEXT.TRANSFORMED_COLORED;
-
-			if (!(is_undefined(text_sep) || is_undefined(text_width))) {
-				draw_type = I18N_DRAW_TEXT.EXT_TRANSFORMED_COLORED;
-			}
-		} else if (!(is_undefined(text_sep) || is_undefined(text_width))) {
-			draw_type = I18N_DRAW_TEXT.EXT_TRANSFORMED;
-
-			if (!(is_undefined(draw_color) || is_undefined(draw_alpha))) {
-				draw_type = I18N_DRAW_TEXT.EXT_TRANSFORMED_COLORED;
-			}
+	if (!(is_undefined(rotation) || is_undefined(scale))) {
+		switch (draw_type) {
+			case I18N_DRAW_TEXT.NORMAL: draw_type = I18N_DRAW_TEXT.TRANSFORMED; break;
+			case I18N_DRAW_TEXT.COLORED: draw_type = I18N_DRAW_TEXT.TRANSFORMED_COLORED; break;
+			case I18N_DRAW_TEXT.EXTENDED: draw_type = I18N_DRAW_TEXT.EXT_TRANSFORMED; break;
+			case I18N_DRAW_TEXT.EXT_COLORED: draw_type = I18N_DRAW_TEXT.EXT_TRANSFORMED_COLORED; break;
 		}
 	}
 }
@@ -2254,13 +2257,11 @@ function i18n_draw_message(x, y, text, data = undefined, preset_name = "", local
 		i18n = variable_global_get(variable_global_get("i18n_name"));
 	}
 	
-	// Get drawing data
-	var drawing_data = undefined;
-
 	if (locale == "") {
 		locale = i18n.locale;
 	}
 
+	// Get message text
 	if (string_pos("@:", text) == 1) {
 		var key = string_copy(text, 3, string_length(text) - 2);
 		var cache_name = string("{0}_{1}_{2}", locale, key, data);
@@ -2284,101 +2285,121 @@ function i18n_draw_message(x, y, text, data = undefined, preset_name = "", local
 		}
 	}
 
+	// Apply drawing preset if provided
+	var preset_data = -1;
+
 	if (preset_name != "") {
-		drawing_data = i18n_use_drawing(preset_name, locale, i18n);
+		if (!struct_exists(i18n.data[$ locale].drawings, preset_name)) {
+			show_debug_message($"I18n ERROR - i18n_draw_message({x}, {y}, {text}, {data}, {preset_name}, {locale}) - `{preset_name}` drawing preset doesn't exists, no drawing will be applied");
+		} else {
+			preset_data = i18n.data[$ locale].drawings[$ preset_name];
+
+			if (!is_undefined(preset_data.font)) {
+				draw_set_font(preset_data.font);
+			}
+
+			if (!is_undefined(preset_data.halign)) {
+				draw_set_halign(preset_data.halign);
+			}
+
+			if (!is_undefined(preset_data.valign)) {
+				draw_set_valign(preset_data.valign);
+			}
+
+			if (!is_undefined(preset_data.color)) {
+				if (!is_array(preset_data.color)) {
+					draw_set_color(preset_data.color);
+				}
+			}
+
+			if (!is_undefined(preset_data.alpha)) {
+				draw_set_alpha(preset_data.alpha);
+			}
+		}
 	}
 	
 	// Draw message
-	if (is_undefined(drawing_data)) {
+	if (preset_data == -1) {
 		draw_text(x, y, text);
 	} else {
-		switch (drawing_data.draw_type) {
+		switch (preset_data.draw_type) {
 			case I18N_DRAW_TEXT.NORMAL:
 				draw_text(x, y, text);
 				break;
 				
 			case I18N_DRAW_TEXT.EXTENDED:
 				draw_text_ext(x, y, text, 
-					(is_undefined(drawing_data.sep) ? -1 : drawing_data.sep), 
-					(is_undefined(drawing_data.width) ? room_width : drawing_data.width));
+					preset_data.sep, 
+					preset_data.width
+				);
 				break;
 				
 			case I18N_DRAW_TEXT.COLORED:
 				draw_text_colour(x, y, text, 
-					(is_undefined(drawing_data.color) ? c_white : 
-						(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 0)] : drawing_data.color)), 
-					(is_undefined(drawing_data.color) ? c_white : 
-						(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 1)] : drawing_data.color)), 
-					(is_undefined(drawing_data.color) ? c_white : 
-						(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 2)] : drawing_data.color)), 
-					(is_undefined(drawing_data.color) ? c_white : 
-						(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 3)] : drawing_data.color)), 
-					(is_undefined(drawing_data.alpha) ? 1 : drawing_data.alpha));
+					preset_data.color[0], 
+					preset_data.color[1], 
+					preset_data.color[2], 
+					preset_data.color[3], 
+					(preset_data.is_template ? draw_get_alpha() : preset_data.alpha)
+				);
 				break;
 
 			case I18N_DRAW_TEXT.TRANSFORMED:
 				draw_text_transformed(x, y, text, 
-					(is_undefined(drawing_data.scale) ? 1 : drawing_data.scale), 
-					(is_undefined(drawing_data.scale) ? 1 : drawing_data.scale), 
-					(is_undefined(drawing_data.rotation) ? 0 : drawing_data.rotation));
+					preset_data.scale, 
+					preset_data.scale, 
+					preset_data.rotation
+				);
 				break;
 				
 			case I18N_DRAW_TEXT.EXT_COLORED:
 				draw_text_ext_colour(x, y, text, 
-					(is_undefined(drawing_data.sep) ? -1 : drawing_data.sep), 
-					(is_undefined(drawing_data.width) ? room_width : drawing_data.width), 
-					(is_undefined(drawing_data.color) ? c_white : 
-						(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 0)] : drawing_data.color)), 
-					(is_undefined(drawing_data.color) ? c_white : 
-						(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 1)] : drawing_data.color)), 
-					(is_undefined(drawing_data.color) ? c_white : 
-						(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 2)] : drawing_data.color)),
-					(is_undefined(drawing_data.color) ? c_white : 
-						(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 3)] : drawing_data.color)),
-					(is_undefined(drawing_data.alpha) ? 1 : drawing_data.alpha));
+					preset_data.sep, 
+					preset_data.width, 
+					preset_data.color[0], 
+					preset_data.color[1], 
+					preset_data.color[2], 
+					preset_data.color[3], 
+					(preset_data.is_template ? draw_get_alpha() : preset_data.alpha)
+				);
 				break;
 				
 			case I18N_DRAW_TEXT.EXT_TRANSFORMED:
 				draw_text_ext_transformed(x, y, text, 
-					(is_undefined(drawing_data.sep) ? -1 : drawing_data.sep), 
-					(is_undefined(drawing_data.width) ? room_width : drawing_data.width), 
-					(is_undefined(drawing_data.scale) ? 1 : drawing_data.scale), 
-					(is_undefined(drawing_data.scale) ? 1 : drawing_data.scale), 
-					(is_undefined(drawing_data.rotation) ? 0 : drawing_data.rotation));
+					preset_data.sep, 
+					preset_data.width,
+					preset_data.scale, 
+					preset_data.scale, 
+					preset_data.rotation
+				);
 				break;
 
 			case I18N_DRAW_TEXT.TRANSFORMED_COLORED:
 				draw_text_transformed_colour(x, y, text, 
-					(is_undefined(drawing_data.scale) ? 1 : drawing_data.scale),
-					(is_undefined(drawing_data.scale) ? 1 : drawing_data.scale),
-					(is_undefined(drawing_data.rotation) ? 0 : drawing_data.rotation),
-					(is_undefined(drawing_data.color) ? c_white : 
-						(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 0)] : drawing_data.color)), 
-					(is_undefined(drawing_data.color) ? c_white : 
-						(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 1)] : drawing_data.color)),
-					(is_undefined(drawing_data.color) ? c_white : 
-						(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 2)] : drawing_data.color)),
-					(is_undefined(drawing_data.color) ? c_white : 
-						(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 3)] : drawing_data.color)),
-					(is_undefined(drawing_data.alpha) ? 1 : drawing_data.alpha));
+					preset_data.scale, 
+					preset_data.scale, 
+					preset_data.rotation,
+					preset_data.color[0], 
+					preset_data.color[1], 
+					preset_data.color[2], 
+					preset_data.color[3], 
+					(preset_data.is_template ? draw_get_alpha() : preset_data.alpha)
+				);
 				break;
 
 			case I18N_DRAW_TEXT.EXT_TRANSFORMED_COLORED:
 				draw_text_ext_transformed_colour(x, y, text, 
-					(is_undefined(drawing_data.sep) ? -1 : drawing_data.sep), 
-					(is_undefined(drawing_data.width) ? room_width : drawing_data.width), 
-					(is_undefined(drawing_data.scale) ? 1 : drawing_data.scale), 
-					(is_undefined(drawing_data.scale) ? 1 : drawing_data.scale), 
-					(is_undefined(drawing_data.rotation) ? 0 : drawing_data.rotation),
-					(is_undefined(drawing_data.color) ? c_white : 
-						(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 0)] : drawing_data.color)), 
-					(is_undefined(drawing_data.color) ? c_white : 
-						(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 1)] : drawing_data.color)),
-					(is_undefined(drawing_data.color) ? c_white : 
-						(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 2)] : drawing_data.color)),
-					(is_undefined(drawing_data.color) ? c_white : 
-						(is_array(drawing_data.color) ? drawing_data.color[min(array_length(drawing_data.color) - 1, 3)] : drawing_data.color)),
-					(is_undefined(drawing_data.alpha) ? 1 : drawing_data.alpha));
+					preset_data.sep, 
+					preset_data.width,
+					preset_data.scale, 
+					preset_data.scale, 
+					preset_data.rotation,
+					preset_data.color[0], 
+					preset_data.color[1], 
+					preset_data.color[2], 
+					preset_data.color[3], 
+					(preset_data.is_template ? draw_get_alpha() : preset_data.alpha)
+				);
 				break;
 		}
 	}
@@ -2766,5 +2787,342 @@ function i18n_clear_cache(i18n = false) {
 	i18n.cache.keys = [];
 	i18n.cache.data = [];
 	i18n.cache.locales = [];
+}
+
+
+/**
+ * @desc Remove messages from the I18n system
+ * @param {String | Array<String>} key The key(s) of the message(s) to remove (e.g. "hello" or ["hello", "goodbye"]).
+ * @param {String | Array<String>} [locale]="" The locale(s) of the message(s) to remove (e.g. "en" or ["en", "fr"]). Leave it empty to use the current locale, or set it to "all" to remove from all locales.
+ * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
+ */
+function i18n_remove_messages(key, locale = "", i18n = false) {
+	// Guard clause
+	if (!(is_string(key) || is_array(key))) {
+		show_debug_message("I18n ERROR - i18n_remove_messages({key}, {locale}) - `key` must be a string or array of string");
+		exit;
+	}
+
+	if (!(is_string(key) || is_array(key))) {
+		show_debug_message("I18n ERROR - i18n_remove_messages({key}, {locale}) - `locale` must be a string, array of string, or \"all\"");
+		exit;
+	}
+
+	if (!(is_struct(i18n) || is_bool(i18n))) {
+		show_debug_message("I18n ERROR - i18n_remove_messages({key}, {locale}) - `i18n` must be a i18n struct");
+		exit;
+	} else if (is_bool(i18n)) {
+		i18n = variable_global_get(variable_global_get("i18n_name"));
+	}
+
+	// Use current locale if empty
+	if (locale == "") {
+		locale = [i18n.locale];
+	} else if (locale == "all") {
+		locale = struct_get_names(i18n.data);
+	}
+	
+	if (!is_array(key)) {
+		key = [key];
+	}
+	if (!is_array(locale)) {
+		locale = [locale];
+	}
+
+	
+	for (var i = 0; i < array_length(locale); i++) {
+		if (!struct_exists(i18n.data, locale[i])) {
+			if (i18n.debug) {
+				show_debug_message($"I18n WARNING - i18n_remove_messages({key}, {locale[i]}) - `{locale[i]}` locale not found");
+			}
+			continue;
+		}
+
+		for (var j = 0; j < array_length(key); j++) {
+			if (!i18n.hashed) {
+				if (struct_exists(i18n.data[$ locale[i]].messages, key[j])) {
+					struct_remove(i18n.data[$ locale[i]].messages, key[j]);
+				} else if (i18n.debug) {
+					show_debug_message($"I18n WARNING - i18n_remove_messages({key[j]}, {locale[i]}) - `{key[j]}` key not found in `{locale[i]}` locale");
+				}
+			} else {
+				if (struct_exists_from_hash(i18n.data[$ locale[i]].messages, variable_get_hash(key[j]))) {
+					struct_remove_from_hash(i18n.data[$ locale[i]].messages, variable_get_hash(key[j]));
+				} else if (i18n.debug) {
+					show_debug_message($"I18n WARNING - i18n_remove_messages({key[j]}, {locale[i]}) - `{key[j]}` key not found in `{locale[i]}` locale");
+				}
+			}
+		}
+	}
+}
+
+
+/**
+ * @desc Clear all messages in the I18n system for a specific locale or all locales
+ * @param {String | Array<String>} [locale]="" The locale(s) to clear (e.g. "en" or ["en", "fr"]). Leave it empty to use the current locale, or set it to "all" to clear all locales.
+ * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
+ */
+function i18n_clear_messages(locale = "", i18n = false) {
+	// Guard clause
+	if (!(is_string(locale) || is_array(locale))) {
+		show_debug_message("I18n ERROR - i18n_clear_messages({locale}) - `locale` must be a string, array of string, or \"all\"");
+		exit;
+	}
+
+	if (!(is_struct(i18n) || is_bool(i18n))) {
+		show_debug_message("I18n ERROR - i18n_clear_messages({locale}) - `i18n` must be a i18n struct");
+		exit;
+	} else if (is_bool(i18n)) {
+		i18n = variable_global_get(variable_global_get("i18n_name"));
+	}
+
+	// Use current locale if empty
+	if (locale == "") {
+		locale = [i18n.locale];
+	} else if (locale == "all") {
+		locale = struct_get_names(i18n.data);
+	}
+	
+	if (!is_array(locale)) {
+		locale = [locale];
+	}
+
+	for (var j = 0; j < array_length(locale); j++) {
+		delete i18n.data[$ locale[j]].messages;
+		i18n.data[$ locale[j]].messages = {};
+		
+		if (i18n.debug) {
+			show_debug_message($"I18n SUCCESS - i18n_clear_messages({locale[j]}) - `{locale[j]}` locale cleared");
+		}
+	}
+}
+
+/**
+ * @desc Flatten a struct into i18n messages
+ * @param {Struct} data_struct The struct to flatten (e.g. {hello: "Hello", goodbye: "Goodbye"}).
+ * @param {String} [locale]="" The locale that you want to get (e.g. "en"). Leave it empty to use the current locale.
+ * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
+ * @param {String} [prefix]="" (Internal) The prefix to use for the keys (e.g. "greetings"). This is useful for nested structs.
+ */
+function i18n_flatten_keys(data_struct, locale = "", i18n = false, prefix = "") {
+	// guard clause
+	if (!is_struct(data_struct)) {
+		show_debug_message($"I18n ERROR - i18n_flatten_keys({data_struct}, {locale}, , {prefix}) - `data_struct` must be a struct");
+		exit;
+	}
+
+	if (!is_string(locale)) {
+		show_debug_message($"I18n ERROR - i18n_flatten_keys({data_struct}, {locale}, , {prefix}) - `locale` must be a string");
+		exit;
+	}
+
+	if (!(is_struct(i18n) || is_bool(i18n))) {
+		show_debug_message($"I18n ERROR - i18n_flatten_keys({data_struct}, {locale}, , {prefix}) - `i18n` must be a i18n struct");
+		exit;
+	} else if (is_bool(i18n)) {
+		i18n = variable_global_get(variable_global_get("i18n_name"));
+	}
+
+	if (!is_string(prefix)) {
+		show_debug_message($"I18n ERROR - i18n_flatten_keys({data_struct}, {locale}, , {prefix}) - `prefix` must be a string");
+		exit;
+	}
+
+	// Use current locale if empty
+	if (locale == "") {
+		locale = i18n.locale;
+	}
+
+	var names = struct_get_names(data_struct);
+	var key = "";
+	
+	for (var i = 0; i < array_length(names); i++) {
+		key = (prefix == "") ? names[i] : string($"{prefix}.{names[i]}");
+		
+		if (is_struct(data_struct[$ names[i]])) {
+			i18n_flatten_keys(data_struct[$ names[i]], locale, i18n, key);
+		} else {
+			if (!i18n.hashed) {
+				i18n.data[$ locale].messages[$ key] = data_struct[$ names[i]];
+			} else {
+				struct_set_from_hash(i18n.data[$ locale].messages, variable_get_hash(key), value);
+			}
+		}
+	}
+}
+
+/**
+ * @desc Load messages from JSON files into the I18n system
+ * @param {String | Array<String>} file The JSON file(s) to load (e.g. "en.json" or ["en1.json", "en2.json"]).
+ * @param {String} [locale]="" The locale that you want to load the messages for (e.g. "en"). Leave it empty to use the current locale.
+ * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
+ */
+function i18n_load_messages(file, locale = "", i18n = false) {
+	// Guard clause
+	if (!(is_string(file) || is_array(file))) {
+		show_debug_message($"I18n ERROR - i18n_load_messages({file}, {locale}) - `file` must be a string or array of string");
+		exit;
+	}
+
+	if (!is_string(locale)) {
+		show_debug_message($"I18n ERROR - i18n_load_messages({file}, {locale}) - `locale` must be a string");
+		exit;
+	}
+
+	if (!(is_struct(i18n) || is_bool(i18n))) {
+		show_debug_message($"I18n ERROR - i18n_load_messages({file}, {locale}) - `i18n` must be a i18n struct");
+		exit;
+	} else if (is_bool(i18n)) {
+		i18n = variable_global_get(variable_global_get("i18n_name"));
+	}
+
+	if (!is_array(file)) {
+		file = [file];
+	}
+
+	// Use current locale if empty
+	if (locale == "") {
+		locale = i18n.locale;
+	}
+
+	// Load messages
+	var root = "";
+	var file_handle = -1;
+	var json_string = "";
+
+	for (var i = 0; i < array_length(file); i++) {
+		if (string_pos(".json", file[i]) == 0) {
+			show_debug_message($"I18n ERROR - i18n_load_messages({file[i]}, {locale}) - \"{file[i]}\" is not a valid JSON file");
+			continue;
+		}
+
+		root = "";
+		if (string_pos("~/", file[i]) == 1) {
+			root = working_directory;
+		}
+
+		if (!file_exists(root + file[i])) {
+			show_debug_message($"I18n ERROR - i18n_load_messages({file[i]}, {locale}) - \"{file[i]}\" JSON file does not exist");
+			continue;
+		}
+
+		file_handle = file_text_open_read(root + string_copy(file[i], 3, string_length(file[i]) - 2));
+		json_string = "";
+
+		while (!file_text_eof(file_handle)) {
+			json_string += file_text_read_string(file_handle);
+			file_text_readln(file_handle);
+		}
+		
+		file_text_close(file_handle);
+
+		try {
+			var json_struct = json_parse(json_string);
+			i18n_flatten_keys(json_struct, locale, i18n);
+
+			if (i18n.debug) {
+				show_debug_message($"I18n SUCCESS - i18n_load_messages({file[i]}, {locale}) - \"{file[i]}\" JSON file successfully loaded");
+			}
+		} catch (e) {
+			show_debug_message($"I18n ERROR - i18n_load_messages({file[i]}, {locale}) - Failed to parse \"{file[i]}\" JSON file: " + string(e));
+			exit;
+		}
+	}
+}
+
+
+/**
+ * @desc Unload messages from JSON files in the I18n system
+ * @param {String | Array<String>} file The JSON file(s) to unload (e.g. "en.json" or ["en1.json", "en2.json"]).
+ * @param {String} [locale]="" The locale that you want to unload the messages for (e.g. "en"). Leave it empty to use the current locale.
+ * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
+ */
+function i18n_unload_messages(file, locale = "", i18n = false) {
+	// Guard clause
+	if (!(is_string(file) || is_array(file))) {
+		show_debug_message($"I18n ERROR - i18n_unload_messages({file}, {locale}) - `file` must be a string or array of string");
+		exit;
+	}
+
+	if (!is_string(locale)) {
+		show_debug_message($"I18n ERROR - i18n_unload_messages({file}, {locale}) - `locale` must be a string");
+		exit;
+	}
+
+	if (!(is_struct(i18n) || is_bool(i18n))) {
+		show_debug_message($"I18n ERROR - i18n_unload_messages({file}, {locale}) - `i18n` must be a i18n struct");
+		exit;
+	} else if (is_bool(i18n)) {
+		i18n = variable_global_get(variable_global_get("i18n_name"));
+	}
+
+	if (!is_array(file)) {
+		file = [file];
+	}
+
+	// Use current locale if empty
+	if (locale == "") {
+		locale = i18n.locale;
+	}
+
+	// Unload messages
+	var root = "";
+	var file_handle = -1;
+	var json_string = "";
+
+	for (var i = 0; i < array_length(file); i++) {
+		if (string_pos(".json", file[i]) == 0) {
+			show_debug_message($"I18n ERROR - i18n_unload_messages({file[i]}, {locale}) - \"{file[i]}\" is not a valid JSON file");
+			continue;
+		}
+
+		root = "";
+		if (string_pos("~/", file[i]) == 1) {
+			root = working_directory;
+		}
+
+		if (!file_exists(root + file[i])) {
+			show_debug_message($"I18n ERROR - i18n_unload_messages({file[i]}, {locale}) - \"{file[i]}\" JSON file does not exist");
+			continue;
+		}
+
+		file_handle = file_text_open_read(root + string_copy(file[i], 3, string_length(file[i]) - 2));
+		json_string = "";
+
+		while (!file_text_eof(file_handle)) {
+			json_string += file_text_read_string(file_handle);
+			file_text_readln(file_handle);
+		}
+		
+		file_text_close(file_handle);
+
+		try {
+			var json_struct = json_parse(json_string);
+			var names = struct_get_names(json_struct);
+			
+			for (var j = 0; j < array_length(names); j++) {
+				if (!i18n.hashed) {
+					if (struct_exists(i18n.data[$ locale].messages, names[j])) {
+						struct_remove(i18n.data[$ locale].messages, names[j]);
+					} else if (i18n.debug) {
+						show_debug_message($"I18n WARNING - i18n_remove_messages({names[j]}, {locale}) - `{names[j]}` key not found in `{locale}` locale");
+					}
+				} else {
+					if (struct_exists_from_hash(i18n.data[$ locale].messages, variable_get_hash(names[j]))) {
+						struct_remove_from_hash(i18n.data[$ locale].messages, variable_get_hash(names[j]));
+					} else if (i18n.debug) {
+						show_debug_message($"I18n WARNING - i18n_remove_messages({names[j]}, {locale}) - `{names[j]}` key not found in `{locale}` locale");
+					}
+				}
+			}
+
+			if (i18n.debug) {
+				show_debug_message($"I18n SUCCESS - i18n_unload_messages({file[i]}, {locale}) - \"{file[i]}\" JSON file successfully unloaded");
+			}
+		} catch (e) {
+			show_debug_message($"I18n ERROR - i18n_unload_messages({file[i]}, {locale}) - Failed to parse \"{file[i]}\" JSON file: " + string(e));
+			exit;
+		}
+	}
 }
 
