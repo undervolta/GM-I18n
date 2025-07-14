@@ -5,7 +5,7 @@ menu_list = [];
 btn_list = [];
 
 page = 1;
-version = "v0.1.1";
+version = "v1.0.0-rc.1";
 
 // Create menu
 var inst_layer = layer_get_id("Instances");

@@ -502,6 +502,9 @@ function i18n_create(var_name, default_locale, locales, options = false) {
 			i18n[$ names[i]] = options[$ names[i]];
 		}
 	}
+	if (i18n.cached && os_browser != browser_not_a_browser) {
+		i18n.cached = false;
+	}
 
 	// Initialize data
 	for (var i = 0; i < array_length(locales); i++) {
@@ -544,23 +547,59 @@ function i18n_update_loader(use_delta_time = false, i18n = false) {
 		exit;
 	}
 	
+
+	if (!struct_exists(i18n, "loader")) {
+		return;
+	}
 	
-	if (struct_exists(i18n, "loader")) {
-		if (struct_exists(i18n, "time")) {									// Interval or time is set
-			if (i18n.loader.step < i18n.loader.max_step) {
-				i18n.loader.update(use_delta_time);
-			} else {														// Remove the loader after all files are loaded
-				i18n.time = i18n.loader.time;
-				struct_remove(i18n, "loader");
-			}
-		} else if (i18n.loader.time[0] == -1) {								// Load all files and then remove the loader if interval or time isn't set
-			for (var i = 0; i < array_length(i18n.loader.files); i++) {
-				i18n.loader.load(i18n.loader.files[i], i18n.loader.files_locale[i]);
-			}
-			
-			i18n.loader.time[0] = 0;
-			struct_remove(i18n, "loader");
+	
+	var to_delete = false;
+
+	// Update the loader
+	if (struct_exists(i18n, "time")) {									// Interval or time is set
+		if (i18n.loader.step < i18n.loader.max_step) {
+			i18n.loader.update(use_delta_time);
+		} else {														// Remove the loader after all files are loaded
+			to_delete = true;
 		}
+	} else if (i18n.loader.time[0] == -1) {								// Load all files and then remove the loader if interval or time isn't set
+		for (var i = 0; i < array_length(i18n.loader.files); i++) {
+			i18n.loader.load(i18n.loader.files[i], i18n.loader.files_locale[i]);
+		}
+		
+		to_delete = true;
+	}
+
+	// Check the fonts in the drawing presets
+	var langs = struct_get_names(i18n.data);
+	var presets = [];
+	var font_index = -1;
+
+	for (var i = 0; i < array_length(langs); i++) {
+		presets = struct_get_names(i18n.data[$ langs[i]].drawings);
+
+		for (var j = 0; j < array_length(presets); j++) {
+			if (is_string(i18n.data[$ langs[i]].drawings[$ presets[j]])) {
+				font_index = asset_get_index(i18n.data[$ langs[i]].drawings[$ presets[j]]);
+				
+				if (font_index != -1) {
+					i18n.data[$ langs[i]].drawings[$ presets[j]] = font_index;
+				} else if (to_delete) {
+					to_delete = false;										// If the font is not found, do not delete the loader
+				}
+			}
+		}
+	}
+
+	// Remove the loader if all locale files are loaded
+	if (to_delete) {
+		if (struct_exists(i18n, "time")) {
+			i18n.time = i18n.loader.time;
+		} else {
+			i18n.loader.time[0] = 0;
+		}
+
+		struct_remove(i18n, "loader");
 	}
 }
 
@@ -1054,7 +1093,7 @@ function i18n_get_messages(key, data = undefined, locale = "", i18n = false, cre
 			if (i18n.cached && create_cache && (cache_name == "1" || cache_name == "2")) {
 				cache_name = string("{0}_{1}_{2}", locale, key[i], data);
 				cache_id = variable_get_hash(cache_name);
-
+				
 				if (cache_id <= 2147483647) {			// full cache
 					i18n_create_cache(key[i], data, locale, undefined, i18n);
 
@@ -2897,14 +2936,17 @@ function i18n_clear_messages(locale = "", i18n = false) {
 	}
 }
 
+
 /**
  * @desc Flatten a struct into i18n messages
  * @param {Struct} data_struct The struct to flatten (e.g. {hello: "Hello", goodbye: "Goodbye"}).
  * @param {String} [locale]="" The locale that you want to get (e.g. "en"). Leave it empty to use the current locale.
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
  * @param {String} [prefix]="" (Internal) The prefix to use for the keys (e.g. "greetings"). This is useful for nested structs.
+ * @param {Bool} [direct_write]=true If true, write the messages directly to the i18n struct. If false, return the flattened struct.
+ * @returns {Undefined | Array<String>}
  */
-function i18n_flatten_keys(data_struct, locale = "", i18n = false, prefix = "") {
+function i18n_flatten_keys(data_struct, locale = "", i18n = false, prefix = "", direct_write = true) {
 	// guard clause
 	if (!is_struct(data_struct)) {
 		show_debug_message($"I18n ERROR - i18n_flatten_keys({data_struct}, {locale}, , {prefix}) - `data_struct` must be a struct");
@@ -2935,21 +2977,35 @@ function i18n_flatten_keys(data_struct, locale = "", i18n = false, prefix = "") 
 
 	var names = struct_get_names(data_struct);
 	var key = "";
+	var result = [];
 	
 	for (var i = 0; i < array_length(names); i++) {
 		key = (prefix == "") ? names[i] : string($"{prefix}.{names[i]}");
 		
-		if (is_struct(data_struct[$ names[i]])) {
-			i18n_flatten_keys(data_struct[$ names[i]], locale, i18n, key);
-		} else {
-			if (!i18n.hashed) {
-				i18n.data[$ locale].messages[$ key] = data_struct[$ names[i]];
+		if (direct_write) {
+			if (is_struct(data_struct[$ names[i]])) {
+				i18n_flatten_keys(data_struct[$ names[i]], locale, i18n, key, direct_write);
 			} else {
-				struct_set_from_hash(i18n.data[$ locale].messages, variable_get_hash(key), value);
+				if (!i18n.hashed) {
+					i18n.data[$ locale].messages[$ key] = data_struct[$ names[i]];
+				} else {
+					struct_set_from_hash(i18n.data[$ locale].messages, variable_get_hash(key), data_struct[$ names[i]]);
+				}
+			} 
+		} else {
+			if (is_struct(data_struct[$ names[i]])) {
+				result = array_concat(result, i18n_flatten_keys(data_struct[$ names[i]], locale, i18n, key, direct_write));
+			} else {
+				array_push(result, key);
 			}
 		}
 	}
+
+	if (!direct_write) {
+		return result;
+	}
 }
+
 
 /**
  * @desc Load messages from JSON files into the I18n system
@@ -2999,6 +3055,7 @@ function i18n_load_messages(file, locale = "", i18n = false) {
 		root = "";
 		if (string_pos("~/", file[i]) == 1) {
 			root = working_directory;
+			file[i] = string_copy(file[i], 3, string_length(file[i]) - 2);
 		}
 
 		if (!file_exists(root + file[i])) {
@@ -3006,7 +3063,7 @@ function i18n_load_messages(file, locale = "", i18n = false) {
 			continue;
 		}
 
-		file_handle = file_text_open_read(root + string_copy(file[i], 3, string_length(file[i]) - 2));
+		file_handle = file_text_open_read(root + file[i]);
 		json_string = "";
 
 		while (!file_text_eof(file_handle)) {
@@ -3079,6 +3136,7 @@ function i18n_unload_messages(file, locale = "", i18n = false) {
 		root = "";
 		if (string_pos("~/", file[i]) == 1) {
 			root = working_directory;
+			file[i] = string_copy(file[i], 3, string_length(file[i]) - 2);
 		}
 
 		if (!file_exists(root + file[i])) {
@@ -3086,7 +3144,7 @@ function i18n_unload_messages(file, locale = "", i18n = false) {
 			continue;
 		}
 
-		file_handle = file_text_open_read(root + string_copy(file[i], 3, string_length(file[i]) - 2));
+		file_handle = file_text_open_read(root + file[i]);
 		json_string = "";
 
 		while (!file_text_eof(file_handle)) {
@@ -3098,20 +3156,21 @@ function i18n_unload_messages(file, locale = "", i18n = false) {
 
 		try {
 			var json_struct = json_parse(json_string);
-			var names = struct_get_names(json_struct);
+			var names = i18n_flatten_keys(json_struct, locale, i18n, "", false);
+			var keys = struct_get_names(i18n.data[$ locale].messages);
 			
 			for (var j = 0; j < array_length(names); j++) {
 				if (!i18n.hashed) {
 					if (struct_exists(i18n.data[$ locale].messages, names[j])) {
 						struct_remove(i18n.data[$ locale].messages, names[j]);
 					} else if (i18n.debug) {
-						show_debug_message($"I18n WARNING - i18n_remove_messages({names[j]}, {locale}) - `{names[j]}` key not found in `{locale}` locale");
+						show_debug_message($"I18n WARNING - i18n_unload_messages({file[i]}, {locale}) - `{names[j]}` key not found in `{locale}` locale");
 					}
 				} else {
 					if (struct_exists_from_hash(i18n.data[$ locale].messages, variable_get_hash(names[j]))) {
 						struct_remove_from_hash(i18n.data[$ locale].messages, variable_get_hash(names[j]));
 					} else if (i18n.debug) {
-						show_debug_message($"I18n WARNING - i18n_remove_messages({names[j]}, {locale}) - `{names[j]}` key not found in `{locale}` locale");
+						show_debug_message($"I18n WARNING - i18n_unload_messages({file[i]}, {locale}) - `{names[j]}` key not found in `{locale}` locale");
 					}
 				}
 			}

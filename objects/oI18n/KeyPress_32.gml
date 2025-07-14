@@ -179,7 +179,7 @@ show_debug_message(npc5);*/
 show_debug_message(not_owned);*/
 
 // dictionaries
-/*var ask1 = i18n_get_messages("ask", {
+var ask1 = i18n_get_messages("ask", {
 	item: "apple"
 }, "idn");
 
@@ -196,7 +196,9 @@ i18n_update_plurals("global.npc3", oUI.my_val, true);
 show_debug_message(global.npc3);
 show_debug_message(global.gb_struct.npc4);
 show_debug_message(global.gb_struct.arr[0]);
-*/
+
+
+/*
 var choose_test = i18n_choose({
 	en: "Test",
 	idn: "Tes"	
@@ -208,3 +210,16 @@ show_debug_message($"title cache id = {i18n_get_cache_id("title", , "en")}")
 show_debug_message($"npc1 variable cache id = {i18n_get_cache_id_from_ref("npc1", instance_id_get(self))}")
 
 i18n_update_cache(i18n_get_cache_id("title", , "en"), "Cihuy!")
+*/
+
+show_debug_message($"idn messages = {global.i18n.data.idn.messages}");
+i18n_remove_messages("plural_guide", "idn");
+show_debug_message($"del idn `plural_guide` = {global.i18n.data.idn.messages}");
+i18n_remove_messages(["menu_3.test_1", "menu_4.test_1"], "all");
+show_debug_message($"del idn `menu_3.test_1, menu_4.test_1` = {global.i18n.data.idn.messages}");
+i18n_clear_messages("idn");
+show_debug_message($"clear idn messages = {global.i18n.data.idn.messages}");
+i18n_load_messages(["~/langs/id.json", "~/langs/ar1.json"], "idn");
+show_debug_message($"load idn messages = {global.i18n.data.idn.messages}");
+i18n_unload_messages("~/langs/ar1.json", "idn");
+show_debug_message($"unload idn messages = {global.i18n.data.idn.messages}");
