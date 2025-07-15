@@ -56,13 +56,14 @@ if (os_browser == browser_not_a_browser) {
 }
 
 refreshed = false;
+var fonts = [fNotoSansMedium, fNotoSansSemiBold]
 
 // Add drawing presets for each locale
 i18n_add_drawings(["en", "idn"], ["title", "button", "header", "desc"], [
-	new I18nDrawings(fNotoSansSemiBold, fa_left, fa_middle, #FFFFFF, 1.14, 0, 1),
-	new I18nDrawings(fNotoSansSemiBold, fa_center, fa_middle, #000000, 0.65, 0, 1),
-	new I18nDrawings(fNotoSansSemiBold, fa_left, fa_middle, #FFFFFF, 0.65, 0, 1),
-	new I18nDrawings(fNotoSansMedium, fa_left, fa_top, #CCCCCC, 0.49, 0, 1, -1, 1198)
+	new I18nDrawings("fNotoSansSemiBold", fa_left, fa_middle, #FFFFFF, 1.14, 0, 1),
+	new I18nDrawings("fNotoSansSemiBold", fa_center, fa_middle, #000000, 0.65, 0, 1),
+	new I18nDrawings("fNotoSansSemiBold", fa_left, fa_middle, #FFFFFF, 0.65, 0, 1),
+	new I18nDrawings("fNotoSansMedium", fa_left, fa_top, #CCCCCC, 0.49, 0, 1, -1, 1198)
 ]);
 
 i18n_add_drawings("ja", ["button", "header", "desc"], [
@@ -79,7 +80,7 @@ i18n_add_drawings("ko", ["button", "header", "desc"], [
 
 // Refresh the drawing preset if it's running on browser
 if (os_browser != browser_not_a_browser) {
-	alarm_set(0, game_get_speed(gamespeed_fps) * 2);	// delay in seconds
+	//alarm_set(0, game_get_speed(gamespeed_fps) * 2);	// delay in seconds
 }
 
 // Add dictionaries

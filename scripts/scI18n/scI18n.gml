@@ -59,7 +59,7 @@ enum I18N_REF {
  * @param {String | Array<String>} [lang_file]="" Path to locale file(s), which will be loaded on initialization automatically (e.g. "~/langs/en.json").
  */
 function I18nLocaleInit(lang_code, lang_name, lang_file = "") constructor {
-	// Guard clauses
+	// Guard clause
 	if (!is_string(lang_code)) {
 		show_debug_message($"I18n ERROR - I18nLocaleInit({lang_code}, {lang_name}, {lang_file}) - `lang_code` must be a string");
 		exit;
@@ -89,7 +89,7 @@ function I18nLocaleInit(lang_code, lang_name, lang_file = "") constructor {
  * @param {Struct.i18n_create | Bool} [i18n_struct]=false I18n struct reference.
  */
 function I18nLoad(interval, i18n_struct = false) constructor {
-	// Guard clauses
+	// Guard clause
 	if (!(is_numeric(interval) || is_array(interval))) {
 		show_debug_message($"I18n ERROR - I18nLoad({interval}) - `interval` must be numeric");
 		exit;
@@ -273,7 +273,7 @@ function I18nLoad(interval, i18n_struct = false) constructor {
 
 /**
  * @desc Struct constructor for I18nDrawings
- * @param {Asset.GMFont} [draw_font] Font asset.
+ * @param {String | Asset.GMFont} [draw_font] Font asset. If a string is provided, it will be converted to an asset index.
  * @param {Constant.HAlign} [draw_halign] Horizontal alignment.
  * @param {Constant.VAlign} [draw_valign] Vertical alignment .
  * @param {Constant.Colour | Array<Constant.Colour> | Real | Array<Real>} [draw_color] Drawing or text color.
@@ -284,7 +284,7 @@ function I18nLoad(interval, i18n_struct = false) constructor {
  * @param {Real} [text_width] Text width.
  */
 function I18nDrawings(draw_font = undefined, draw_halign = undefined, draw_valign = undefined, draw_color = undefined, draw_scale = undefined, draw_rotation = undefined, draw_alpha = undefined, text_sep = undefined, text_width = undefined, is_template = false) constructor  {
-	font = (asset_get_type(draw_font) == asset_font) ? draw_font : undefined;
+	font = (asset_get_type(draw_font) == asset_font || is_string(draw_font)) ? draw_font : undefined;
 	halign = draw_halign;
 	valign = draw_valign;
 	color = draw_color;
@@ -296,20 +296,20 @@ function I18nDrawings(draw_font = undefined, draw_halign = undefined, draw_valig
 
 	// Member validation
 	if (!(halign == fa_left || halign == fa_center || halign == fa_right)) {
-		show_debug_message("I18n ERROR - I18nDrawings() - `draw_halign` must be a valid horizontal alignment constant, defaulting to `fa_left`");
+		show_debug_message($"I18n WARNING - I18nDrawings({draw_font}, {draw_halign}, {draw_valign}, {draw_color}, {draw_scale}, {draw_rotation}, {draw_alpha}, {text_sep}, {text_width}, {is_template}) - `draw_halign` must be a valid horizontal alignment constant, defaulting to `fa_left`");
 		halign = is_template ? undefined : fa_left;
 	}
 	if (!(valign == fa_top || valign == fa_middle || valign == fa_bottom)) {
-		show_debug_message("I18n ERROR - I18nDrawings() - `draw_valign` must be a valid vertical alignment constant, defaulting to `fa_top`");
+		show_debug_message($"I18n WARNING - I18nDrawings({draw_font}, {draw_halign}, {draw_valign}, {draw_color}, {draw_scale}, {draw_rotation}, {draw_alpha}, {text_sep}, {text_width}, {is_template}) - `draw_valign` must be a valid vertical alignment constant, defaulting to `fa_top`");
 		valign = is_template ? undefined : fa_top;
 	}
 	if (!(is_numeric(color) || is_array(color))) {
-		show_debug_message("I18n ERROR - I18nDrawings() - `draw_color` must be a valid color constant or array, defaulting to `c_white`");
+		show_debug_message($"I18n WARNING - I18nDrawings({draw_font}, {draw_halign}, {draw_valign}, {draw_color}, {draw_scale}, {draw_rotation}, {draw_alpha}, {text_sep}, {text_width}, {is_template}) - `draw_color` must be a valid color constant or array, defaulting to `c_white`");
 		color = is_template ? undefined : c_white;
 	}
 	if (is_array(color)) {
 		if (array_length(color) < 4) {
-			show_debug_message($"I18n ERROR - I18nDrawings() - `draw_color` array must have 4 elements, filling the missing elemnts with the last color");
+			show_debug_message($"I18n WARNING - I18nDrawings({draw_font}, {draw_halign}, {draw_valign}, {draw_color}, {draw_scale}, {draw_rotation}, {draw_alpha}, {text_sep}, {text_width}, {is_template}) - `draw_color` array must have 4 elements, filling the missing elemnts with the last color");
 			repeat (4 - array_length(color)) {
 				array_push(color, color[array_length(color) - 1]);
 			}
@@ -399,7 +399,7 @@ function binary_search(array, target) {
 function binary_search_insert_pos(array, target) {
 	// Guard clause
 	if (!is_array(array)) {
-		show_debug_message($"I18n ERROR - binary_search_insert_pos({array}, {target}) - `array` must be array");
+		show_debug_message($"ERROR - binary_search_insert_pos({array}, {target}) - `array` must be array");
 		return -1;
 	}
 	if (array_length(array) == 0) {
@@ -434,19 +434,19 @@ function binary_search_insert_pos(array, target) {
  * @returns {Struct.i18n_create} 
  */
 function i18n_create(var_name, default_locale, locales, options = false) {
-	// Guard clauses
+	// Guard clause
 	if (!(is_string(var_name) && is_string(default_locale))) {
-		show_debug_message("I18n ERROR - i18n_create() - var_name and default_locale must be strings");
+		show_debug_message($"I18n ERROR - i18n_create({var_name}, {default_locale}, {locales}, {options}) - `var_name` and `default_locale` must be strings");
 		exit;
 	}
 
 	if (!is_array(locales)) {
-		show_debug_message("I18n ERROR - i18n_create() - locales must be an array of I18nLocaleInit structs");
+		show_debug_message($"I18n ERROR - i18n_create({var_name}, {default_locale}, {locales}, {options}) - `locales` must be an array of I18nLocaleInit structs");
 		exit;
 	}
 
 	if (!(is_bool(options || is_struct(options)))) {
-		show_debug_message("I18n ERROR - i18n_create() - options must be a struct");
+		show_debug_message($"I18n ERROR - i18n_create({var_name}, {default_locale}, {locales}, {options}) - `options` must be a struct");
 		exit;
 	}
 
@@ -457,6 +457,7 @@ function i18n_create(var_name, default_locale, locales, options = false) {
 		default_locale: default_locale,
 		locale: default_locale,
 		locales: locales,
+		drawing_presets: [],
 		data: {},
 		refs: {
 			messages: {
@@ -503,6 +504,9 @@ function i18n_create(var_name, default_locale, locales, options = false) {
 		}
 	}
 	if (i18n.cached && os_browser != browser_not_a_browser) {
+		if (i18n.debug) {
+			show_debug_message($"I18n WARNING - i18n_create({var_name}, {default_locale}, {locales}, {options}) - Message caching is not supported in the browser, disabling it");
+		}
 		i18n.cached = false;
 	}
 
@@ -534,22 +538,22 @@ function i18n_create(var_name, default_locale, locales, options = false) {
  * @param {Struct.i18n_create | Bool} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
  */
 function i18n_update_loader(use_delta_time = false, i18n = false) {
-	// Guard clauses
+	// Guard clause
+	if (!is_bool(use_delta_time)) {
+		show_debug_message($"I18n ERROR - i18n_update_loader({use_delta_time}) - `use_delta_time` must be boolean");
+		exit;
+	}
+
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_update_loader() - i18n must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_update_loader({use_delta_time}) - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
 	}
 
-	if (!is_bool(use_delta_time)) {
-		show_debug_message("I18n ERROR - i18n_update_loader() - Use delta time must be boolean");
-		exit;
-	}
 	
-
 	if (!struct_exists(i18n, "loader")) {
-		return;
+		exit;
 	}
 	
 	
@@ -574,24 +578,44 @@ function i18n_update_loader(use_delta_time = false, i18n = false) {
 	var langs = struct_get_names(i18n.data);
 	var presets = [];
 	var font_index = -1;
-
-	for (var i = 0; i < array_length(langs); i++) {
-		presets = struct_get_names(i18n.data[$ langs[i]].drawings);
-
-		for (var j = 0; j < array_length(presets); j++) {
-			if (is_string(i18n.data[$ langs[i]].drawings[$ presets[j]])) {
-				font_index = asset_get_index(i18n.data[$ langs[i]].drawings[$ presets[j]]);
+	
+	if (array_length(i18n.drawing_presets) == 0) {			// If the drawing presets are not initialized, initialize them
+		for (var i = 0; i < array_length(langs); i++) {
+			presets = struct_get_names(i18n.data[$ langs[i]].drawings);
+			
+			for (var j = 0; j < array_length(presets); j++) {
+				array_push(i18n.drawing_presets, i18n.data[$ langs[i]].drawings[$ presets[j]]);
 				
-				if (font_index != -1) {
-					i18n.data[$ langs[i]].drawings[$ presets[j]] = font_index;
-				} else if (to_delete) {
-					to_delete = false;										// If the font is not found, do not delete the loader
+				if (is_string(i18n.data[$ langs[i]].drawings[$ presets[j]].font)) {
+					font_index = asset_get_index(i18n.data[$ langs[i]].drawings[$ presets[j]].font);
+					
+					if (font_index != -1) {
+						i18n.data[$ langs[i]].drawings[$ presets[j]].font = font_index;
+						
+						if (to_delete) {
+							to_delete = false;				// If the font is not found, do not delete the loader
+						} 
+					} 
 				}
+			}
+		}
+	} else {			// If the drawing presets are initialized, check the fonts
+		for (var i = 0; i < array_length(i18n.drawing_presets); i++) {
+			if (is_string(i18n.drawing_presets[i].font)) {
+				font_index = asset_get_index(i18n.drawing_presets[i].font);
+				show_debug_message("cek")
+				if (font_index != -1) {
+					i18n.drawing_presets[i].font = font_index;
+					
+					if (to_delete) {
+						to_delete = false;				// If the font is not found, do not delete the loader
+					} 
+				} 
 			}
 		}
 	}
 
-	// Remove the loader if all locale files are loaded
+	// Remove the loader and drawing presets initialization if all locale files are loaded
 	if (to_delete) {
 		if (struct_exists(i18n, "time")) {
 			i18n.time = i18n.loader.time;
@@ -600,6 +624,7 @@ function i18n_update_loader(use_delta_time = false, i18n = false) {
 		}
 
 		struct_remove(i18n, "loader");
+		struct_remove(i18n, "drawing_presets");
 	}
 }
 
@@ -612,26 +637,26 @@ function i18n_update_loader(use_delta_time = false, i18n = false) {
  * @param {String} [prefix]="" = (INTERNAL) Prefix to add to the message keys
  */
 function i18n_add_messages(locale, data, i18n = false, prefix = "") {
-	// Guard clauses
+	// Guard clause
 	if (!is_string(locale)) {
-		show_debug_message("I18n ERROR - i18n_add_messages() - Locale must be a string");
+		show_debug_message($"I18n ERROR - i18n_add_messages({locale}, {data}) - `locale` must be a string");
 		exit;
 	}
 
 	if (!is_struct(data)) {
-		show_debug_message("I18n ERROR - i18n_add_messages() - Data must be a struct: {key: value, ...}");
+		show_debug_message($"I18n ERROR - i18n_add_messages({locale}, {data}) - `data` must be a struct");
 		exit;
 	}
 
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_add_messages() - i18n must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_add_messages({locale}, {data}) - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
 	}	
 
 	if (!struct_exists(i18n.data, locale)) {
-		show_debug_message("I18n ERROR - i18n_add_messages() - Locale does not exist: " + locale);
+		show_debug_message($"I18n ERROR - i18n_add_messages({locale}, {data}) - \"{locale}\" locale does not exist");
 		exit;
 	}
 
@@ -663,26 +688,26 @@ function i18n_add_messages(locale, data, i18n = false, prefix = "") {
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
  */
 function i18n_add_dictionaries(locale, data, i18n = false) {
-	// Guard clauses
+	// Guard clause
 	if (!is_string(locale)) {
-		show_debug_message("I18n ERROR - i18n_add_dictionaries() - Locale must be a string");
+		show_debug_message($"I18n ERROR - i18n_add_dictionaries({locale}, {data}) - `locale` must be a string");
 		exit;
 	}
 
 	if (!is_array(data)) {
-		show_debug_message("I18n ERROR - i18n_add_dictionaries() - Data must be an array of strings or an array of arrays of strings");
+		show_debug_message($"I18n ERROR - i18n_add_dictionaries({locale}, {data}) - `data` must be an array of strings or an array of arrays of strings");
 		exit;
 	}
 	
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_add_dictionaries() - i18n must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_add_dictionaries({locale}, {data}) - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
 	}
 
 	if (!struct_exists(i18n.data, locale)) {
-		show_debug_message("I18n ERROR - i18n_add_dictionaries() - Locale does not exist: " + locale);
+		show_debug_message($"I18n ERROR - i18n_add_dictionaries({locale}, {data}) - \"{locale}\" locale does not exist");
 		exit;
 	}
 
@@ -717,29 +742,29 @@ function i18n_add_dictionaries(locale, data, i18n = false) {
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
  */
 function i18n_add_drawings(locale, preset_name, data, use_ref = true, i18n = false) {
-	// Guard clauses
+	// Guard clause
 	if (!(is_string(locale) || is_array(locale))) {
-		show_debug_message("I18n ERROR - i18n_add_drawings() - Locale must be a string or array of strings");
+		show_debug_message($"I18n ERROR - i18n_add_drawings({locale}, {preset_name}, {data}, {use_ref}) - `locale` must be a string or array of strings");
 		exit;
 	}
 
 	if (!(is_string(preset_name) || is_array(preset_name))) {
-		show_debug_message("I18n ERROR - i18n_add_drawings() - Drawing preset name must be a string or array of strings");
+		show_debug_message($"I18n ERROR - i18n_add_drawings({locale}, {preset_name}, {data}, {use_ref}) - `preset_name` must be a string or array of strings");
 		exit;
 	}
 
 	if (!(is_struct(data) || is_array(data))) {
-		show_debug_message("I18n ERROR - i18n_add_drawings() - Data must be a struct -> Partial<{font, halign, valign, color, scale, rotation, alpha}> or array of this struct");
+		show_debug_message($"I18n ERROR - i18n_add_drawings({locale}, {preset_name}, {data}, {use_ref}) - `data` must be a struct from `I18nDrawings` or array of `I18nDrawings`");
 		exit;
 	}
 
 	if (!is_bool(use_ref)) {
-		show_debug_message("I18n ERROR - i18n_add_drawings() - use_ref must be a boolean");
+		show_debug_message($"I18n ERROR - i18n_add_drawings({locale}, {preset_name}, {data}, {use_ref}) - `use_ref` must be a boolean");
 		exit;
 	}
 
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_add_drawings() - i18n must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_add_drawings({locale}, {preset_name}, {data}, {use_ref}) - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
@@ -755,7 +780,7 @@ function i18n_add_drawings(locale, preset_name, data, use_ref = true, i18n = fal
 
 	if (array_length(preset_name) != array_length(data)) {
 		if (i18n.debug) {
-			show_debug_message("I18n ERROR - i18n_add_drawings() - Drawing preset name and data must be the same length");
+			show_debug_message($"I18n ERROR - i18n_add_drawings({locale}, {preset_name}, {data}, {use_ref}) - `preset_name` and `data` must be the same lengthname and data must be the same length");
 		}
 		exit;
 	}
@@ -768,7 +793,7 @@ function i18n_add_drawings(locale, preset_name, data, use_ref = true, i18n = fal
 	for (var i = 0; i < array_length(locale); i++) {
 		// Guard clauses
 		if (!struct_exists(i18n.data, locale[i])) {
-			show_debug_message("I18n ERROR - i18n_add_drawings() - Locale does not exist: " + locale[i]);
+			show_debug_message($"I18n ERROR - i18n_add_drawings({locale}, {preset_name}, {data}, {use_ref}) - \"{locale[i]} Locale does not exist");
 			break;
 		}
 
@@ -799,14 +824,14 @@ function i18n_add_drawings(locale, preset_name, data, use_ref = true, i18n = fal
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
  */
 function i18n_add_locales(code, i18n = false) {
-	// Guard clauses
+	// Guard clause
 	if (!(is_string(code) || is_array(code))) {
-		show_debug_message("I18n ERROR - i18n_add_locales() - Code must be a string or an array of strings");
+		show_debug_message($"I18n ERROR - i18n_add_locales({code}) - `code` must be a string or an array of strings");
 		exit;
 	}
 
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_add_locales() - i18n must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_add_locales({code}) - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
@@ -833,9 +858,9 @@ function i18n_add_locales(code, i18n = false) {
  * @returns {Bool} 
  */
 function i18n_is_ready(i18n = false) {
-	// Guard clauses
+	// Guard clause
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_is_ready() - i18n must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_is_ready() - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
@@ -852,14 +877,14 @@ function i18n_is_ready(i18n = false) {
  * @returns {Bool} 
  */
 function i18n_locale_exists(locale, i18n = false) {
-	// Guard clauses
+	// Guard clause
 	if (!is_string(locale)) {
-		show_debug_message("I18n ERROR - i18n_locale_exists() - Locale must be a string");
+		show_debug_message($"I18n ERROR - i18n_locale_exists({locale}) - `locale` must be a string");
 		exit;
 	}
 
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_locale_exists() - i18n must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_locale_exists({locale}) - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
@@ -877,19 +902,19 @@ function i18n_locale_exists(locale, i18n = false) {
  * @returns {Bool} 
  */
 function i18n_message_exists(key, locale = "", i18n = false) {
-	// Guard clauses
+	// Guard clause
 	if (!is_string(key)) {
-		show_debug_message("I18n ERROR - i18n_message_exists() - Key must be a string");
+		show_debug_message($"I18n ERROR - i18n_message_exists({key}, {locale}) - `key` must be a string");
 		exit;
 	}
 
 	if (!is_string(locale)) {
-		show_debug_message("I18n ERROR - i18n_message_exists() - Locale must be a string");
+		show_debug_message($"I18n ERROR - i18n_message_exists({key}, {locale}) - `locale` must be a string");
 		exit;
 	}
 
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_message_exists() - i18n must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_message_exists({key}, {locale}) - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
@@ -909,9 +934,9 @@ function i18n_message_exists(key, locale = "", i18n = false) {
  * @returns {String} 
  */
 function i18n_get_locale(i18n = false) {
-	// Guard clauses
+	// Guard clause
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_get_locale() - i18n must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_get_locale() - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
@@ -927,9 +952,9 @@ function i18n_get_locale(i18n = false) {
  * @returns {Array<Struct.I18nLocaleInit>} 
  */
 function i18n_get_locales(i18n = false) {
-	// Guard clauses
+	// Guard clause
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_get_locales() - i18n must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_get_locales() - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
@@ -946,9 +971,14 @@ function i18n_get_locales(i18n = false) {
  * @returns {Array<String>} 
  */
 function i18n_get_locales_code(include_non_init = false, i18n = false) {
-	// Guard clauses
+	// Guard clause
+	if (!is_bool(include_non_init)) {
+		show_debug_message($"I18n ERROR - i18n_get_locales_code({include_non_init}) - `include_non_init` must be a boolean");
+		exit;
+	}
+
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_get_locales_code() - i18n must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_get_locales_code({include_non_init}) - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
@@ -976,9 +1006,9 @@ function i18n_get_locales_code(include_non_init = false, i18n = false) {
  * @returns {Array<String>} 
  */
 function i18n_get_locales_name(i18n = false) {
-	// Guard clauses
+	// Guard clause
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_get_locales_name() - i18n must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_get_locales_name() - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
@@ -1007,22 +1037,22 @@ function i18n_get_locales_name(i18n = false) {
 function i18n_get_messages(key, data = undefined, locale = "", i18n = false, create_cache = false) {
 	// Guard clauses
 	if (!(is_string(key) || is_array(key))) {
-		show_debug_message("I18n ERROR - i18n_get_messages() - key must be a string");
+		show_debug_message($"I18n ERROR - i18n_get_messages({key}, {data}, {locale}) - `key` must be a string");
 		exit;
 	}
 
 	if (!is_undefined(data) && !(is_array(data) || is_struct(data) || is_real(data))) {
-		show_debug_message($"I18n ERROR - i18n_get_messages() - data must be an array, struct, or real");
+		show_debug_message($"I18n ERROR - i18n_get_messages({key}, {data}, {locale}) - `data` must be an array, struct, or real");
 		exit;
 	}
 
 	if (!is_string(locale)) {
-		show_debug_message("I18n ERROR - i18n_get_messages() - Locale must be a string");
+		show_debug_message($"I18n ERROR - i18n_get_messages({key}, {data}, {locale}) - `locale` must be a string");
 		exit;
 	}
 
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_get_messages() - i18n must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_get_messages({key}, {data}, {locale}) - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
@@ -1080,12 +1110,12 @@ function i18n_get_messages(key, data = undefined, locale = "", i18n = false, cre
 									? i18n.data[$ i18n.default_locale].messages[$ key[i]] 
 									: struct_get_from_hash(i18n.data[$ i18n.default_locale].messages, variable_get_hash(key[i])));
 				if (i18n.debug) {
-					show_debug_message($"I18n WARNING - i18n_get_messages() - {key[i]} message key doesn't exists in {locale} locale, use default locale instead");
+					show_debug_message($"I18n WARNING - i18n_get_messages({key}, {data}, {locale}) - \"{key[i]}\" message key doesn't exists in \"{locale}\" locale, using default locale instead");
 				}
 			} else {
 				array_push(result, i18n.default_message);
 				if (i18n.debug) {
-					show_debug_message($"I18n ERROR - i18n_get_messages() - {key[i]} message key doesn't exists in {locale} locale");
+					show_debug_message($"I18n ERROR - i18n_get_messages({key}, {data}, {locale}) - \"{key[i]}\" message key doesn't exists in \"{locale}\" locale");
 				}
 			}
 
@@ -1098,7 +1128,7 @@ function i18n_get_messages(key, data = undefined, locale = "", i18n = false, cre
 					i18n_create_cache(key[i], data, locale, undefined, i18n);
 
 					if (i18n.debug) {
-						show_debug_message($"I18n SUCCESS - i18n_get_messages({key[i]}, {data}, {locale}) - Message fully cached with id {variable_get_hash(cache_name)}");
+						show_debug_message($"I18n SUCCESS - i18n_get_messages({key[i]}, {data}, {locale}) - Message fully cached with id = {variable_get_hash(cache_name)}");
 					}
 				} else {													// partial cache
 					cache_name = string("{0}_{1}", locale, key[i]);
@@ -1108,7 +1138,7 @@ function i18n_get_messages(key, data = undefined, locale = "", i18n = false, cre
 						i18n_create_cache(key[i], undefined, locale, undefined, i18n);
 
 						if (i18n.debug) {
-							show_debug_message($"I18n SUCCESS - i18n_get_messages({key[i]}, {data}, {locale}) - Message partially cached with id {variable_get_hash(cache_name)}");
+							show_debug_message($"I18n SUCCESS - i18n_get_messages({key[i]}, {data}, {locale}) - Message partially cached with id = {variable_get_hash(cache_name)}");
 						}
 					}
 				}
@@ -1124,7 +1154,7 @@ function i18n_get_messages(key, data = undefined, locale = "", i18n = false, cre
 					result[i] = string_trim(raw_plural[max(i18n.plural_start_at, floor(data - i18n.plural_start_at))]);
 
 					if (i18n.debug && (data < i18n.plural_start_at || data > array_length(raw_plural) - 1 + i18n.plural_start_at)) {
-						show_debug_message($"I18n WARNING - i18n_get_messages() - Pluralization index out of range");
+						show_debug_message($"I18n WARNING - i18n_get_messages({key}, {data}, {locale}) - Pluralization index out of range");
 					}
 				} else if (is_struct(data)) {			// Pluralization by struct (need "plural" key (e.g {plural: 1}, {plural: function(number) {return number}, plural_value: 1}, ...))
 					if (struct_exists(data, "plural")) {
@@ -1132,7 +1162,7 @@ function i18n_get_messages(key, data = undefined, locale = "", i18n = false, cre
 							result[i] = string_trim(raw_plural[max(i18n.plural_start_at, floor(data.plural - i18n.plural_start_at))]);
 							
 							if (i18n.debug && (data.plural < i18n.plural_start_at || data.plural > array_length(raw_plural) - 1 + i18n.plural_start_at)) {
-								show_debug_message($"I18n WARNING - i18n_get_messages() - Pluralization index out of range");
+								show_debug_message($"I18n WARNING - i18n_get_messages({key}, {data}, {locale}) - Pluralization index out of range");
 							}
 						} else if (is_callable(data.plural) && struct_exists(data, "plural_value")) {
 							var plural_result = data.plural(data.plural_value);
@@ -1141,19 +1171,19 @@ function i18n_get_messages(key, data = undefined, locale = "", i18n = false, cre
 								result[i] = string_trim(raw_plural[max(i18n.plural_start_at, floor(plural_result - i18n.plural_start_at))]);
 
 								if (i18n.debug && (plural_result < i18n.plural_start_at || plural_result > array_length(raw_plural) - 1 + i18n.plural_start_at)) {
-									show_debug_message($"I18n WARNING - i18n_get_messages() - Pluralization index out of range");
+									show_debug_message($"I18n WARNING - i18n_get_messages({key}, {data}, {locale}) - Pluralization index out of range");
 								}
 							} else if (i18n.debug) {
-								show_debug_message($"I18n ERROR - i18n_get_messages() - Pluralization method must return a real number");
+								show_debug_message($"I18n ERROR - i18n_get_messages({key}, {data}, {locale}) - Pluralization method must return a real number");
 							}
 						} else if (i18n.debug) {
-							show_debug_message($"I18n ERROR - i18n_get_messages() - Pluralization struct doesn't have a 'plural_value' key");
+							show_debug_message($"I18n ERROR - i18n_get_messages({key}, {data}, {locale}) - Pluralization struct doesn't have a 'plural_value' key");
 						}
 					} else if (i18n.debug) {
-						show_debug_message($"I18n WARNING - i18n_get_messages() - Pluralization struct doesn't have a 'plural' key");
+						show_debug_message($"I18n WARNING - i18n_get_messages({key}, {data}, {locale}) - Pluralization struct doesn't have a 'plural' key");
 					}
 				} else if (i18n.debug) {
-					show_debug_message($"I18n ERROR - i18n_get_messages() - Pluralization data must be a real number or a struct");
+					show_debug_message($"I18n ERROR - i18n_get_messages({key}, {data}, {locale}) - Pluralization data must be a real number or a struct");
 				}
 			}
 			
@@ -1229,7 +1259,7 @@ function i18n_get_messages(key, data = undefined, locale = "", i18n = false, cre
 									if (struct_exists_from_hash(i18n.data[$ current_locale].dictionaries, variable_get_hash(replace_str))) {
 										result_str = string_replace(result_str, replace_str, struct_get_from_hash(i18n.data[$ current_locale].dictionaries, variable_get_hash(replace_str)));
 									} else if (i18n.debug) {
-										show_debug_message($"I18n WARNING - i18n_get_messages() - {replace_str} dictionary doesn't exists in {current_locale} locale");
+										show_debug_message($"I18n WARNING - i18n_get_messages({key}, {data}, {locale}) - \"{replace_str}\" dictionary doesn't exists in \"{current_locale}\" locale");
 									}
 									
 									// Update the position of the next placeholder
@@ -1241,7 +1271,7 @@ function i18n_get_messages(key, data = undefined, locale = "", i18n = false, cre
 
 								result[i] = string_replace(result[i], placeholder, result_str);
 							} else if (i18n.debug) {
-								show_debug_message($"I18n ERROR - i18n_get_messages() - {current_str} placeholder doesn't exists in {i18n.locale} locale");
+								show_debug_message($"I18n ERROR - i18n_get_messages({key}, {data}, {locale}) - \"{current_str}\" placeholder doesn't exists in \"{locale}\" locale");
 							}
 							
 						} else if (intp_type[j] == 2) {			// Key interpolation
@@ -1270,10 +1300,10 @@ function i18n_get_messages(key, data = undefined, locale = "", i18n = false, cre
 								result[i] = string_replace(result[i], placeholder, result_str);
 								
 								if (i18n.debug) {
-									show_debug_message($"I18n WARNING - i18n_get_messages() - message key {current_str} doesn't exists in {i18n.locale} locale, use default locale instead");
+									show_debug_message($"I18n WARNING - i18n_get_messages({key}, {data}, {locale}) - \"{current_str}\" message key doesn't exists in \"{locale}\" locale, using default locale instead");
 								}
 							} else if (i18n.debug) {
-								show_debug_message($"I18n ERROR - i18n_get_messages() - message key {current_str} doesn't exists in {i18n.locale} locale");
+								show_debug_message($"I18n ERROR - i18n_get_messages({key}, {data}, {locale}) - \"{current_str}\" message key doesn't exists in \"{locale}\" locale");
 							}
 						}
 					}
@@ -1293,14 +1323,14 @@ function i18n_get_messages(key, data = undefined, locale = "", i18n = false, cre
  * @returns {Array | Array<String>} 
  */
 function i18n_get_drawing_presets(locale = "", i18n = false) {
-	// Guard clauses
+	// Guard clause
 	if (!is_string(locale)) {
-		show_debug_message("I18n ERROR - i18n_get_drawing_presets() - Locale must be a string");
+		show_debug_message($"I18n ERROR - i18n_get_drawing_presets({locale}) - `locale` must be a string");
 		exit;
 	}
 
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_get_drawing_presets() - i18n must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_get_drawing_presets({locale}) - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
@@ -1315,7 +1345,7 @@ function i18n_get_drawing_presets(locale = "", i18n = false) {
 		return struct_get_names(i18n.data[$ locale].drawings);
 	}
 
-	show_debug_message($"I18n ERROR - i18n_get_drawing_presets() - {locale} locale doesn't exists");
+	show_debug_message($"I18n ERROR - i18n_get_drawing_presets({locale}) - \"{locale}\" locale doesn't exists");
 	return [];
 }
 
@@ -1328,35 +1358,36 @@ function i18n_get_drawing_presets(locale = "", i18n = false) {
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
  */
 function i18n_update_drawings(preset_name, data, locale = "", i18n = false) {
-	// Guard clauses
+	// Guard clause
 	if (!is_string(preset_name)) {
-		show_debug_message("I18n ERROR - i18n_update_drawings() - Preset name must be a string");
+		show_debug_message($"I18n ERROR - i18n_update_drawings({preset_name}, {data}, {locale}) - `preset_name` must be a string");
 		exit;
 	}
 
 	if (!is_string(locale)) {
-		show_debug_message("I18n ERROR - i18n_update_drawings() - Locale must be a string");
+		show_debug_message($"I18n ERROR - i18n_update_drawings({preset_name}, {data}, {locale}) - `locale` must be a string");
+		exit;
+	}
+
+	if (!(is_array(data) || is_struct(data))) {
+		show_debug_message($"I18n ERROR - i18n_update_drawings({preset_name}, {data}, {locale}) - `data` must be an array or a struct");
 		exit;
 	}
 
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_update_drawings() - i18n must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_update_drawings({preset_name}, {data}, {locale}) - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
 	}
 
-	if (!(is_array(data) || is_struct(data))) {
-		show_debug_message("I18n ERROR - i18n_update_drawings() - Data must be an array or a struct");
-		exit;
-	}
 
 	if (locale == "") {
 		locale = i18n.locale;
 	}
 	
 	if (!struct_exists(i18n.data[$ locale].drawings, preset_name)) {
-		show_debug_message($"I18n ERROR - i18n_update_drawings() - {preset_name} drawing preset doesn't exists");
+		show_debug_message($"I18n ERROR - i18n_update_drawings({preset_name}, {data}, {locale}) - \"{preset_name}\" drawing preset doesn't exists");
 		exit;
 	}
 
@@ -1374,7 +1405,7 @@ function i18n_update_drawings(preset_name, data, locale = "", i18n = false) {
 
 		for (var i = 0; i < array_length(data); i++) {
 			if (!is_string(data[i][0])) {
-				show_debug_message("I18n ERROR - i18n_update_drawings() - Data must be an array of strings");
+				show_debug_message($"I18n ERROR - i18n_update_drawings({preset_name}, {data}, {locale}) - {data[i][0]} is not a string, skipping this data");
 				continue;
 			}
 
@@ -1392,19 +1423,19 @@ function i18n_update_drawings(preset_name, data, locale = "", i18n = false) {
  * @returns {Struct.I18nDrawings}
  */
 function i18n_get_drawings(preset_name, locale = "", i18n = false) {
-	// Guard clauses
+	// Guard clause
 	if (!(is_string(preset_name) || is_array(preset_name))) {
-		show_debug_message("I18n ERROR - i18n_get_drawings() - Preset name must be a string");
+		show_debug_message($"I18n ERROR - i18n_get_drawings({preset_name}, {locale}) - `preset_name` must be a string");
 		exit;
 	}
 
 	if (!is_string(locale)) {
-		show_debug_message("I18n ERROR - i18n_get_drawings() - Locale must be a string");
+		show_debug_message($"I18n ERROR - i18n_get_drawings({preset_name}, {locale}) - `locale` must be a string");
 		exit;
 	}
 
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_get_drawings() - i18n must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_get_drawings({preset_name}, {locale}) - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
@@ -1427,20 +1458,23 @@ function i18n_get_drawings(preset_name, locale = "", i18n = false) {
 				array_push(result, i18n.data[$ locale].drawings[$ preset_name[i]]);
 			} else if (struct_exists(i18n.data[$ i18n.default_locale].drawings, preset_name[i])) {
 				if (i18n.debug) {
-					show_debug_message($"I18n WARNING - i18n_get_drawings() - {preset_name[i]} drawing preset doesn't exists in current locale, using default locale instead");
+					show_debug_message($"I18n WARNING - i18n_get_drawings({preset_name[i]}, {locale}) - \"{preset_name[i]}\" drawing preset doesn't exists in current locale, using default locale instead");
 				}
 				
 				array_push(result, i18n.data[$ i18n.default_locale].drawings[$ preset_name[i]]);
 			} else {
+				if (i18n.debug) {
+					show_debug_message($"I18n WARNING - i18n_get_drawings({preset_name[i]}, {locale}) - \"{preset_name[i]}\" drawing preset doesn't exists, using default drawing preset instead");
+				}
+
 				array_push(result, new I18nDrawings());
-				show_debug_message($"I18n ERROR - i18n_get_drawings() - {preset_name[i]} drawing preset doesn't exists");
 			}
 		}
 
 		return ((array_length(result) == 1) ? result[0] : result);
 	}
 	
-	show_debug_message($"I18n ERROR - i18n_get_drawings() - {locale} locale doesn't exists");
+	show_debug_message($"I18n ERROR - i18n_get_drawings({preset_name}, {locale}) - \"{locale}\" locale doesn't exists");
 	return (new I18nDrawings());
 }
 
@@ -1454,24 +1488,24 @@ function i18n_get_drawings(preset_name, locale = "", i18n = false) {
  * @returns {Any}
  */
 function i18n_get_drawings_data(preset_name, type, locale = "", i18n = false) {
-	// Guard clauses
+	// Guard clause
 	if (!is_string(preset_name)) {
-		show_debug_message("I18n ERROR - i18n_get_drawings_data() - Preset name must be a string");
+		show_debug_message($"I18n ERROR - i18n_get_drawings_data({preset_name}, {type}, {locale}) - `preset_name` must be a string");
 		exit;
 	}
 
 	if (!is_numeric(type)) {
-		show_debug_message("I18n ERROR - i18n_get_drawings_data() - Type must be a real");
+		show_debug_message($"I18n ERROR - i18n_get_drawings_data({preset_name}, {type}, {locale}) - `type` must be a I18N_DRAWING constant");
 		exit;
 	}
 
 	if (!is_string(locale)) {
-		show_debug_message("I18n ERROR - i18n_get_drawings_data() - Locale must be a string");
+		show_debug_message($"I18n ERROR - i18n_get_drawings_data({preset_name}, {type}, {locale}) - `locale` must be a string");
 		exit;
 	}
 	
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_get_drawings_data() - i18n must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_get_drawings_data({preset_name}, {type}, {locale}) - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
@@ -1483,17 +1517,18 @@ function i18n_get_drawings_data(preset_name, type, locale = "", i18n = false) {
 	
 	// Return the drawing data
 	var names = ["font", "halign", "valign", "color", "scale", "rotation", "alpha", "sep", "width"];
+	type = min(array_length(names) - 1, round(type));
 
 	if (struct_exists(i18n.data[$ locale].drawings, preset_name)) {
 		return i18n.data[$ locale].drawings[$ preset_name][$ names[type]];
 	} else if (struct_exists(i18n.data[$ i18n.default_locale].drawings, preset_name)) {
 		if (i18n.debug) {
-			show_debug_message($"I18n WARNING - i18n_get_drawings_data() - {preset_name} drawing preset doesn't exists in current locale, using default locale instead");
+			show_debug_message($"I18n WARNING - i18n_get_drawings_data({preset_name}, {type}, {locale}) - \"{preset_name}\" drawing preset doesn't exists in current locale, using default locale instead");
 		}
 
 		return i18n.data[$ locale].drawings[$ i18n.default_locale][$ names[type]];
 	} else {
-		show_debug_message($"I18n ERROR - i18n_get_drawings_data() - {preset_name} drawing preset doesn't exists");
+		show_debug_message($"I18n ERROR - i18n_get_drawings_data({preset_name}, {type}, {locale}) - \"{preset_name}\" drawing preset doesn't exists");
 		return;
 	}
 }
@@ -1508,24 +1543,24 @@ function i18n_get_drawings_data(preset_name, type, locale = "", i18n = false) {
  * @returns {String}
  */
 function i18n_create_ref_message(var_name, key, data = undefined, i18n = false) {
-	// Guard clauses
+	// Guard clause
 	if (!is_string(var_name)) {
-		show_debug_message("I18n ERROR - i18n_create_ref_message() - var_name must be a string");
+		show_debug_message($"I18n ERROR - i18n_create_ref_message({var_name}, {key}, {data}) - `var_name` must be a string");
 		exit;
 	}
 
 	if (!is_string(key)) {
-		show_debug_message("I18n ERROR - i18n_create_ref_message() - key must be a string");
+		show_debug_message($"I18n ERROR - i18n_create_ref_message({var_name}, {key}, {data}) - `key` must be a string");
 		exit;
 	}
 	
 	if (!is_undefined(data) && !(is_real(data) || is_array(data) || is_struct(data))) {
-		show_debug_message("I18n ERROR - i18n_create_ref_message() - data must be an array or a struct");
+		show_debug_message($"I18n ERROR - i18n_create_ref_message({var_name}, {key}, {data}) - `data` must be an integer, an array, or a struct");
 		exit;
 	}
 
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_create_ref_message() - i18n must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_create_ref_message({var_name}, {key}, {data}) - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
@@ -1557,19 +1592,19 @@ function i18n_create_ref_message(var_name, key, data = undefined, i18n = false) 
  * @returns {Any}
  */
 function i18n_create_ref_asset(var_name, locale_asset, i18n = false) {
-	// Guard clauses
+	// Guard clause
 	if (!is_string(var_name)) {
-		show_debug_message("I18n ERROR - i18n_create_ref_asset() - var_name must be a string");
+		show_debug_message($"I18n ERROR - i18n_create_ref_asset({var_name}, {locale_asset}) - `var_name` must be a string");
 		exit;
 	}
 
 	if (!is_struct(locale_asset)) {
-		show_debug_message("I18n ERROR - i18n_create_ref_asset() - locale_asset must be a struct");
+		show_debug_message($"I18n ERROR - i18n_create_ref_asset({var_name}, {locale_asset}) - `locale_asset` must be a struct");
 		exit;
 	}
 	
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_create_ref_message() - i18n must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_create_ref_message({var_name}, {locale_asset}) - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
@@ -1585,7 +1620,7 @@ function i18n_create_ref_asset(var_name, locale_asset, i18n = false) {
 		}
 		
 		if (asset_type != asset_get_type(locale_asset[$ asset_keys[i]])) {
-			show_debug_message("I18n ERROR - i18n_create_ref_asset() - All assets must be the same type");
+			show_debug_message($"I18n ERROR - i18n_create_ref_asset({var_name}, {locale_asset}) - All assets must be the same asset type");
 			exit;
 		}
 	}
@@ -1614,15 +1649,15 @@ function i18n_create_ref_asset(var_name, locale_asset, i18n = false) {
  * @returns {Any}
  */
 function i18n_get_ref_message(index, i18n = false) {
-	// Guard clauses
+	// Guard clause
 	if (!is_real(index)) {
-		show_debug_message("I18n ERROR - i18n_get_ref_message() - index must be a real");
+		show_debug_message($"I18n ERROR - i18n_get_ref_message({index}) - `index` must be a real");
 		exit;
 	}
 	index = round(index);
 
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_create_ref_message() - i18n must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_create_ref_message({index}) - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
@@ -1636,19 +1671,19 @@ function i18n_get_ref_message(index, i18n = false) {
 
 	for (var i = ((root_ref == "global")); i < (array_length(name_split) - 1); i++) {
 		if (string_digits(name_split[i]) != "" && string_letters(name_split[i]) == "") {
-			show_debug_message($"I18n ERROR - i18n_get_ref_message() - An array is only supported at the last reference level");
+			show_debug_message($"I18n ERROR - i18n_get_ref_message({index}) - An array is only supported at the last reference level");
 			break;
 		}
 		
 		if (root_ref == "global") {					// e.g ref = "global.text"
 			if (!is_struct(current_ref)) {
 				if (!variable_global_exists(name_split[i])) {
-					show_debug_message($"I18n ERROR - i18n_get_ref_message() - Global variable {name_split[i]} doesn't exist");
+					show_debug_message($"I18n ERROR - i18n_get_ref_message({index}) - \"{name_split[i]}\" global variable doesn't exist");
 					break;
 				}
 			} else {
 				if (!struct_exists(current_ref, name_split[i])) {
-					show_debug_message($"I18n ERROR - i18n_get_ref_message() - Struct {current_ref} member {name_split[i]} doesn't exist");
+					show_debug_message($"I18n ERROR - i18n_get_ref_message({index}) - \"{name_split[i]}\" member doesn't exist in the \"{current_ref}\" struct");
 					break;
 				}
 			}
@@ -1657,12 +1692,12 @@ function i18n_get_ref_message(index, i18n = false) {
 		} else {
 			if (!is_struct(current_ref)) {
 				if (!variable_instance_exists(root_ref, name_split[i])) {
-					show_debug_message($"I18n ERROR - i18n_get_ref_message() - Instance {root_ref} variable {name_split[i]} doesn't exist");
+					show_debug_message($"I18n ERROR - i18n_get_ref_message({index}) - \"{name_split[i]}\" variable doesn't exist in the \"{root_ref}\" instance");
 					break;
 				}
 			} else {
 				if (!struct_exists(current_ref, name_split[i])) {
-					show_debug_message($"I18n ERROR - i18n_get_ref_message() - Struct {current_ref} member {name_split[i]} doesn't exist");
+					show_debug_message($"I18n ERROR - i18n_get_ref_message({index}) - \"{name_split[i]}\" member doesn't exist in the \"{current_ref}\" struct");
 					break;
 				}
 			}
@@ -1682,14 +1717,14 @@ function i18n_get_ref_message(index, i18n = false) {
  * @returns {Any}
  */
 function i18n_get_ref_asset(index, i18n = false) {
-	// Guard clauses
+	// Guard clause
 	if (!is_real(index)) {
-		show_debug_message("I18n ERROR - i18n_get_ref_asset() - index must be a real");
+		show_debug_message($"I18n ERROR - i18n_get_ref_asset({index}) - `index` must be a real");
 		exit;
 	}
 
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_get_ref_asset() - i18n must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_get_ref_asset({index}) - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
@@ -1703,19 +1738,19 @@ function i18n_get_ref_asset(index, i18n = false) {
 
 	for (var i = ((root_ref == "global")); i < (array_length(name_split) - 1); i++) {
 		if (string_digits(name_split[i]) != "" && string_letters(name_split[i]) == "") {
-			show_debug_message($"I18n ERROR - i18n_get_ref_asset() - An array is only supported at the last reference level");
+			show_debug_message($"I18n ERROR - i18n_get_ref_asset({index}) - An array is only supported at the last reference level");
 			break;
 		}
 
 		if (root_ref == "global") {					// e.g ref = "global.text"
 			if (!is_struct(current_ref)) {
 				if (!variable_global_exists(name_split[i])) {
-					show_debug_message($"I18n ERROR - i18n_get_ref_asset() - Global variable {name_split[i]} doesn't exist");
+					show_debug_message($"I18n ERROR - i18n_get_ref_asset({index}) - \"{name_split[i]}\" global variable doesn't exist");
 					break;
 				}
 			} else {
 				if (!struct_exists(current_ref, name_split[i])) {
-					show_debug_message($"I18n ERROR - i18n_get_ref_asset() - Struct {current_ref} member {name_split[i]} doesn't exist");
+					show_debug_message($"I18n ERROR - i18n_get_ref_asset({index}) - \"{name_split[i]}\" member doesn't exist in the \"{current_ref}\" struct");
 					break;
 				}
 			}
@@ -1724,12 +1759,12 @@ function i18n_get_ref_asset(index, i18n = false) {
 		} else {
 			if (!is_struct(current_ref)) {
 				if (!variable_instance_exists(root_ref, name_split[i])) {
-					show_debug_message($"I18n ERROR - i18n_get_ref_asset() - Instance {root_ref} variable {name_split[i]} doesn't exist");
+					show_debug_message($"I18n ERROR - i18n_get_ref_asset({index}) - \"{name_split[i]}\" variable doesn't exist in the \"{root_ref}\" instance");
 					break;
 				}
 			} else {
 				if (!struct_exists(current_ref, name_split[i])) {
-					show_debug_message($"I18n ERROR - i18n_get_ref_asset() - Struct {current_ref} member {name_split[i]} doesn't exist");
+					show_debug_message($"I18n ERROR - i18n_get_ref_asset({index}) - \"{name_split[i]}\" member doesn't exist in the \"{current_ref}\" struct");
 					break;
 				}
 			}
@@ -1748,9 +1783,14 @@ function i18n_get_ref_asset(index, i18n = false) {
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
  */
 function i18n_update_refs(type = I18N_REF.ALL, i18n = false) {
-	// Guard clauses
+	// Guard clause
+	if (!is_numeric(type)) {
+		show_debug_message($"I18n ERROR - i18n_update_refs({type}) - `type` must be a I18N_REF constant");
+		exit;
+	}
+
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_update_refs() - i18n must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_update_refs({type}) - i18n must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
@@ -1770,14 +1810,13 @@ function i18n_update_refs(type = I18N_REF.ALL, i18n = false) {
 			var index = 0;
 
 			// Guard clauses
-			if (root_ref == "global") {					// e.g ref = "global.text"
+			if (root_ref == "global") {						// e.g ref = "global.text"
 				if (array_length(name_split) < 2) {
-					show_debug_message($"I18n ERROR - i18n_update_refs() - Global variable member hasn't been specified");
+					show_debug_message($"I18n ERROR - i18n_update_refs({type}) - Global variable member hasn't been specified");
 					array_push(to_delete, j);
 					continue;
 				}
 			} else if (!instance_exists(root_ref)) {		// e.g ref = "text"
-				// show_debug_message($"I18n ERROR - Instance {root_ref} doesn't exist");
 				array_push(to_delete, j);
 				continue;
 			}
@@ -1794,7 +1833,7 @@ function i18n_update_refs(type = I18N_REF.ALL, i18n = false) {
 					if (root_ref == "global") {
 						if (array_length(name_split) == 2) {
 							if (string_digits(to_update) != "" && string_letters(to_update) == "") {
-								show_debug_message($"I18n ERROR - i18n_update_refs() - An array isn't supported as a global variable member");
+								show_debug_message($"I18n ERROR - i18n_update_refs({type}) - An array isn't supported as a global variable member");
 								continue;
 							}
 
@@ -1811,7 +1850,7 @@ function i18n_update_refs(type = I18N_REF.ALL, i18n = false) {
 						if (array_length(name_split) == 1) {
 							if (string_digits(to_update) != "" && string_letters(to_update) == "") {
 								show_debug_message(name_split)
-								show_debug_message($"I18n ERROR - i18n_update_refs() - An array isn't supported as an instance variable member");
+								show_debug_message($"I18n ERROR - i18n_update_refs({type}) - An array isn't supported as an instance variable member");
 								continue;
 							}
 
@@ -1839,10 +1878,10 @@ function i18n_update_refs(type = I18N_REF.ALL, i18n = false) {
 							localized_asset = i18n.refs[$ types[i]].assets[j][$ i18n.default_locale];
 
 							if (i18n.debug) {
-								show_debug_message($"I18n WARNING - i18n_update_refs() - Asset {i18n.refs[$ types[i]].refs[j]} doesn't have a {i18n.locale} locale, using {i18n.default_locale} locale instead");
+								show_debug_message($"I18n WARNING - i18n_update_refs({type}) - \"{i18n.refs[$ types[i]].refs[j]}\" ref doesn't have an asset for the \"{i18n.locale}\" locale, using \"{i18n.default_locale}\" locale instead");
 							}
 						} else if (i18n.debug) {
-							show_debug_message($"I18n ERROR - i18n_update_refs() - Asset {i18n.refs[$ types[i]].refs[j]} doesn't have a {i18n.locale} locale, and {i18n.default_locale} locale doesn't exist");
+							show_debug_message($"I18n ERROR - i18n_update_refs({type}) - \"{i18n.refs[$ types[i]].refs[j]}\" ref doesn't have an asset for the \"{i18n.locale}\" and \"{i18n.default_locale}\" locales, skipping this reference");
 							continue;
 						}
 					}
@@ -1851,7 +1890,7 @@ function i18n_update_refs(type = I18N_REF.ALL, i18n = false) {
 					if (root_ref == "global") {
 						if (array_length(name_split) == 2) {
 							if (string_digits(to_update) != "" && string_letters(to_update) == "") {
-								show_debug_message($"I18n ERROR - i18n_update_refs() - An array isn't supported as a global variable member");
+								show_debug_message($"I18n ERROR - i18n_update_refs({type}) - An array isn't supported as a global variable member");
 								continue;
 							}
 
@@ -1868,7 +1907,7 @@ function i18n_update_refs(type = I18N_REF.ALL, i18n = false) {
 						if (array_length(name_split) == 1) {
 							if (string_digits(to_update) != "" && string_letters(to_update) == "") {
 								show_debug_message(name_split)
-								show_debug_message($"I18n ERROR - i18n_update_refs() - An array isn't supported as an instance variable member");
+								show_debug_message($"I18n ERROR - i18n_update_refs({type}) - An array isn't supported as an instance variable member");
 								continue;
 							}
 
@@ -1915,19 +1954,19 @@ function i18n_update_refs(type = I18N_REF.ALL, i18n = false) {
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
  */
 function i18n_update_plurals(var_name, value, update_refs = false, i18n = false) {
-	// Guard clauses
+	// Guard clause
 	if (!is_string(var_name)) {
-		show_debug_message("I18n ERROR - i18n_update_plurals() - var_name must be a string");
+		show_debug_message($"I18n ERROR - i18n_update_plurals({var_name}, {value}, {update_refs}) - `var_name` must be a string");
 		exit;
 	}
 
 	if (!is_real(value)) {
-		show_debug_message("I18n ERROR - i18n_update_plurals() - value must be a real");
+		show_debug_message($"I18n ERROR - i18n_update_plurals({var_name}, {value}, {update_refs}) - `value` must be a real");
 		exit;
 	}
 	
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_update_plurals() - i18n must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_update_plurals({var_name}, {value}, {update_refs}) - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
@@ -1949,7 +1988,7 @@ function i18n_update_plurals(var_name, value, update_refs = false, i18n = false)
 	}
 
 	if (ref_index == -1) {
-		show_debug_message($"I18n ERROR - i18n_update_plurals() - Reference {var_name} doesn't exist");
+		show_debug_message($"I18n ERROR - i18n_update_plurals({var_name}, {value}, {update_refs}) - `{var_name}` reference doesn't exist");
 		exit;
 	}
 
@@ -1966,10 +2005,10 @@ function i18n_update_plurals(var_name, value, update_refs = false, i18n = false)
 				target_ref.plural = value;
 			}
 		} else {
-			show_debug_message($"I18n ERROR - i18n_update_plurals() - Struct {i18n.refs.messages.data[ref_index]} doesn't have a plural member");
+			show_debug_message($"I18n ERROR - i18n_update_plurals({var_name}, {value}, {update_refs}) - `{i18n.refs.messages.data[ref_index]}` struct doesn't have a plural member");
 		}
 	} else {
-		show_debug_message($"I18n ERROR - i18n_update_plurals() - Data at index {ref_index} isn't a real or struct");
+		show_debug_message($"I18n ERROR - i18n_update_plurals({var_name}, {value}, {update_refs}) - Data at index {ref_index} isn't a real or struct");
 	}
 
 	// Update i18n references
@@ -1988,24 +2027,24 @@ function i18n_update_plurals(var_name, value, update_refs = false, i18n = false)
  * @returns {String}
  */
 function i18n_get_message_from_ref(var_name, ref = "", locale = "", i18n = false) {
-	// Guard clauses
+	// Guard clause
 	if (!is_string(var_name)) {
-		show_debug_message("I18n ERROR - i18n_get_message_from_ref() - var_name must be a string");
+		show_debug_message($"I18n ERROR - i18n_get_message_from_ref({var_name}, {ref}, {locale}) - `var_name` must be a string");
 		exit;
 	}
 
 	if (!(is_string(ref) || typeof(ref) == "ref")) {
-		show_debug_message("I18n ERROR - i18n_get_message_from_ref() - ref must be a string, instance id, or asset id");
+		show_debug_message($"I18n ERROR - i18n_get_message_from_ref({var_name}, {ref}, {locale}) - `ref` must be a string, instance id, or asset id");
 		exit;
 	}
 
 	if (!is_string(locale)) {
-		show_debug_message("I18n ERROR - i18n_get_message_from_ref() - Locale must be a string");
+		show_debug_message($"I18n ERROR - i18n_get_message_from_ref({var_name}, {ref}, {locale}) - `locale` must be a string");
 		exit;
 	}
 
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_get_message_from_ref() - i18n must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_get_message_from_ref({var_name}, {ref}, {locale}) - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
@@ -2027,14 +2066,14 @@ function i18n_get_message_from_ref(var_name, ref = "", locale = "", i18n = false
 			ref = "";
 
 			if (i18n.debug) {
-				show_debug_message($"I18n WARNING - i18n_get_message_from_ref() - Asset {ref} doesn't exist, using the first matching var_name instead");
+				show_debug_message($"I18n WARNING - i18n_get_message_from_ref({var_name}, {ref}, {locale}) - `{ref}` reference doesn't exist, using the first matching `var_name` instead");
 			}
 		}
 	} else if (!instance_exists(ref)) {
 		ref = "";
 
 		if (i18n.debug) {
-			show_debug_message($"I18n WARNING - i18n_get_message_from_ref() - Instance/asset {ref} doesn't exist, using the first matching var_name instead");
+			show_debug_message($"I18n WARNING - i18n_get_message_from_ref({var_name}, {ref}, {locale}) - `{ref}` instance/asset doesn't exist, using the first matching `var_name` instead");
 		}
 	}
 	
@@ -2046,7 +2085,7 @@ function i18n_get_message_from_ref(var_name, ref = "", locale = "", i18n = false
 	}
 
 	if (ref_index == -1) {
-		show_debug_message($"I18n ERROR - i18n_get_message_from_ref() - Reference {var_name} doesn't exist");
+		show_debug_message($"I18n ERROR - i18n_get_message_from_ref({var_name}, {ref}, {locale}) - `{var_name}` reference doesn't exist");
 		return "";
 	}
 
@@ -2064,24 +2103,24 @@ function i18n_get_message_from_ref(var_name, ref = "", locale = "", i18n = false
  * @returns {Struct | undefined}
  */
 function i18n_get_asset_from_ref(var_name, ref = "", locale = "", i18n = false) {
-	// Guard clauses
+	// Guard clause
 	if (!is_string(var_name)) {
-		show_debug_message("I18n ERROR - i18n_get_asset_from_ref() - var_name must be a string");
+		show_debug_message($"I18n ERROR - i18n_get_asset_from_ref({var_name}, {ref}, {locale}) - `var_name` must be a string");
 		exit;
 	}
 
 	if (!(is_string(ref) || typeof(ref) == "ref")) {
-		show_debug_message("I18n ERROR - i18n_get_asset_from_ref() - ref must be a string, instance id, or asset id");
+		show_debug_message($"I18n ERROR - i18n_get_asset_from_ref({var_name}, {ref}, {locale}) - `ref` must be a string, instance id, or asset id");
 		exit;
 	}
 
 	if (!is_string(locale)) {
-		show_debug_message("I18n ERROR - i18n_get_asset_from_ref() - Locale must be a string");
+		show_debug_message($"I18n ERROR - i18n_get_asset_from_ref({var_name}, {ref}, {locale}) - `locale` must be a string");
 		exit;
 	}
 
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_get_asset_from_ref() - i18n must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_get_asset_from_ref({var_name}, {ref}, {locale}) - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
@@ -2103,14 +2142,14 @@ function i18n_get_asset_from_ref(var_name, ref = "", locale = "", i18n = false) 
 			ref = "";
 
 			if (i18n.debug) {
-				show_debug_message($"I18n WARNING - i18n_get_asset_from_ref() - Asset {ref} doesn't exist, using the first matching var_name instead");
+				show_debug_message($"I18n WARNING - i18n_get_asset_from_ref({var_name}, {ref}, {locale}) - `{ref}` reference doesn't exist, using the first matching `var_name` instead");
 			}
 		}
 	} else if (!instance_exists(ref)) {
 		ref = "";
 
 		if (i18n.debug) {
-			show_debug_message($"I18n WARNING - i18n_get_asset_from_ref() - Instance/asset {ref} doesn't exist, using the first matching var_name instead");
+			show_debug_message($"I18n WARNING - i18n_get_asset_from_ref({var_name}, {ref}, {locale}) - `{ref}` instance/asset doesn't exist, using the first matching `var_name` instead");
 		}
 	}
 	
@@ -2122,7 +2161,7 @@ function i18n_get_asset_from_ref(var_name, ref = "", locale = "", i18n = false) 
 	}
 
 	if (ref_index == -1) {
-		show_debug_message($"I18n ERROR - i18n_get_asset_from_ref() - Reference {var_name} doesn't exist");
+		show_debug_message($"I18n ERROR - i18n_get_asset_from_ref({var_name}, {ref}, {locale}) - `{var_name}` reference doesn't exist");
 		return undefined;
 	}
 
@@ -2137,14 +2176,14 @@ function i18n_get_asset_from_ref(var_name, ref = "", locale = "", i18n = false) 
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
  */
 function i18n_set_default_message(message, i18n = false) {
-	// Guard clauses
+	// Guard clause
 	if (!is_string(message)) {
-		show_debug_message("I18n ERROR - i18n_set_default_message() - Message must be a string");
+		show_debug_message($"I18n ERROR - i18n_set_default_message({message}) - `message` must be a string");
 		exit;
 	}
 
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_set_default_message() - i18n must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_set_default_message({message}) - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
@@ -2161,21 +2200,21 @@ function i18n_set_default_message(message, i18n = false) {
  * @param {Bool | Struct.i18n_create} [i18n]=false I18n struct reference (e.g. i18n), or leave it empty to use the global i18n struct.
  */
 function i18n_set_locale(code, update_refs = true, i18n = false) {
-	// Guard clauses
+	// Guard clause
 	if (!is_string(code)) {
-		show_debug_message("I18n ERROR - i18n_set_locale() - Code must be a string");
+		show_debug_message($"I18n ERROR - i18n_set_locale({code}, {update_refs}) - `code` must be a string");
 		exit;
 	}
 
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_set_locale() - i18n must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_set_locale({code}, {update_refs}) - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
 	}
 
 	if (!struct_exists(i18n.data, code)) {
-		show_debug_message($"I18n ERROR - i18n_set_locale() - {code} locale doesn't exists");
+		show_debug_message($"I18n ERROR - i18n_set_locale({code}, {update_refs}) - \"{code}\" locale doesn't exists");
 		exit;
 	}
 
@@ -2197,19 +2236,19 @@ function i18n_set_locale(code, update_refs = true, i18n = false) {
  * @returns {Struct | undefined}
  */
 function i18n_use_drawing(preset_name, locale = "", i18n = false) {
-	// Guard clauses
+	// Guard clause
 	if (!is_string(preset_name)) {
-		show_debug_message("I18n ERROR - i18n_use_drawing() - Preset name must be a string");
+		show_debug_message($"I18n ERROR - i18n_use_drawing({preset_name}, {locale}) - `preset_name` must be a string");
 		exit;
 	}
 
 	if (!is_string(locale)) {
-		show_debug_message("I18n ERROR - i18n_use_drawing() - Locale must be a string");
+		show_debug_message($"I18n ERROR - i18n_use_drawing({preset_name}, {locale}) - `locale` must be a string");
 		exit;
 	}
 
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_use_drawing() - i18n must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_use_drawing({preset_name}, {locale}) - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
@@ -2222,9 +2261,11 @@ function i18n_use_drawing(preset_name, locale = "", i18n = false) {
 	// Set available drawing type
 	if (struct_exists(i18n.data[$ locale].drawings, preset_name)) {
 		var preset = i18n.data[$ locale].drawings[$ preset_name];
-
-		if (!is_undefined(preset.font)) {
-			draw_set_font(preset.font);
+		
+		if (is_numeric(preset.font)) {
+			if (font_exists(preset.font)) {
+				draw_set_font(preset.font);
+			}
 		}
 
 		if (!is_undefined(preset.halign)) {
@@ -2246,7 +2287,7 @@ function i18n_use_drawing(preset_name, locale = "", i18n = false) {
 		return preset;
 	} 
 
-	show_debug_message($"I18n ERROR - i18n_use_drawing() - {preset_name} drawing preset doesn't exists");
+	show_debug_message($"I18n ERROR - i18n_use_drawing({preset_name}, {locale}) - \"{preset_name}\" drawing preset doesn't exists");
 
 	return undefined;
 }
@@ -2265,32 +2306,32 @@ function i18n_use_drawing(preset_name, locale = "", i18n = false) {
 function i18n_draw_message(x, y, text, data = undefined, preset_name = "", locale = "", i18n = false) {
 	// Guard clauses
 	if (!(is_real(x) || is_real(y))) {
-		show_debug_message("I18n ERROR - i18n_draw_message() - x and y must be a real");
+		show_debug_message($"I18n ERROR - i18n_draw_message({x}, {y}, {text}, {data}, {preset_name}, {locale}) - `x` and `y` must be a real");
 		exit;
 	}
 
 	if (!is_string(text)) {
-		show_debug_message("I18n ERROR - i18n_draw_message() - Text must be a string");
+		show_debug_message($"I18n ERROR - i18n_draw_message({x}, {y}, {text}, {data}, {preset_name}, {locale}) - `text` must be a string");
 		exit;
 	}
 
 	if (!is_undefined(data) && !(is_real(data) || is_array(data))) {
-		show_debug_message("I18n ERROR - i18n_draw_message() - Data must be a real or array");
+		show_debug_message($"I18n ERROR - i18n_draw_message({x}, {y}, {text}, {data}, {preset_name}, {locale}) - `data` must be a real or array");
 		exit;
 	}
 
 	if (!is_string(preset_name)) {
-		show_debug_message("I18n ERROR - i18n_draw_message() - Preset name must be a string");
+		show_debug_message($"I18n ERROR - i18n_draw_message({x}, {y}, {text}, {data}, {preset_name}, {locale}) - `preset_name` must be a string");
 		exit;
 	}
 
 	if (!is_string(locale)) {
-		show_debug_message("I18n ERROR - i18n_draw_message() - Locale must be a string");
+		show_debug_message($"I18n ERROR - i18n_draw_message({x}, {y}, {text}, {data}, {preset_name}, {locale}) - `locale` must be a string");
 		exit;
 	}
 	
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_draw_message() - i18n must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_draw_message({x}, {y}, {text}, {data}, {preset_name}, {locale}) - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
@@ -2329,12 +2370,14 @@ function i18n_draw_message(x, y, text, data = undefined, preset_name = "", local
 
 	if (preset_name != "") {
 		if (!struct_exists(i18n.data[$ locale].drawings, preset_name)) {
-			show_debug_message($"I18n ERROR - i18n_draw_message({x}, {y}, {text}, {data}, {preset_name}, {locale}) - `{preset_name}` drawing preset doesn't exists, no drawing will be applied");
+			show_debug_message($"I18n ERROR - i18n_draw_message({x}, {y}, {text}, {data}, {preset_name}, {locale}) - \"{preset_name}\" drawing preset doesn't exists, no drawing will be applied");
 		} else {
 			preset_data = i18n.data[$ locale].drawings[$ preset_name];
-
-			if (!is_undefined(preset_data.font)) {
-				draw_set_font(preset_data.font);
+			
+			if (is_numeric(preset_data.font)) {
+				if (font_exists(preset_data.font)) {
+					draw_set_font(preset_data.font);
+				}
 			}
 
 			if (!is_undefined(preset_data.halign)) {
@@ -2488,7 +2531,7 @@ function i18n_choose(data, locale = "", single_use = false, i18n = false) {
 			}
 		} else {
 			if (i18n.debug) {
-				show_debug_message($"I18n WARNING - i18n_choose({data}, {locale}, {single_use}) - `{locale}` locale not found and `{i18n.default_locale}` default locale not found, returning empty string");
+				show_debug_message($"I18n WARNING - i18n_choose({data}, {locale}, {single_use}) - `{locale}` locale and `{i18n.default_locale}` default locale not found, returning empty string");
 			}
 			return "";
 		}
@@ -2579,17 +2622,17 @@ function i18n_get_cache_id_from_ref(var_name, ref = "", locale = "", i18n = fals
 	}
 
 	if (!(is_string(ref) || typeof(ref) == "ref")) {
-		show_debug_message("I18n ERROR - i18n_get_cache_id_from_ref({var_name}, {ref}, {locale}) - `ref` must be a string, instance id, or asset id");
+		show_debug_message($"I18n ERROR - i18n_get_cache_id_from_ref({var_name}, {ref}, {locale}) - `ref` must be a string, instance id, or asset id");
 		exit;
 	}
 
 	if (!is_string(locale)) {
-		show_debug_message("I18n ERROR - i18n_get_cache_id_from_ref({var_name}, {ref}, {locale}) - `locale` must be a string");
+		show_debug_message($"I18n ERROR - i18n_get_cache_id_from_ref({var_name}, {ref}, {locale}) - `locale` must be a string");
 		exit;
 	}
 
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_get_cache_id_from_ref({var_name}, {ref}, {locale}) - `i18n` must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_get_cache_id_from_ref({var_name}, {ref}, {locale}) - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
@@ -2815,7 +2858,7 @@ function i18n_update_cache(cache_id, value = "", i18n = false) {
 function i18n_clear_cache(i18n = false) {
 	// Guard clause
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_clear_cache() - `i18n` must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_clear_cache() - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
@@ -2838,17 +2881,17 @@ function i18n_clear_cache(i18n = false) {
 function i18n_remove_messages(key, locale = "", i18n = false) {
 	// Guard clause
 	if (!(is_string(key) || is_array(key))) {
-		show_debug_message("I18n ERROR - i18n_remove_messages({key}, {locale}) - `key` must be a string or array of string");
+		show_debug_message($"I18n ERROR - i18n_remove_messages({key}, {locale}) - `key` must be a string or array of string");
 		exit;
 	}
 
 	if (!(is_string(key) || is_array(key))) {
-		show_debug_message("I18n ERROR - i18n_remove_messages({key}, {locale}) - `locale` must be a string, array of string, or \"all\"");
+		show_debug_message($"I18n ERROR - i18n_remove_messages({key}, {locale}) - `locale` must be a string, array of string, or \"all\"");
 		exit;
 	}
 
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_remove_messages({key}, {locale}) - `i18n` must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_remove_messages({key}, {locale}) - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
@@ -2904,12 +2947,12 @@ function i18n_remove_messages(key, locale = "", i18n = false) {
 function i18n_clear_messages(locale = "", i18n = false) {
 	// Guard clause
 	if (!(is_string(locale) || is_array(locale))) {
-		show_debug_message("I18n ERROR - i18n_clear_messages({locale}) - `locale` must be a string, array of string, or \"all\"");
+		show_debug_message($"I18n ERROR - i18n_clear_messages({locale}) - `locale` must be a string, array of string, or \"all\"");
 		exit;
 	}
 
 	if (!(is_struct(i18n) || is_bool(i18n))) {
-		show_debug_message("I18n ERROR - i18n_clear_messages({locale}) - `i18n` must be a i18n struct");
+		show_debug_message($"I18n ERROR - i18n_clear_messages({locale}) - `i18n` must be a i18n struct");
 		exit;
 	} else if (is_bool(i18n)) {
 		i18n = variable_global_get(variable_global_get("i18n_name"));
@@ -3185,3 +3228,12 @@ function i18n_unload_messages(file, locale = "", i18n = false) {
 	}
 }
 
+
+/* 
+ * Without caching raw benchmark
+ * FPS = 800 - 1000
+ * oUI-Draw = 26.7 - 27
+ * oBtnLocale-Draw = 24.1 - 24.3
+ * oMenu-Draw = 11.2
+ * oI18n-Step = 3.7 - 3.8
+ */

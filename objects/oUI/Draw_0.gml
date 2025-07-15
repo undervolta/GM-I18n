@@ -5,9 +5,15 @@ draw_set_color(#CCCCCC);
 draw_set_valign(fa_bottom);
 draw_text_transformed(410, 106, version, 0.6, 0.6, 0);
 
-if (oI18n.refreshed && os_browser != browser_not_a_browser) {
+if (os_browser != browser_not_a_browser) {
+	var font = i18n_get_drawings_data("desc", I18N_DRAWING.FONT);
 	draw_set_halign(fa_right);
-	draw_set_font(i18n_get_drawings_data("desc", I18N_DRAWING.FONT));
+	if (is_numeric(font)) {
+		if (font_exists(font)) {
+			draw_set_font(font);
+		}
+	}
+	
 	draw_text_transformed(room_width - 35, 111, bug_1, 0.4, 0.4, 0);
 }
 
