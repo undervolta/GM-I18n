@@ -1,9 +1,9 @@
-/*
+/**
  * name: GM-I18n
  * desc: A powerful, open-source internationalization (i18n) library for GameMaker 2.3+
  * author: @undervolta
- * version: 1.0.0-rc.1
- * date: 2025-07-13
+ * version: 1.0.0
+ * date: 2025-07-16
  * 
  * repo: https://github.com/undervolta/GM-I18n
  * docs: https://gm-i18n.lefinitas.com
@@ -289,30 +289,40 @@ function I18nDrawings(draw_font = undefined, draw_halign = undefined, draw_valig
 	valign = draw_valign;
 	color = draw_color;
 	alpha = is_real(draw_alpha) ? draw_alpha : undefined;
-	scale = is_real(draw_scale) ? draw_scale : 1;
-	rotation = is_real(draw_rotation) ? draw_rotation : 0;
-	sep = is_real(text_sep) ? text_sep : -1;
-	width = is_real(text_width) ? text_width : room_width;
+	scale = is_real(draw_scale) ? draw_scale : (is_template ? undefined : 1);
+	rotation = is_real(draw_rotation) ? draw_rotation : (is_template ? undefined : 0);
+	sep = is_real(text_sep) ? text_sep : (is_template ? undefined : -1);
+	width = is_real(text_width) ? text_width : (is_template ? undefined : room_width);
 
 	// Member validation
 	if (!(halign == fa_left || halign == fa_center || halign == fa_right)) {
-		show_debug_message($"I18n WARNING - I18nDrawings({draw_font}, {draw_halign}, {draw_valign}, {draw_color}, {draw_scale}, {draw_rotation}, {draw_alpha}, {text_sep}, {text_width}, {is_template}) - `draw_halign` must be a valid horizontal alignment constant, defaulting to `fa_left`");
+		if (!is_template) {
+			show_debug_message($"I18n WARNING - I18nDrawings({draw_font}, {draw_halign}, {draw_valign}, {draw_color}, {draw_scale}, {draw_rotation}, {draw_alpha}, {text_sep}, {text_width}, {is_template}) - `draw_halign` must be a valid horizontal alignment constant, defaulting to `fa_left`");
+		}
 		halign = is_template ? undefined : fa_left;
 	}
 	if (!(valign == fa_top || valign == fa_middle || valign == fa_bottom)) {
-		show_debug_message($"I18n WARNING - I18nDrawings({draw_font}, {draw_halign}, {draw_valign}, {draw_color}, {draw_scale}, {draw_rotation}, {draw_alpha}, {text_sep}, {text_width}, {is_template}) - `draw_valign` must be a valid vertical alignment constant, defaulting to `fa_top`");
+		if (!is_template) {
+			show_debug_message($"I18n WARNING - I18nDrawings({draw_font}, {draw_halign}, {draw_valign}, {draw_color}, {draw_scale}, {draw_rotation}, {draw_alpha}, {text_sep}, {text_width}, {is_template}) - `draw_valign` must be a valid vertical alignment constant, defaulting to `fa_top`");
+		}
 		valign = is_template ? undefined : fa_top;
 	}
 	if (!(is_numeric(color) || is_array(color))) {
-		show_debug_message($"I18n WARNING - I18nDrawings({draw_font}, {draw_halign}, {draw_valign}, {draw_color}, {draw_scale}, {draw_rotation}, {draw_alpha}, {text_sep}, {text_width}, {is_template}) - `draw_color` must be a valid color constant or array, defaulting to `c_white`");
+		if (!is_template) {
+			show_debug_message($"I18n WARNING - I18nDrawings({draw_font}, {draw_halign}, {draw_valign}, {draw_color}, {draw_scale}, {draw_rotation}, {draw_alpha}, {text_sep}, {text_width}, {is_template}) - `draw_color` must be a valid color constant or array, defaulting to `c_white`");
+		}
 		color = is_template ? undefined : c_white;
 	}
 	if (is_array(color)) {
-		if (array_length(color) < 4) {
-			show_debug_message($"I18n WARNING - I18nDrawings({draw_font}, {draw_halign}, {draw_valign}, {draw_color}, {draw_scale}, {draw_rotation}, {draw_alpha}, {text_sep}, {text_width}, {is_template}) - `draw_color` array must have 4 elements, filling the missing elemnts with the last color");
-			repeat (4 - array_length(color)) {
-				array_push(color, color[array_length(color) - 1]);
+		if (array_length(color) > 0 && array_length(color) < 4) {
+			if (!is_template) {
+				show_debug_message($"I18n WARNING - I18nDrawings({draw_font}, {draw_halign}, {draw_valign}, {draw_color}, {draw_scale}, {draw_rotation}, {draw_alpha}, {text_sep}, {text_width}, {is_template}) - `draw_color` array must have 4 elements, filling the missing elemnts with the last color");
+				repeat (4 - array_length(color)) {
+					array_push(color, color[array_length(color) - 1]);
+				}
 			}
+		} else {
+			color = [c_white, c_white, c_white, c_white];
 		}
 	}
 
@@ -3227,13 +3237,3 @@ function i18n_unload_messages(file, locale = "", i18n = false) {
 		}
 	}
 }
-
-
-/* 
- * Without caching raw benchmark
- * FPS = 800 - 1000
- * oUI-Draw = 26.7 - 27
- * oBtnLocale-Draw = 24.1 - 24.3
- * oMenu-Draw = 11.2
- * oI18n-Step = 3.7 - 3.8
- */

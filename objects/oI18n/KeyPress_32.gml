@@ -212,6 +212,7 @@ show_debug_message($"npc1 variable cache id = {i18n_get_cache_id_from_ref("npc1"
 i18n_update_cache(i18n_get_cache_id("title", , "en"), "Cihuy!")
 */
 
+/*
 show_debug_message($"idn messages = {global.i18n.data.idn.messages}");
 i18n_remove_messages("plural_guide", "idn");
 show_debug_message($"del idn `plural_guide` = {global.i18n.data.idn.messages}");
@@ -223,3 +224,7 @@ i18n_load_messages(["~/langs/id.json", "~/langs/ar1.json"], "idn");
 show_debug_message($"load idn messages = {global.i18n.data.idn.messages}");
 i18n_unload_messages("~/langs/ar1.json", "idn");
 show_debug_message($"unload idn messages = {global.i18n.data.idn.messages}");
+*/
+
+show_debug_message($"normal = {new I18nDrawings(, , , , , , , , , false)}")
+show_debug_message($"template = {new I18nDrawings(, , , , , , , , , true)}")
