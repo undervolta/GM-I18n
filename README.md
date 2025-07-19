@@ -1,4 +1,4 @@
-![Banner](img/Banner.webp)
+[![Banner](img/Banner.webp)](https://gm-i18n.lefinitas.com/)
 
 **A powerful, open-source internationalization (i18n) library for GameMaker 2.3+**
 
@@ -17,19 +17,19 @@
 - Direct message drawing with customizable presets.
 - Asset localization for sprites, sounds, and other assets.
 - Debug mode with detailed logging and validation.
-- Optimized performance.
+- Optimized performance with message hashing and caching.
+
+---
+
+## Installation & Documentation
+
+You can find the installation guide and documentation [here](https://gm-i18n.lefinitas.com/). Visit the documentation repository [here](https://github.com/undervolta/gm-i18n-docs).
 
 ---
 
 ## Supported GameMaker Versions
 
-Please check the [tested versions page](https://github.com/undervolta/GM-I18n/issues/2) for the list of tested versions.
-
----
-
-## Documentation
-
-You can find the documentation [here](https://gm-i18n.lefinitas.com/). Visit the documentation repository [here](https://github.com/undervolta/gm-i18n-docs).
+Generally, GM-I18n should work on all GameMaker 2.3+ versions. Please check the [tested versions page](https://github.com/undervolta/GM-I18n/issues/2) for the list of tested versions.
 
 ---
 
